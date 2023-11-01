@@ -1,8 +1,20 @@
 const std = @import("std");
 
 pub fn main() !void {
+    // See https://zigbyexample.github.io/command_line_arguments
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    const args = try std.process.argsAlloc(allocator);
+    defer std.process.argsFree(allocator, args);
+
+    // args[0] is the executable
+    const filename = args[1];
+    std.debug.print("Filename: {s}\n", .{filename});
+
     // https://stackoverflow.com/a/68879352/388951
-    var file = try std.fs.cwd().openFile("input.txt", .{});
+    var file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
 
     var buf_reader = std.io.bufferedReader(file.reader());

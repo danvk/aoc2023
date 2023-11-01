@@ -90,3 +90,4 @@ Had to Google how to read a file line-by-line in Zig.
 I'm not getting autocomplete or quickinfo in VS Code. Is this expected or broken?
 I was surprised that `std.debug.print` takes a tuple as its second arg. Are there no varargs in Zig?
 I had a bug where I was adding the `u8` ASCII values of the digits, not the numeric values.
+You can do `zig run src/main.zig -- input.txt` to pass args to the program, but it doesn't cache between builds.
