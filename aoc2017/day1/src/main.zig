@@ -9,10 +9,8 @@ pub fn main() !void {
     var in_stream = buf_reader.reader();
     var buf: [4096]u8 = undefined;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        var i: u32 = 0;
         var sum: u32 = 0;
-        while (i < line.len) : (i += 1) {
-            var a = line[i];
+        for (line, 0..) |a, i| {
             var b = if (i == line.len - 1) line[0] else line[i + 1];
             if (a == b) {
                 std.debug.print("{d} sum += {d}\n", .{ i, a });
