@@ -12,6 +12,19 @@ fn part1(line: []u8) u32 {
     return sum;
 }
 
+fn part2(line: []u8) u32 {
+    var sum: u32 = 0;
+    for (line, 0..) |a, i| {
+        var j = (i + (line.len >> 1)) % line.len;
+        var b = line[j];
+        if (a == b) {
+            // std.debug.print("{d} sum += {d}\n", .{ i, a });
+            sum += (a - '0');
+        }
+    }
+    return sum;
+}
+
 pub fn main() !void {
     // See https://zigbyexample.github.io/command_line_arguments
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -34,6 +47,7 @@ pub fn main() !void {
     var buf: [4096]u8 = undefined;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         std.debug.print("Part 1: {d}\n", .{part1(line)});
+        std.debug.print("Part 2: {d}\n", .{part2(line)});
     }
 }
 
