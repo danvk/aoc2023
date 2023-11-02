@@ -1,6 +1,7 @@
 const std = @import("std");
 const day1 = @import("day1").main;
 const day2 = @import("day2").main;
+const day3 = @import("day3").main;
 
 const expect = std.testing.expect;
 const eql = std.mem.eql;
@@ -19,6 +20,8 @@ pub fn main() !void {
         try day1(allocator, args[2..]);
     } else if (std.mem.eql(u8, day, "day2")) {
         try day2(allocator, args[2..]);
+    } else if (std.mem.eql(u8, day, "day3")) {
+        try day3(allocator, args[2..]);
     } else {
         unreachable;
     }
