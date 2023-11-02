@@ -79,6 +79,10 @@ https://ziglearn.org/
 Questions:
 
 - Who makes Zig? Where did it come from? Why?
+  - It's been around since 2016. I'm surprised no one did AoC in it last year!
+  - This is the mission statement: https://andrewkelley.me/post/intro-to-zig.html
+  - I see a lot of signal processing work
+  - Andrew Kelley used to work at OkC and has some JS background: https://andrewkelley.me/post/do-not-use-bodyparser-with-express-js.html
 - Is it annoying to use in practice? (I found Rust quite annoying!)
 - Is Zig a good language for targeting WASM?
 
@@ -94,3 +98,7 @@ Questions:
 - I had a bug where I was adding the `u8` ASCII values of the digits, not the numeric values.
 - You can do `zig run src/main.zig -- input.txt` to pass args to the program, but it doesn't cache between builds.
 - Second star was very speedy after all the setup for the first!
+
+### Day 2
+
+I'm not sure what the best way to set up the Zig build system for multi-day AoC is. I made `src/day1.zig` and `src/day2.zig` and updated `build.zig` to use a for loop. This produces two output binaries. I think this works, but maybe I should have a single binary that takes "day" as an argument? Do I have to change `build.zig` every time I add a source file? This is a part of C that I don't love.
