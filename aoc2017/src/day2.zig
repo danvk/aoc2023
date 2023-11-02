@@ -1,28 +1,38 @@
 const std = @import("std");
 
-fn part1(line: []u8) u32 {
+fn extent(line: []u8) [2]u32 {
     var sum: u32 = 0;
-    for (line, 0..) |a, i| {
-        var b = if (i == line.len - 1) line[0] else line[i + 1];
-        if (a == b) {
-            // std.debug.print("{d} sum += {d}\n", .{ i, a });
-            sum += (a - '0');
+    _ = sum;
+
+    var it = std.mem.splitAny(u8, line, " \t");
+
+    var min: ?u32 = null;
+    var max: ?u32 = null;
+
+    while (it.next()) |split| {
+        std.debug.print("split: {s}\n", .{split});
+        if (split.len == 0) {
+            continue;
+        }
+        // XXX what's the right way to handle errors here?
+        const num = std.fmt.parseInt(u32, split, 10) catch {
+            return .{ 0, 0 };
+        };
+        std.debug.print("num: {d}, {any} / {any}\n", .{ num, min orelse num, max orelse num });
+        if (min orelse num >= num) {
+            min = num;
+        }
+        if (max orelse num <= num) {
+            max = num;
         }
     }
-    return sum;
+    std.debug.print("{any} / {any}\n", .{ min, max });
+    return .{ min orelse 0, max orelse 0 };
 }
 
 fn part2(line: []u8) u32 {
-    var sum: u32 = 0;
-    for (line, 0..) |a, i| {
-        var j = (i + (line.len >> 1)) % line.len;
-        var b = line[j];
-        if (a == b) {
-            // std.debug.print("{d} sum += {d}\n", .{ i, a });
-            sum += (a - '0');
-        }
-    }
-    return sum;
+    _ = line;
+    return 0;
 }
 
 pub fn main() !void {
@@ -45,10 +55,16 @@ pub fn main() !void {
     var buf_reader = std.io.bufferedReader(file.reader());
     var in_stream = buf_reader.reader();
     var buf: [4096]u8 = undefined;
+    var sum: u32 = 0;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        std.debug.print("Part 1: {d}\n", .{part1(line)});
-        std.debug.print("Part 2: {d}\n", .{part2(line)});
+        const min_max = extent(line);
+        const min = min_max[0];
+        const max = min_max[1];
+        const diff = max - min;
+        std.debug.print("{d} - {d} = {d}\n", .{ min, max, diff });
+        sum += diff;
     }
+    std.debug.print("Part 1: {d}\n", .{sum});
 }
 
 test "simple test" {

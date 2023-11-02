@@ -20,6 +20,7 @@ pub fn build(b: *std.Build) void {
     for (days) |day| {
         // var path = "src/" ++ day ++ ".zig";
         // var path = std.fmt.bufPrint(&buffer, "src/{s}.zig", .{day});
+        // https://www.huy.rocks/everyday/01-04-2022-zig-strings-in-5-minutes
         var path = std.fmt.allocPrint(allocator, "src/{s}.zig", .{day}) catch "format failed";
         std.debug.print("path: {s}\n", .{path});
 
