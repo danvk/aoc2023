@@ -19,25 +19,23 @@ const Dir = enum(u2) {
         const n: u32 = @intFromEnum(self);
         return @as(Dir, @enumFromInt((n + 1) % 4));
     }
+    pub fn dx(this: Dir) i32 {
+        return switch (this) {
+            Dir.left => -1,
+            Dir.right => 1,
+            Dir.up => 0,
+            Dir.down => 0,
+        };
+    }
+    pub fn dy(this: Dir) i32 {
+        return switch (this) {
+            Dir.left => 0,
+            Dir.right => 0,
+            Dir.up => -1,
+            Dir.down => 1,
+        };
+    }
 };
-
-// TODO: make these methods
-fn dirDx(d: Dir) i32 {
-    return switch (d) {
-        Dir.left => -1,
-        Dir.right => 1,
-        Dir.up => 0,
-        Dir.down => 0,
-    };
-}
-fn dirDy(d: Dir) i32 {
-    return switch (d) {
-        Dir.left => 0,
-        Dir.right => 0,
-        Dir.up => -1,
-        Dir.down => 1,
-    };
-}
 
 fn part1(n: u32) u32 {
     var d = Dir.right;
@@ -52,8 +50,8 @@ fn part1(n: u32) u32 {
                 break :outer;
             }
             i += 1;
-            x += dirDx(d);
-            y += dirDy(d);
+            x += d.dx();
+            y += d.dy();
         }
         d = d.next();
         if (d == Dir.left or d == Dir.right) {
