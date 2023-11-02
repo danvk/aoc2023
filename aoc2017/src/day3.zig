@@ -65,18 +65,20 @@ fn part1(n: u32) u32 {
 
 const Point = struct { x: i32, y: i32 };
 
-fn part2(n: u32, allocator: std.mem.Allocator) u32 {
+fn part2(n: u32, allocator: std.mem.Allocator) !u32 {
     var d = Dir.right;
     var amount: u32 = 1;
     var x: i32 = 0;
     var y: i32 = 0;
     var i: u32 = 1;
 
-    const values = std.AutoHashMap(Point, u32).init(allocator);
+    var values = std.AutoHashMap(Point, u32).init(allocator);
+    defer values.deinit();
+    try values.put(Point{ .x = 0, .y = 0 }, 1);
 
     const ds = [_]i32{ -1, 0, 1 };
 
-    while (i < n) {
+    while (true) {
         for (1..(1 + amount)) |_| {
             var sum: u32 = 0;
             for (ds) |dx| {
@@ -91,7 +93,7 @@ fn part2(n: u32, allocator: std.mem.Allocator) u32 {
                 return sum;
             }
             const pt = Point{ .x = x, .y = y };
-            values.put(pt, sum);
+            try values.put(pt, sum);
             i += 1;
             x += d.dx();
             y += d.dy();
@@ -101,6 +103,7 @@ fn part2(n: u32, allocator: std.mem.Allocator) u32 {
             amount += 1;
         }
     }
+    return 0;
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
@@ -110,7 +113,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const num = try std.fmt.parseInt(u32, arg, 10);
 
     std.debug.print("Part 1: {d}\n", .{part1(num)});
-    std.debug.print("Part 2: {d}\n", .{part2(num, allocator)});
+    std.debug.print("Part 2: {d}\n", .{try part2(num, allocator)});
 }
 
 test "next dir" {

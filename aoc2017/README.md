@@ -41,3 +41,12 @@ Reworking `build.zig` to use a for loop is a real pain! I banged my head for a w
 Zig uses `or` instead of `||`. This is confusing because `||` does mean something in Zig, just not what I expected.
 
 My bug with enum math was really just a bug (I did `(n+4)%4` instead of `(n+1)%4`). A unit test made it easy to track down.
+
+For part 2 I had to roll out the hash map. My first mistake was forgetting to call `init` on the hash map, which resulted in some deeply confusing errors about not passing enough parameters to `get`.
+
+Then I got some errors about "cast discards const qualifier". It seems there is a big difference between:
+
+    - const values = std.AutoHashMap(Point, u32).init(allocator);
+    + var values = std.AutoHashMap(Point, u32).init(allocator);
+
+This difference doesn't seem like it's the same as it is in JS.
