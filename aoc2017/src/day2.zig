@@ -1,24 +1,21 @@
 const std = @import("std");
 
-fn extent(line: []u8) [2]u32 {
-    var sum: u32 = 0;
-    _ = sum;
-
+fn readInts(line: []u8, nums: *std.ArrayList(u32)) !void {
     var it = std.mem.splitAny(u8, line, " \t");
-
-    var min: ?u32 = null;
-    var max: ?u32 = null;
-
     while (it.next()) |split| {
-        std.debug.print("split: {s}\n", .{split});
         if (split.len == 0) {
             continue;
         }
-        // XXX what's the right way to handle errors here?
-        const num = std.fmt.parseInt(u32, split, 10) catch {
-            return .{ 0, 0 };
-        };
-        std.debug.print("num: {d}, {any} / {any}\n", .{ num, min orelse num, max orelse num });
+        const num = try std.fmt.parseInt(u32, split, 10);
+        try nums.append(num);
+    }
+}
+
+fn extent(nums: []u32) [2]u32 {
+    var min: ?u32 = null;
+    var max: ?u32 = null;
+
+    for (nums) |num| {
         if (min orelse num >= num) {
             min = num;
         }
@@ -57,7 +54,11 @@ pub fn main() !void {
     var buf: [4096]u8 = undefined;
     var sum: u32 = 0;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        const min_max = extent(line);
+        var nums = std.ArrayList(u32).init(allocator);
+        defer nums.deinit();
+        try readInts(line, &nums);
+
+        const min_max = extent(nums.items);
         const min = min_max[0];
         const max = min_max[1];
         const diff = max - min;
