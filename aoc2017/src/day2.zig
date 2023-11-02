@@ -27,8 +27,18 @@ fn extent(nums: []u32) [2]u32 {
     return .{ min orelse 0, max orelse 0 };
 }
 
-fn part2(line: []u8) u32 {
-    _ = line;
+fn part2(nums: []u32) u32 {
+    for (nums, 0..) |a, i| {
+        for (nums, 0..) |b, j| {
+            if (j == i) {
+                continue;
+            }
+            if (a % b == 0) {
+                std.debug.print("Found it! {d} / {d}\n", .{ a, b });
+                return a / b;
+            }
+        }
+    }
     return 0;
 }
 
@@ -53,6 +63,7 @@ pub fn main() !void {
     var in_stream = buf_reader.reader();
     var buf: [4096]u8 = undefined;
     var sum: u32 = 0;
+    var sum2: u32 = 0;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         var nums = std.ArrayList(u32).init(allocator);
         defer nums.deinit();
@@ -62,10 +73,13 @@ pub fn main() !void {
         const min = min_max[0];
         const max = min_max[1];
         const diff = max - min;
-        std.debug.print("{d} - {d} = {d}\n", .{ min, max, diff });
+        // std.debug.print("{d} - {d} = {d}\n", .{ min, max, diff });
         sum += diff;
+
+        sum2 += part2(nums.items);
     }
     std.debug.print("Part 1: {d}\n", .{sum});
+    std.debug.print("Part 2: {d}\n", .{sum2});
 }
 
 test "simple test" {

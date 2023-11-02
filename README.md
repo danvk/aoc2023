@@ -108,3 +108,5 @@ Concatenating strings was kinda painful! You need an allocator to do it, which I
 I had a `null` vs. `undefined` bug! You have to initialize optionals to `null` rather than `undefined`.
 
 For part 2 I'm implementing `readInts` using an `ArrayList`. Zig found a memory leak (I forgot to deallocate the ArrayList). Pretty cool!
+
+Zig error handling is interesting. If your function returns `!void`, then you can just stick `try` in front of any statement that could error and its error returns will be added to your error returns.
