@@ -48,8 +48,7 @@ pub fn main(args: []const [:0]u8) !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    // args[0] is the executable
-    const filename = args[1];
+    const filename = args[0];
     std.debug.print("Filename: {s}\n", .{filename});
 
     // https://stackoverflow.com/a/68879352/388951
