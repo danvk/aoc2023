@@ -42,14 +42,11 @@ fn part2(nums: []u32) u32 {
     return 0;
 }
 
-pub fn main() !void {
+pub fn main(args: []const [:0]u8) !void {
     // See https://zigbyexample.github.io/command_line_arguments
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
-
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
 
     // args[0] is the executable
     const filename = args[1];
