@@ -10,7 +10,16 @@ const std = @import("std");
 // D4
 // R5
 
-const Dir = enum(u2) { right, up, left, down };
+const Dir = enum(u2) {
+    right,
+    up,
+    left,
+    down,
+    pub fn next(self: Dir) Dir {
+        const n: u32 = @intFromEnum(self);
+        return @as(Dir, @enumFromInt((n + 1) % 4));
+    }
+};
 
 // TODO: make these methods
 fn dirDx(d: Dir) i32 {
@@ -29,10 +38,6 @@ fn dirDy(d: Dir) i32 {
         Dir.down => 1,
     };
 }
-fn next(d: Dir) Dir {
-    const n: u32 = @intFromEnum(d);
-    return @as(Dir, @enumFromInt((n + 1) % 4));
-}
 
 fn part1(n: u32) u32 {
     var d = Dir.right;
@@ -50,12 +55,13 @@ fn part1(n: u32) u32 {
             x += dirDx(d);
             y += dirDy(d);
         }
-        d = next(d);
+        d = d.next();
         if (d == Dir.left or d == Dir.right) {
             amount += 1;
         }
     }
     std.debug.print("{d} is at {d}, {d}\n", .{ i, x, y });
+    // Will become @abs in Zig 0.12: https://github.com/ziglang/zig/issues/16026
     return std.math.absCast(x) + std.math.absCast(y);
 }
 
@@ -71,5 +77,5 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
 }
 
 test "next dir" {
-    try std.testing.expectEqual(next(Dir.left), Dir.down);
+    try std.testing.expectEqual(Dir.left.next(), Dir.down);
 }
