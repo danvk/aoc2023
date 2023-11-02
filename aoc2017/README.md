@@ -1,5 +1,9 @@
 # Advent of Code 2017
 
+## Questions
+
+- Is `GeneralPurposeAllocator` a singleton? Should I care about reusing my instance?
+
 ## Day 1
 
 - Had to Google how to read a file line-by-line in Zig.
@@ -27,3 +31,5 @@ I'm thinking I should at least try the mono-binary approach. It's supposed to be
 
 The Zig Build System / module documentation is pretty poor: https://ziglearn.org/chapter-3/
 There's no explanation of what `zig.mod` is, for example.
+
+Setting each day up as a module works fine. It's a little verbose (for each day I have to add a line to `build.zig` and an `if` statement to `main.zig`) but not so terrible. See 3dc252e for my failed attempt to rework this using a hash map of function pointers.

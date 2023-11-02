@@ -13,9 +13,9 @@ pub fn main() !void {
     // args[0] is the executable
     const day = args[1];
     if (std.mem.eql(u8, day, "day1")) {
-        try day1(args[2..]);
+        try day1(allocator, args[2..]);
     } else if (std.mem.eql(u8, day, "day2")) {
-        try day2(args[2..]);
+        try day2(allocator, args[2..]);
     } else {
         unreachable;
     }
