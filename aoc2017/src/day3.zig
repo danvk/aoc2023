@@ -65,14 +65,14 @@ fn part1(n: u32) u32 {
 
 const Point = struct { x: i32, y: i32 };
 
-fn part2(n: u32) u32 {
+fn part2(n: u32, allocator: std.mem.Allocator) u32 {
     var d = Dir.right;
     var amount: u32 = 1;
     var x: i32 = 0;
     var y: i32 = 0;
     var i: u32 = 1;
 
-    const values = std.AutoHashMap(Point, u32);
+    const values = std.AutoHashMap(Point, u32).init(allocator);
 
     const ds = [_]i32{ -1, 0, 1 };
 
@@ -86,11 +86,12 @@ fn part2(n: u32) u32 {
                     sum += val orelse 0;
                 }
             }
-            std.debug.print("{d},{d} {d} -> sum={d}\n", x, y, i, sum);
+            std.debug.print("{d},{d} {d} -> sum={d}\n", .{ x, y, i, sum });
             if (sum > n) {
                 return sum;
             }
-            values.put(Point{ .x = x, .y = y }, sum);
+            const pt = Point{ .x = x, .y = y };
+            values.put(pt, sum);
             i += 1;
             x += d.dx();
             y += d.dy();
@@ -103,16 +104,22 @@ fn part2(n: u32) u32 {
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
-    _ = allocator;
     const arg = args[0];
     std.debug.print("arg: {s}\n", .{arg});
 
     const num = try std.fmt.parseInt(u32, arg, 10);
 
     std.debug.print("Part 1: {d}\n", .{part1(num)});
-    std.debug.print("Part 2: {d}\n", .{part2(num)});
+    std.debug.print("Part 2: {d}\n", .{part2(num, allocator)});
 }
 
 test "next dir" {
     try std.testing.expectEqual(Dir.left.next(), Dir.down);
+}
+
+test "point as hash key" {
+    var values = std.AutoHashMap(Point, u32).init(std.testing.allocator);
+    defer values.deinit();
+    try values.put(Point{ .x = 2, .y = 3 }, 123);
+    try std.testing.expectEqual(values.get(Point{ .x = 2, .y = 3 }), 123);
 }
