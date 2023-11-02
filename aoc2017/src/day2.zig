@@ -23,7 +23,7 @@ fn extent(nums: []u32) [2]u32 {
             max = num;
         }
     }
-    std.debug.print("{any} / {any}\n", .{ min, max });
+    // std.debug.print("{any} / {any}\n", .{ min, max });
     return .{ min orelse 0, max orelse 0 };
 }
 
@@ -34,7 +34,7 @@ fn part2(nums: []u32) u32 {
                 continue;
             }
             if (a % b == 0) {
-                std.debug.print("Found it! {d} / {d}\n", .{ a, b });
+                // std.debug.print("Found it! {d} / {d}\n", .{ a, b });
                 return a / b;
             }
         }
@@ -42,7 +42,7 @@ fn part2(nums: []u32) u32 {
     return 0;
 }
 
-pub fn main(allocator: std.Allocator, args: []const [:0]u8) !void {
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const filename = args[0];
     std.debug.print("Filename: {s}\n", .{filename});
 

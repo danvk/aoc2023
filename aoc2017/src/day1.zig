@@ -25,7 +25,7 @@ fn part2(line: []u8) u32 {
     return sum;
 }
 
-pub fn main(allocator: std.Allocator, args: []const [:0]u8) !void {
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     _ = allocator;
     const filename = args[0];
     std.debug.print("Filename: {s}\n", .{filename});

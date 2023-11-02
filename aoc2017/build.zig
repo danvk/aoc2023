@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const NUM_DAYS = 2;
+
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
 // runner.
@@ -24,8 +26,15 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    exe.addModule("day1", b.addModule("day1", .{ .source_file = .{ .path = "src/day1.zig" } }));
-    exe.addModule("day2", b.addModule("day2", .{ .source_file = .{ .path = "src/day2.zig" } }));
+    // With general-purpose allocator, I get memory leak errors. Why not with this?
+    const allocator = std.heap.page_allocator;
+
+    for (1..(1 + NUM_DAYS)) |day| {
+        const path = std.fmt.allocPrint(allocator, "src/day{d}.zig", .{day}) catch "";
+        const module_name = std.fmt.allocPrint(allocator, "day{d}", .{day}) catch "";
+        std.debug.print("module {s} src: {s}\n", .{ module_name, path });
+        exe.addModule(module_name, b.addModule(module_name, .{ .source_file = .{ .path = path } }));
+    }
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

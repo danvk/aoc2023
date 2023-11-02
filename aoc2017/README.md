@@ -33,3 +33,5 @@ The Zig Build System / module documentation is pretty poor: https://ziglearn.org
 There's no explanation of what `zig.mod` is, for example.
 
 Setting each day up as a module works fine. It's a little verbose (for each day I have to add a line to `build.zig` and an `if` statement to `main.zig`) but not so terrible. See 3dc252e for my failed attempt to rework this using a hash map of function pointers.
+
+Reworking `build.zig` to use a for loop is a real pain! I banged my head for a while thinking that my call to `std.fmt.bufPrint` was actually running out of space, when it was just trying to return that error from a function (`build`) that can't return an error. Now I'm running into an issue where (I think) the buffer I'm allocating gets reused across loops. So maybe an allocator really is the way to go.
