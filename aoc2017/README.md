@@ -50,3 +50,14 @@ Then I got some errors about "cast discards const qualifier". It seems there is 
     + var values = std.AutoHashMap(Point, u32).init(allocator);
 
 This difference doesn't seem like it's the same as it is in JS.
+
+## Day 4
+
+I'm getting errors like this when I try to write a test with a string literal:
+
+    src/day4.zig:48:48: error: expected type '[]u8', found '*const [14:0]u8'
+
+How do I read `*const [14:0]u8`? And how do I pass a string literal to a function?
+It's a `const` issue: https://zig.news/kristoff/what-s-a-string-literal-in-zig-31e9
+
+Since any function that allocates memory can fail, it seems like you wind up having to put `try` in front of almost every function call.
