@@ -61,3 +61,7 @@ How do I read `*const [14:0]u8`? And how do I pass a string literal to a functio
 It's a `const` issue: https://zig.news/kristoff/what-s-a-string-literal-in-zig-31e9
 
 Since any function that allocates memory can fail, it seems like you wind up having to put `try` in front of almost every function call.
+
+I've turned off inlay hints, which I find quite distracting and "jumpy" as I type. The "offUnlessPressed" setting means that they appear when I hit option+ctrl. This still doesn't eliminate the inlays when I hit `(` to call a function.
+
+On part 2 I had some fun figuring out how to properly free memory I allocated to sort the words. I wound up putting them all on an ArrayList and freeing that in a `defer` block, but maybe there's a more idiomatic way.
