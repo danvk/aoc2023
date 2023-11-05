@@ -80,3 +80,12 @@ This is [Sentinel Termination](https://ziglearn.org/chapter-1/#sentinel-terminat
 > The types of string literals is *const [N:0]u8, where N is the length of the string.
 
 So the `:0` means it's null-terminated. Sentinel-termination seems like kind of a funny generalization of null-termination. Are there any use cases other than C strings? A `[]u8` is kind of like a Pascal string, just without storing the length in a specific place.
+
+## Day 5
+
+So much `try`! I'm getting flashbacks to doing the Advent of Code in Rust three years ago, and how fussy it was about adding signed and unsigned ints:
+
+    const idx = @as(usize, @intCast(i));
+    var offset = nums[idx];
+    nums[idx] += 1;
+
