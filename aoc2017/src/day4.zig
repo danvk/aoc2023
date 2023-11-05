@@ -15,26 +15,18 @@ fn is_valid(line: []const u8, allocator: std.mem.Allocator) !bool {
     return true;
 }
 
-fn is_valid2(line: []const u8, allocator: std.mem.Allocator) !bool {
+fn is_valid2(line: []const u8, parent_allocator: std.mem.Allocator) !bool {
+    var arena = std.heap.ArenaAllocator.init(parent_allocator);
+    defer arena.deinit();
+    var allocator = arena.allocator();
     var values = std.StringHashMap(void).init(allocator);
-    defer values.deinit();
-
-    var to_free = std.ArrayList([]u8).init(allocator);
-    defer to_free.deinit();
-    defer {
-        for (to_free.items) |word| {
-            allocator.free(word);
-        }
-    }
+    // defer values.deinit();
 
     var it = std.mem.splitAny(u8, line, " \t");
     while (it.next()) |word| {
-        var my_word = try std.fmt.allocPrint(allocator, "{s}", .{word});
-        try to_free.append(my_word);
+        var my_word = try allocator.dupe(u8, word);
         std.mem.sort(u8, my_word, {}, comptime std.sort.asc(u8));
-        // std.debug.print("in: {s}, out: {s}\n", .{ word, my_word });
-        const prev = values.get(my_word);
-        if (prev) |_| {
+        if (values.contains(my_word)) {
             return false;
         }
         try values.put(my_word, undefined);

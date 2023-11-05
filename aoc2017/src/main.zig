@@ -1,8 +1,8 @@
 const std = @import("std");
-const day1 = @import("day1").main;
-const day2 = @import("day2").main;
-const day3 = @import("day3").main;
-const day4 = @import("day4").main;
+const day1 = @import("./day1.zig").main;
+const day2 = @import("./day2.zig").main;
+const day3 = @import("./day3.zig").main;
+const day4 = @import("./day4.zig").main;
 
 const expect = std.testing.expect;
 const eql = std.mem.eql;

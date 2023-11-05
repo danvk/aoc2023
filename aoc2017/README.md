@@ -65,3 +65,18 @@ Since any function that allocates memory can fail, it seems like you wind up hav
 I've turned off inlay hints, which I find quite distracting and "jumpy" as I type. The "offUnlessPressed" setting means that they appear when I hit option+ctrl. This still doesn't eliminate the inlays when I hit `(` to call a function.
 
 On part 2 I had some fun figuring out how to properly free memory I allocated to sort the words. I wound up putting them all on an ArrayList and freeing that in a `defer` block, but maybe there's a more idiomatic way.
+
+I asked for feedback on r/zig:
+https://www.reddit.com/r/Zig/comments/17mwi96/feedback_on_a_zig_advent_of_code_solution/
+
+Arena allocators seem very useful!
+
+You can `@import("./path/to/file.zig");`. Interestingly there are zero examples of this on ziglearn.org!
+
+> How do I read `*const [14:0]u8`?
+
+This is [Sentinel Termination](https://ziglearn.org/chapter-1/#sentinel-termination):
+
+> The types of string literals is *const [N:0]u8, where N is the length of the string.
+
+So the `:0` means it's null-terminated. Sentinel-termination seems like kind of a funny generalization of null-termination. Are there any use cases other than C strings? A `[]u8` is kind of like a Pascal string, just without storing the length in a specific place.
