@@ -32,9 +32,7 @@ fn is_valid2(line: []const u8, allocator: std.mem.Allocator) !bool {
         var my_word = try allocator.dupe(u8, word);
         try to_free.append(my_word);
         std.mem.sort(u8, my_word, {}, comptime std.sort.asc(u8));
-        // std.debug.print("in: {s}, out: {s}\n", .{ word, my_word });
-        const prev = values.get(my_word);
-        if (prev) |_| {
+        if (values.contains(my_word)) {
             return false;
         }
         try values.put(my_word, undefined);
