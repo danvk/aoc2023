@@ -15,7 +15,7 @@ const Dir = enum(u2) {
     up,
     left,
     down,
-    pub fn next(self: Dir) Dir {
+    pub fn ccw(self: Dir) Dir {
         const n: u32 = @intFromEnum(self);
         return @as(Dir, @enumFromInt((n + 1) % 4));
     }
@@ -53,7 +53,7 @@ fn part1(n: u32) u32 {
             x += d.dx();
             y += d.dy();
         }
-        d = d.next();
+        d = d.ccw();
         if (d == Dir.left or d == Dir.right) {
             amount += 1;
         }
@@ -98,7 +98,7 @@ fn part2(n: u32, allocator: std.mem.Allocator) !u32 {
             x += d.dx();
             y += d.dy();
         }
-        d = d.next();
+        d = d.ccw();
         if (d == Dir.left or d == Dir.right) {
             amount += 1;
         }

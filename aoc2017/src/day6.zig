@@ -13,7 +13,6 @@ const U32SliceContext = struct {
 };
 
 fn hash_u32_slice(s: []const u32) u64 {
-    // Any hash could be used here, for testing autoHash.
     var hasher = std.hash.Wyhash.init(0);
     // Can I write ".Deep" here?
     std.hash.autoHashStrat(&hasher, s, std.hash.Strategy.Deep);
