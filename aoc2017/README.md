@@ -69,3 +69,4 @@ On part 2 I had some fun figuring out how to properly free memory I allocated to
 I asked for feedback on r/zig:
 https://www.reddit.com/r/Zig/comments/17mwi96/feedback_on_a_zig_advent_of_code_solution/
 
+Arena allocators seem very useful!
