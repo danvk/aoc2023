@@ -29,7 +29,7 @@ fn is_valid2(line: []const u8, allocator: std.mem.Allocator) !bool {
 
     var it = std.mem.splitAny(u8, line, " \t");
     while (it.next()) |word| {
-        var my_word = try std.fmt.allocPrint(allocator, "{s}", .{word});
+        var my_word = try allocator.dupe(u8, word);
         try to_free.append(my_word);
         std.mem.sort(u8, my_word, {}, comptime std.sort.asc(u8));
         // std.debug.print("in: {s}, out: {s}\n", .{ word, my_word });
