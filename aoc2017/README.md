@@ -89,3 +89,4 @@ So much `try`! I'm getting flashbacks to doing the Advent of Code in Rust three 
     var offset = nums[idx];
     nums[idx] += 1;
 
+Short integer loops are certainly fast! 0.25s for both parts.
