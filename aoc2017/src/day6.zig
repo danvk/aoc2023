@@ -14,8 +14,7 @@ const U32SliceContext = struct {
 
 fn hash_u32_slice(s: []const u32) u64 {
     var hasher = std.hash.Wyhash.init(0);
-    // Can I write ".Deep" here?
-    std.hash.autoHashStrat(&hasher, s, std.hash.Strategy.Deep);
+    std.hash.autoHashStrat(&hasher, s, .Deep);
     return hasher.final();
 }
 
