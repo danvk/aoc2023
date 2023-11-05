@@ -90,3 +90,7 @@ So much `try`! I'm getting flashbacks to doing the Advent of Code in Rust three 
     nums[idx] += 1;
 
 Short integer loops are certainly fast! 0.25s for both parts.
+
+## Day 6
+
+Perhaps the values in each bank will always be below 256, but I wasn't sure about part 2 so I chose to represent them as a `[]u32`. This mean that I couldn't use `StringHashMap`. Slices can't go through an `AutoHashMap` (it's ambiguous what you want) so I had to roll my own hashing function. Fortunately there was a unit test in `auto_hash.zig` that showed me how to do what I wanted. My first try failed until I looked at the unit test more closely. "Shallow" is really, truly shallow (just comparing pointers). What I wanted was "deep" but not deep recursive.

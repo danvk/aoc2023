@@ -4,6 +4,7 @@ const day2 = @import("./day2.zig").main;
 const day3 = @import("./day3.zig").main;
 const day4 = @import("./day4.zig").main;
 const day5 = @import("./day5.zig").main;
+const day6 = @import("./day6.zig").main;
 
 const expect = std.testing.expect;
 const eql = std.mem.eql;
@@ -28,6 +29,8 @@ pub fn main() !void {
         try day4(allocator, args[2..]);
     } else if (std.mem.eql(u8, day, "day5")) {
         try day5(allocator, args[2..]);
+    } else if (std.mem.eql(u8, day, "day6")) {
+        try day6(allocator, args[2..]);
     } else {
         unreachable;
     }
