@@ -98,3 +98,10 @@ Perhaps the values in each bank will always be below 256, but I wasn't sure abou
 ... and of course part 2 didn't need `u32` :/ I'm sure this will come in handy again sometime.
 
 Instead of `std.hash.Strategy.Deep`, you can just write `.Deep`. Though `zls` doesn't seem to understand this.
+
+Implementing a line-by-line iterator seems ridiculously hard (this was also true in Rust). I tried, failed, and ran across a few interesting links:
+
+- https://web.archive.org/web/20210413234716/https://zigforum.org/t/read-file-or-buffer-by-line/317/2; this does exactly what I want, but the `ReturnTypeOf` function doesn't seem to work for a `File` (maybe it does for stdin).
+- This article explains `@This`: https://www.openmymind.net/Zig-Quirks/
+- This page has some advice for using Zig for Advent of Code! https://www.huy.rocks/everyday/12-11-2022-zig-using-zig-for-advent-of-code
+
