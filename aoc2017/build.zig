@@ -26,16 +26,6 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    // With general-purpose allocator, I get memory leak errors. Why not with this?
-    const allocator = std.heap.page_allocator;
-
-    for (1..(1 + NUM_DAYS)) |day| {
-        const path = std.fmt.allocPrint(allocator, "src/day{d}.zig", .{day}) catch "";
-        const module_name = std.fmt.allocPrint(allocator, "day{d}", .{day}) catch "";
-        std.debug.print("module {s} src: {s}\n", .{ module_name, path });
-        exe.addModule(module_name, b.addModule(module_name, .{ .source_file = .{ .path = path } }));
-    }
-
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).
