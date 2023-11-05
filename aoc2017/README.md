@@ -70,3 +70,13 @@ I asked for feedback on r/zig:
 https://www.reddit.com/r/Zig/comments/17mwi96/feedback_on_a_zig_advent_of_code_solution/
 
 Arena allocators seem very useful!
+
+You can `@import("./path/to/file.zig");`. Interestingly there are zero examples of this on ziglearn.org!
+
+> How do I read `*const [14:0]u8`?
+
+This is [Sentinel Termination](https://ziglearn.org/chapter-1/#sentinel-termination):
+
+> The types of string literals is *const [N:0]u8, where N is the length of the string.
+
+So the `:0` means it's null-terminated. Sentinel-termination seems like kind of a funny generalization of null-termination. Are there any use cases other than C strings? A `[]u8` is kind of like a Pascal string, just without storing the length in a specific place.
