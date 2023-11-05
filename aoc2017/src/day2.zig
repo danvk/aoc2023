@@ -1,22 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
 
-fn extent(nums: []u32) [2]u32 {
-    var min: ?u32 = null;
-    var max: ?u32 = null;
-
-    for (nums) |num| {
-        if (min orelse num >= num) {
-            min = num;
-        }
-        if (max orelse num <= num) {
-            max = num;
-        }
-    }
-    // std.debug.print("{any} / {any}\n", .{ min, max });
-    return .{ min orelse 0, max orelse 0 };
-}
-
 fn part2(nums: []u32) u32 {
     for (nums, 0..) |a, i| {
         for (nums, 0..) |b, j| {
@@ -50,9 +34,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
         defer nums.deinit();
         try util.readInts(line, &nums);
 
-        const min_max = extent(nums.items);
-        const min = min_max[0];
-        const max = min_max[1];
+        const min_max = std.mem.minMax(u32, nums.items);
+        const min = min_max.min;
+        const max = min_max.max;
         const diff = max - min;
         // std.debug.print("{d} - {d} = {d}\n", .{ min, max, diff });
         sum += diff;
