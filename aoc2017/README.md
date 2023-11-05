@@ -105,3 +105,6 @@ Implementing a line-by-line iterator seems ridiculously hard (this was also true
 - This article explains `@This`: https://www.openmymind.net/Zig-Quirks/
 - This page has some advice for using Zig for Advent of Code! https://www.huy.rocks/everyday/12-11-2022-zig-using-zig-for-advent-of-code
 
+Zig explicitly does not have closures:
+https://github.com/ziglang/zig/issues/229
+
