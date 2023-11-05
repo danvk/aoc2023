@@ -1,5 +1,6 @@
 const std = @import("std");
 
+// Read u32s delimited by spaces or tabs from a line of text.
 pub fn readInts(line: []u8, nums: *std.ArrayList(u32)) !void {
     var it = std.mem.splitAny(u8, line, " \t");
     while (it.next()) |split| {

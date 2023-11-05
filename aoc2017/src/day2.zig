@@ -1,15 +1,5 @@
 const std = @import("std");
-
-fn readInts(line: []u8, nums: *std.ArrayList(u32)) !void {
-    var it = std.mem.splitAny(u8, line, " \t");
-    while (it.next()) |split| {
-        if (split.len == 0) {
-            continue;
-        }
-        const num = try std.fmt.parseInt(u32, split, 10);
-        try nums.append(num);
-    }
-}
+const util = @import("./util.zig");
 
 fn extent(nums: []u32) [2]u32 {
     var min: ?u32 = null;
@@ -58,7 +48,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         var nums = std.ArrayList(u32).init(allocator);
         defer nums.deinit();
-        try readInts(line, &nums);
+        try util.readInts(line, &nums);
 
         const min_max = extent(nums.items);
         const min = min_max[0];
