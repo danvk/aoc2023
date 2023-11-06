@@ -16,7 +16,7 @@ fn part2(nums: []u32) u32 {
     return 0;
 }
 
-pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
     std.debug.print("Filename: {s}\n", .{filename});
 

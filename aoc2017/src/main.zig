@@ -6,9 +6,23 @@ const day4 = @import("./day4.zig").main;
 const day5 = @import("./day5.zig").main;
 const day6 = @import("./day6.zig").main;
 const day7 = @import("./day7.zig").main;
+const day8 = @import("./day8.zig").main;
 
-const expect = std.testing.expect;
-const eql = std.mem.eql;
+const Day = struct {
+    name: []const u8,
+    main: fn (std.mem.Allocator, [][:0]u8) anyerror!void,
+};
+
+const DAYS = [_]Day{
+    Day{ .name = "day1", .main = day1 },
+    Day{ .name = "day2", .main = day2 },
+    Day{ .name = "day3", .main = day3 },
+    Day{ .name = "day4", .main = day4 },
+    Day{ .name = "day5", .main = day5 },
+    Day{ .name = "day6", .main = day6 },
+    Day{ .name = "day7", .main = day7 },
+    Day{ .name = "day8", .main = day8 },
+};
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -20,21 +34,13 @@ pub fn main() !void {
 
     // args[0] is the executable
     const day = args[1];
-    if (std.mem.eql(u8, day, "day1")) {
-        try day1(allocator, args[2..]);
-    } else if (std.mem.eql(u8, day, "day2")) {
-        try day2(allocator, args[2..]);
-    } else if (std.mem.eql(u8, day, "day3")) {
-        try day3(allocator, args[2..]);
-    } else if (std.mem.eql(u8, day, "day4")) {
-        try day4(allocator, args[2..]);
-    } else if (std.mem.eql(u8, day, "day5")) {
-        try day5(allocator, args[2..]);
-    } else if (std.mem.eql(u8, day, "day6")) {
-        try day6(allocator, args[2..]);
-    } else if (std.mem.eql(u8, day, "day7")) {
-        try day7(allocator, args[2..]);
-    } else {
-        unreachable;
+    var has_run = false;
+    inline for (DAYS) |day_entry| {
+        if (std.mem.eql(u8, day, day_entry.name)) {
+            try day_entry.main(allocator, args[2..]);
+            has_run = true;
+            break;
+        }
     }
+    std.debug.assert(has_run);
 }
