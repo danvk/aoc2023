@@ -106,7 +106,7 @@ fn part2(n: u32, allocator: std.mem.Allocator) !u32 {
     return 0;
 }
 
-pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const arg = args[0];
     std.debug.print("arg: {s}\n", .{arg});
 

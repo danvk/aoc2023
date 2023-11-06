@@ -20,7 +20,7 @@ pub fn getProgramWeight(program_name: []const u8, programs: std.StringHashMap(Pr
     return sum;
 }
 
-pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
+pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
     defer arena.deinit();

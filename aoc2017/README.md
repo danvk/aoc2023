@@ -137,3 +137,10 @@ tylelk:
   1614 (666) qqnroz
 
 The 1623 should be a 1614. So the 1215 needs to be a 1206.
+
+I've at least learned something because it was clearer to me how to clean up some repeated code in `main.zig` (d7aff8d). I'm a bit confused about `anyerror`. Putting all the `main` functions for each day in a struct requires me to declare their error sets. I can declare them as `anyerror`, but then Zig is unwilling to infer the error set on each of them. Declaring each `main` to return `anyerror` makes the problem go away. But what issue am I addressing here, exactly? Is there a downside to using `anyerror`?
+
+## Day 8
+
+- Is there a `toString()` convention for Zig structs?
+- Is it a convention that `allocator` is always passed first?

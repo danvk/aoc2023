@@ -37,7 +37,7 @@ fn part2(in_nums: []const i32, allocator: std.mem.Allocator) !u32 {
     return num_steps;
 }
 
-pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
     var line_it = try util.iterLines(filename, allocator);

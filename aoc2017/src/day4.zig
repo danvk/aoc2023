@@ -35,7 +35,7 @@ fn is_valid2(line: []const u8, parent_allocator: std.mem.Allocator) !bool {
     return true;
 }
 
-pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
     var line_it = try util.iterLines(filename, allocator);

@@ -51,7 +51,7 @@ fn part1_2(in_nums: []const u32, parent_allocator: std.mem.Allocator) ![2]u32 {
     return .{ 0, 0 };
 }
 
-pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
     var line_it = try util.iterLines(filename, allocator);
