@@ -15,7 +15,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     defer arena.deinit();
     var allocator = arena.allocator();
 
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try util.iterLines2(filename, allocator);
     defer line_it.deinit();
 
     var programs = std.StringHashMap(Program).init(allocator);
@@ -23,7 +23,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     var parents = std.StringHashMap([]const u8).init(allocator);
     defer parents.deinit();
 
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         // vpryah (310) -> iedlpkf, epeain
         // xnoux (41)
         var parts_it = std.mem.splitSequence(u8, line, " -> ");

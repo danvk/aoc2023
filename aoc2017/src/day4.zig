@@ -38,12 +38,12 @@ fn is_valid2(line: []const u8, parent_allocator: std.mem.Allocator) !bool {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const filename = args[0];
 
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try util.iterLines2(filename, allocator);
     defer line_it.deinit();
 
     var sum: u32 = 0;
     var sum2: u32 = 0;
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         if (try is_valid(line, allocator)) {
             sum += 1;
         }

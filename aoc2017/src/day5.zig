@@ -40,13 +40,13 @@ fn part2(in_nums: []const i32, allocator: std.mem.Allocator) !u32 {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const filename = args[0];
 
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try util.iterLines2(filename, allocator);
     defer line_it.deinit();
 
     var nums = std.ArrayList(i32).init(allocator);
     defer nums.deinit();
 
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         const num = try std.fmt.parseInt(i32, line, 10);
         try nums.append(num);
     }
