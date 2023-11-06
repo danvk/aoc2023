@@ -78,8 +78,8 @@ pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !MemoryLine
 }
 
 pub fn iterLines2(filename: []const u8, allocator: std.mem.Allocator) !ReadByLineIterator(@TypeOf((std.fs.cwd().openFile(filename, .{}) catch unreachable).reader())) {
-    const file = try std.fs.cwd().openFile(filename, .{});
-    return readByLine(allocator, file);
+    var file = try std.fs.cwd().openFile(filename, .{});
+    return readByLine(allocator, &file, file);
 }
 
 fn ReadByLineIterator(comptime ReaderType: type) type {
@@ -88,12 +88,14 @@ fn ReadByLineIterator(comptime ReaderType: type) type {
         pub const MaxBufferSize: usize = 64 * 1024;
 
         allocator: std.mem.Allocator,
+        file_to_close: *std.fs.File,
         reader: ReaderType,
         last_read: ?[]const u8,
 
         pub fn deinit(self: @This()) void {
             if (self.last_read) |buf|
                 self.allocator.free(buf);
+            self.file_to_close.close();
         }
 
         pub fn next(self: *@This()) !?[]const u8 {
@@ -109,10 +111,11 @@ fn ReadByLineIterator(comptime ReaderType: type) type {
     };
 }
 
-pub fn readByLine(allocator: std.mem.Allocator, file: anytype) ReadByLineIterator(@TypeOf(file.reader())) {
+pub fn readByLine(allocator: std.mem.Allocator, fileToClose: *std.fs.File, file: anytype) ReadByLineIterator(@TypeOf(file.reader())) {
     return .{
         .allocator = allocator,
         .reader = file.reader(),
         .last_read = null,
+        .file_to_close = fileToClose,
     };
 }
