@@ -144,3 +144,5 @@ I've at least learned something because it was clearer to me how to clean up som
 
 - Is there a `toString()` convention for Zig structs?
 - Is it a convention that `allocator` is always passed first?
+- The `std.meta.stringToEnum` trick is handy.
+- I wrote a `printHashMap` function but I'm surprised that I had to.

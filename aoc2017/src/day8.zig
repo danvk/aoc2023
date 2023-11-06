@@ -51,6 +51,21 @@ fn parseInstruction(allocator: std.mem.Allocator, line: []const u8) !Instruction
     } };
 }
 
+fn printHashMap(comptime V: type, hash_map: std.StringHashMap(V)) void {
+    var is_first = true;
+    var it = hash_map.iterator();
+    std.debug.print("{{ ", .{});
+    while (it.next()) |entry| {
+        if (!is_first) {
+            std.debug.print(", ", .{});
+        } else {
+            is_first = false;
+        }
+        std.debug.print("{s}: {any}", .{ entry.key_ptr.*, entry.value_ptr.* });
+    }
+    std.debug.print(" }}\n", .{});
+}
+
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
@@ -60,10 +75,41 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     var line_it = try util.iterLines(filename, allocator);
     defer line_it.deinit();
 
+    var reg = std.StringHashMap(i32).init(allocator);
+
     while (line_it.next()) |line| {
-        const instr = parseInstruction(line);
-        _ = instr;
+        const instr = try parseInstruction(allocator, line);
+        const cond = instr.cond;
+        const reg_val = reg.get(cond.reg) orelse 0;
+        const cond_true = switch (cond.op) {
+            .@"<" => reg_val < cond.val,
+            .@"<=" => reg_val <= cond.val,
+            .@">" => reg_val > cond.val,
+            .@">=" => reg_val >= cond.val,
+            .@"!=" => reg_val != cond.val,
+            .@"==" => reg_val == cond.val,
+        };
+        if (cond_true) {
+            var target_val = reg.get(instr.reg) orelse 0;
+            switch (instr.op) {
+                .dec => {
+                    target_val -= instr.amount;
+                },
+                .inc => {
+                    target_val += instr.amount;
+                },
+            }
+            try reg.put(instr.reg, target_val);
+        }
+        printHashMap(i32, reg);
     }
+
+    var max: i32 = 0;
+    var it = reg.valueIterator();
+    while (it.next()) |val| {
+        max = @max(max, val.*);
+    }
+    std.debug.print("Max register: {d}\n", .{max});
 }
 
 const expectEqual = std.testing.expectEqual;
