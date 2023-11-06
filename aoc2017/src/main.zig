@@ -5,6 +5,7 @@ const day3 = @import("./day3.zig").main;
 const day4 = @import("./day4.zig").main;
 const day5 = @import("./day5.zig").main;
 const day6 = @import("./day6.zig").main;
+const day7 = @import("./day7.zig").main;
 
 const expect = std.testing.expect;
 const eql = std.mem.eql;
@@ -31,32 +32,9 @@ pub fn main() !void {
         try day5(allocator, args[2..]);
     } else if (std.mem.eql(u8, day, "day6")) {
         try day6(allocator, args[2..]);
+    } else if (std.mem.eql(u8, day, "day7")) {
+        try day7(allocator, args[2..]);
     } else {
         unreachable;
-    }
-}
-
-test "hex" {
-    var b: [8]u8 = undefined;
-
-    _ = try std.fmt.bufPrint(&b, "{X}", .{4294967294});
-    try expect(eql(u8, &b, "FFFFFFFE"));
-
-    _ = try std.fmt.bufPrint(&b, "{x}", .{4294967294});
-    try expect(eql(u8, &b, "fffffffe"));
-
-    _ = try std.fmt.bufPrint(&b, "{}", .{std.fmt.fmtSliceHexLower("Zig!")});
-    try expect(eql(u8, &b, "5a696721"));
-}
-
-test "day formatting" {
-    for (1..1) |day| {
-        var path: [100]u8 = undefined;
-        var module_name: [100]u8 = undefined;
-
-        _ = try std.fmt.bufPrint(&path, "src/day{d}.zig", .{day});
-        _ = try std.fmt.bufPrint(&module_name, "day{d}", .{day});
-        try expect(eql([]u8, path, "src/day1.zig"));
-        try expect(eql([]u8, module_name, "day1"));
     }
 }

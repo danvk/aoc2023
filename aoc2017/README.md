@@ -108,3 +108,17 @@ Implementing a line-by-line iterator seems ridiculously hard (this was also true
 Zig explicitly does not have closures:
 https://github.com/ziglang/zig/issues/229
 
+Reading the Zig AoC page introduced me to `std.mem.tokenize`. It has a return type of `TokenIterator`, which is considerably easier to write out than the return type of `buffered_reader.reader()`. So I _can_ write my `iter_lines` function, just not with a buffered reader.
+
+I have a [Stack Overflow question](https://stackoverflow.com/q/77427514/388951) up about this. If I get an answer then I can hopefully swap out the implementation without changing the API.
+
+## Day 7
+
+Zig is also [opposed to scanf](https://github.com/ziglang/zig/issues/12161). Maybe this is most useful for Aoc? When I searched "zig scanf", a post about AoC not being a good way to learn Zig popped up!
+
+Regular expressions also seem hard in Zig:
+https://www.openmymind.net/Regular-Expressions-in-Zig/
+
+So maybe just split, split, split?
+
+I continue to be surprised by the differences between `const` and `var`. You need to make your iterators `var`. Also the error you get if you forget the `init()` on a hash map is very cryptic!
