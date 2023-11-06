@@ -57,6 +57,14 @@ pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]cons
     return try file.reader().readAllAlloc(allocator, fileSize);
 }
 
+fn SuccessTypeOf(comptime callable_type: type) type {
+    const info = @typeInfo(callable_type);
+    return switch (info) {
+        .ErrorUnion => info.ErrorUnion.payload,
+        else => @compileError("unsupported type " ++ @typeName(callable_type)),
+    };
+}
+
 pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !MemoryLineIterator {
     const content = try readInputFile(filename, allocator);
 
@@ -69,39 +77,10 @@ pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !MemoryLine
     };
 }
 
-fn ReturnTypeOf(comptime callable_type: type) type {
-    const info = @typeInfo(callable_type);
-    return switch (info) {
-        .Fn => info.Fn.return_type.?,
-        .Type => @compileError("unsupporte type Type "),
-        .Void => @compileError("unsupported type Void "),
-        .Bool => @compileError("unsupported type Bool "),
-        .NoReturn => @compileError("unsupported type NoReturn "),
-        .Int => @compileError("unsupported type Int "),
-        .Float => @compileError("unsupported type Float "),
-        .Pointer => @compileError("unsupported type Pointer "),
-        .Array => @compileError("unsupported type Array "),
-        .Struct => @compileError("unsupported type Struct " ++ @typeName(callable_type)),
-        .ComptimeFloat => @compileError("unsupported type ComptimeFloat "),
-        .ComptimeInt => @compileError("unsupported type ComptimeInt "),
-        .Undefined => @compileError("unsupported type Undefined "),
-        .Null => @compileError("unsupported type Null "),
-        .Optional => @compileError("unsupported type Optional "),
-        .ErrorUnion => @compileError("unsupported type ErrorUnion "),
-        .ErrorSet => @compileError("unsupported type ErrorSet "),
-        .Enum => @compileError("unsupported type Enum "),
-        .Union => @compileError("unsupported type Union "),
-        .Opaque => @compileError("unsupported type Opaque "),
-        .Frame => @compileError("unsupported type Frame "),
-        .AnyFrame => @compileError("unsupported type AnyFrame "),
-        .Vector => @compileError("unsupported type Vector "),
-        .EnumLiteral => @compileError("unsupported type EnumLiteral "),
-
-        // This seems to not be a thing anymore:
-        // .BoundFn => info.BoundFn.return_type.?,
-        // else => @compileError("unsupported type " ++ @typeName(callable_type)),
-    };
-}
+// pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !void {
+//     const file = try std.fs.cwd().openFile(filename, .{});
+//     return readByLine(allocator, file);
+// }
 
 fn ReadByLineIterator(comptime ReaderType: type) type {
     return struct {

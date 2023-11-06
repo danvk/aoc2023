@@ -20,10 +20,12 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const filename = args[0];
     std.debug.print("Filename: {s}\n", .{filename});
 
-    const file = try std.fs.cwd().openFile(filename, .{});
+    var file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
+    var buf_reader = std.io.bufferedReader(file.reader());
 
-    var line_it = util.readByLine(allocator, file);
+    var line_it = util.readByLine(allocator, &buf_reader);
+    // var line_it = util.iterLines(filename, allocator);
     defer line_it.deinit();
 
     var sum: u32 = 0;
