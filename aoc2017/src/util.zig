@@ -77,7 +77,13 @@ pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !MemoryLine
     };
 }
 
-pub fn getBufferedReader(file: std.fs.File) @TypeOf(std.io.bufferedReader(file.reader()).reader()) {
+pub fn getBufferedReader(file: std.fs.File) @TypeOf(while (true)
+{
+    var raw_reader = file.reader();
+    var buf_reader = std.io.bufferedReader(raw_reader);
+    var r = buf_reader.reader();
+    break r;
+}) {
     var raw_reader = file.reader();
     var buf_reader = std.io.bufferedReader(raw_reader);
     return buf_reader.reader();
