@@ -7,8 +7,18 @@ const Program = struct {
     name: []const u8,
     value: u32,
     parent: ?*Program,
+    // TODO: would be better if this were []*Program
     children: [][]const u8,
 };
+
+pub fn getProgramWeight(program_name: []const u8, programs: std.StringHashMap(Program)) u32 {
+    const program = programs.get(program_name) orelse unreachable;
+    var sum = program.value;
+    for (program.children) |child| {
+        sum += getProgramWeight(child, programs);
+    }
+    return sum;
+}
 
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const filename = args[0];
@@ -81,5 +91,28 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
         std.debug.print("{s}: {any}\n", .{ prog.name, prog.* });
         const parent = prog.parent;
         prog_it = parent;
+    }
+
+    prog_iter = programs.valueIterator();
+    while (prog_iter.next()) |prog| {
+        if (prog.children.len == 0) {
+            continue;
+        }
+
+        var sums = std.ArrayList(u32).init(allocator);
+        defer sums.deinit();
+        for (prog.children) |child_name| {
+            const sum = getProgramWeight(child_name, programs);
+            try sums.append(sum);
+            // std.debug.print("  {d} ({d}) {s}\n", .{ sum, child.value, child_name });
+        }
+        const extent = std.mem.minMax(u32, sums.items);
+        if (extent.min != extent.max) {
+            std.debug.print("{s}:\n", .{prog.name});
+            for (prog.children, sums.items) |child_name, sum| {
+                const child = programs.get(child_name) orelse unreachable;
+                std.debug.print("  {d} ({d}) {s}\n", .{ sum, child.value, child_name });
+            }
+        }
     }
 }

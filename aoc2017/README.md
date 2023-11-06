@@ -124,3 +124,16 @@ So maybe just split, split, split?
 I continue to be surprised by the differences between `const` and `var`. You need to make your iterators `var`. Also the error you get if you forget the `init()` on a hash map is very cryptic!
 
 Is there anything like C++'s pass by value copying? I guess not if Zig is all about "no secret copying".
+
+zls is surprisingly bad at reporting errors. For example calling `std.debug.print` with the wrong number of parameters is not reported as an error.
+
+I'm just going to get a final answer for part two by hand:
+
+tylelk:
+  1614 (58) drfzng
+  1614 (579) yhonqw
+  1614 (504) wsyiyen
+  1623 (1215) dqwocyn
+  1614 (666) qqnroz
+
+The 1623 should be a 1614. So the 1215 needs to be a 1206.
