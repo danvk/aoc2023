@@ -66,6 +66,19 @@ fn printHashMap(comptime V: type, hash_map: std.StringHashMap(V)) void {
     std.debug.print(" }}\n", .{});
 }
 
+pub fn maxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?V {
+    var ret: ?V = null;
+    var it = hash_map.valueIterator();
+    while (it.next()) |val| {
+        if (ret) |old_val| {
+            ret = @max(old_val, val.*);
+        } else {
+            ret = val.*;
+        }
+    }
+    return ret;
+}
+
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
@@ -76,6 +89,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     defer line_it.deinit();
 
     var reg = std.StringHashMap(i32).init(allocator);
+    var max_ever: i32 = 0;
 
     while (line_it.next()) |line| {
         const instr = try parseInstruction(allocator, line);
@@ -102,14 +116,11 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
             try reg.put(instr.reg, target_val);
         }
         printHashMap(i32, reg);
+        max_ever = @max(max_ever, maxValue(i32, reg) orelse 0);
     }
 
-    var max: i32 = 0;
-    var it = reg.valueIterator();
-    while (it.next()) |val| {
-        max = @max(max, val.*);
-    }
-    std.debug.print("Max register: {d}\n", .{max});
+    std.debug.print("part 1: {d}\n", .{maxValue(i32, reg) orelse 0});
+    std.debug.print("part 2: {d}\n", .{max_ever});
 }
 
 const expectEqual = std.testing.expectEqual;

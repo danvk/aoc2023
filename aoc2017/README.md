@@ -146,3 +146,4 @@ I've at least learned something because it was clearer to me how to clean up som
 - Is it a convention that `allocator` is always passed first?
 - The `std.meta.stringToEnum` trick is handy.
 - I wrote a `printHashMap` function but I'm surprised that I had to.
+- I continue to find postfix dereferencing (`x.*`) weird, but I guess this does make more sense than C (`*x`).
