@@ -77,9 +77,15 @@ pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !MemoryLine
     };
 }
 
-pub fn iterLines2(filename: []const u8, allocator: std.mem.Allocator) !ReadByLineIterator(@TypeOf((std.fs.cwd().openFile(filename, .{}) catch unreachable).reader())) {
+pub fn iterLines2(filename: []const u8, allocator: std.mem.Allocator) !ReadByLineIterator(@TypeOf(
+    std.io.bufferedReader(
+        (std.fs.cwd().openFile(filename, .{}) catch unreachable).reader()
+    ).reader()
+)) {
     var file = try std.fs.cwd().openFile(filename, .{});
-    return readByLine(allocator, &file, file);
+    var raw_reader = file.reader();
+    var buf_reader = std.io.bufferedReader(raw_reader);
+    return readByLine(allocator, &file, buf_reader);
 }
 
 fn ReadByLineIterator(comptime ReaderType: type) type {
