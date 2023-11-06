@@ -114,7 +114,7 @@ I have a [Stack Overflow question](https://stackoverflow.com/q/77427514/388951) 
 
 ## Day 7
 
-Zig is also [opposed to scanf](https://github.com/ziglang/zig/issues/12161). Maybe this is most useful for Aoc? When I searched "zig scanf", a post about AoC not being a good way to learn Zig popped up!
+Zig is also [opposed to scanf](https://github.com/ziglang/zig/issues/12161). Maybe this is most useful for Aoc? When I searched "zig scanf", a [post about AoC not being a good way to learn Zig](https://cohost.org/strangebroadcasts/post/542139-also-failing-to-lear) popped up!
 
 Regular expressions also seem hard in Zig:
 https://www.openmymind.net/Regular-Expressions-in-Zig/

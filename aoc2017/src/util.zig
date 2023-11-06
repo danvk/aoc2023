@@ -68,3 +68,72 @@ pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !MemoryLine
         .iter = readIter,
     };
 }
+
+fn ReturnTypeOf(comptime callable_type: type) type {
+    const info = @typeInfo(callable_type);
+    return switch (info) {
+        .Fn => info.Fn.return_type.?,
+        .Type => @compileError("unsupporte type Type "),
+        .Void => @compileError("unsupported type Void "),
+        .Bool => @compileError("unsupported type Bool "),
+        .NoReturn => @compileError("unsupported type NoReturn "),
+        .Int => @compileError("unsupported type Int "),
+        .Float => @compileError("unsupported type Float "),
+        .Pointer => @compileError("unsupported type Pointer "),
+        .Array => @compileError("unsupported type Array "),
+        .Struct => @compileError("unsupported type Struct " ++ @typeName(callable_type)),
+        .ComptimeFloat => @compileError("unsupported type ComptimeFloat "),
+        .ComptimeInt => @compileError("unsupported type ComptimeInt "),
+        .Undefined => @compileError("unsupported type Undefined "),
+        .Null => @compileError("unsupported type Null "),
+        .Optional => @compileError("unsupported type Optional "),
+        .ErrorUnion => @compileError("unsupported type ErrorUnion "),
+        .ErrorSet => @compileError("unsupported type ErrorSet "),
+        .Enum => @compileError("unsupported type Enum "),
+        .Union => @compileError("unsupported type Union "),
+        .Opaque => @compileError("unsupported type Opaque "),
+        .Frame => @compileError("unsupported type Frame "),
+        .AnyFrame => @compileError("unsupported type AnyFrame "),
+        .Vector => @compileError("unsupported type Vector "),
+        .EnumLiteral => @compileError("unsupported type EnumLiteral "),
+
+        // This seems to not be a thing anymore:
+        // .BoundFn => info.BoundFn.return_type.?,
+        // else => @compileError("unsupported type " ++ @typeName(callable_type)),
+    };
+}
+
+fn ReadByLineIterator(comptime ReaderType: type) type {
+    return struct {
+        // Should be customizable! But also if you have lines of more than 64k you have other problems.
+        pub const MaxBufferSize: usize = 64 * 1024;
+
+        allocator: std.mem.Allocator,
+        reader: ReaderType,
+        last_read: ?[]const u8,
+
+        pub fn deinit(self: @This()) void {
+            if (self.last_read) |buf|
+                self.allocator.free(buf);
+        }
+
+        pub fn next(self: *@This()) !?[]const u8 {
+            if (self.last_read) |buf| {
+                self.allocator.free(buf);
+                self.last_read = null;
+            }
+
+            const line = try self.reader.readUntilDelimiterOrEofAlloc(self.allocator, '\n', MaxBufferSize);
+            self.last_read = line;
+            return line;
+        }
+    };
+}
+
+pub fn readByLine(allocator: std.mem.Allocator, file: anytype) ReadByLineIterator(@TypeOf(file.reader())) {
+    return .{
+        .allocator = allocator,
+        .reader = file.reader(),
+        .last_read = null,
+    };
+}

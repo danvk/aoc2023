@@ -20,12 +20,15 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const filename = args[0];
     std.debug.print("Filename: {s}\n", .{filename});
 
-    var line_it = try util.iterLines(filename, allocator);
+    const file = try std.fs.cwd().openFile(filename, .{});
+    defer file.close();
+
+    var line_it = util.readByLine(allocator, file);
     defer line_it.deinit();
 
     var sum: u32 = 0;
     var sum2: u32 = 0;
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         var nums = std.ArrayList(u32).init(allocator);
         defer nums.deinit();
         try util.readInts(line, &nums);
