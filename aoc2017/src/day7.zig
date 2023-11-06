@@ -7,6 +7,7 @@ const Program = struct {
     name: []const u8,
     value: u32,
     parent: ?*Program,
+    children: [][]const u8,
 };
 
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
@@ -38,10 +39,13 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
         std.debug.print("{s}\n", .{val_slice});
         const value = try std.fmt.parseInt(u32, val_slice, 10);
 
+        var child_array = std.ArrayList([]const u8).init(allocator);
+
         if (parts_it.next()) |children| {
             var children_it = std.mem.splitSequence(u8, children, ", ");
             while (children_it.next()) |child| {
                 const my_child = try allocator.dupe(u8, child);
+                try child_array.append(my_child);
                 try parents.put(my_child, my_name);
             }
         }
@@ -50,6 +54,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) !void {
             .name = my_name,
             .value = value,
             .parent = null,
+            .children = child_array.items,
         });
     }
 

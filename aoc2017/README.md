@@ -122,3 +122,5 @@ https://www.openmymind.net/Regular-Expressions-in-Zig/
 So maybe just split, split, split?
 
 I continue to be surprised by the differences between `const` and `var`. You need to make your iterators `var`. Also the error you get if you forget the `init()` on a hash map is very cryptic!
+
+Is there anything like C++'s pass by value copying? I guess not if Zig is all about "no secret copying".
