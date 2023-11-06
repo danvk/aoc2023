@@ -1,4 +1,5 @@
 const std = @import("std");
+const util = @import("./util.zig");
 
 fn part1(in_nums: []const i32, allocator: std.mem.Allocator) !u32 {
     var nums = try allocator.dupe(i32, in_nums);
@@ -38,23 +39,14 @@ fn part2(in_nums: []const i32, allocator: std.mem.Allocator) !u32 {
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) !void {
     const filename = args[0];
-    std.debug.print("Filename: {s}\n", .{filename});
 
-    // https://stackoverflow.com/a/68879352/388951
-    var file = try std.fs.cwd().openFile(filename, .{});
-    defer file.close();
+    var line_it = try util.iterLines(filename, allocator);
+    defer line_it.deinit();
 
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-    var buf: [4096]u8 = undefined;
-    var sum: u32 = 0;
-    _ = sum;
-    var sum2: u32 = 0;
-    _ = sum2;
     var nums = std.ArrayList(i32).init(allocator);
     defer nums.deinit();
 
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (line_it.next()) |line| {
         const num = try std.fmt.parseInt(i32, line, 10);
         try nums.append(num);
     }
