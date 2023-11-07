@@ -26,7 +26,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     defer arena.deinit();
     var allocator = arena.allocator();
 
-    var line_it = try util.iterLines2(filename, allocator);
+    var line_it = try util.iterLines(filename, allocator);
     defer line_it.deinit();
 
     var programs = std.StringHashMap(Program).init(allocator);

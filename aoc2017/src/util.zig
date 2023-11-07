@@ -31,7 +31,7 @@ pub fn getBufferedReader(file: std.fs.File) @TypeOf(blk: {
     return buf_reader.reader();
 }
 
-pub fn iterLines2(filename: []const u8, allocator: std.mem.Allocator) !ReadByLineIterator(@TypeOf(getBufferedReader(std.fs.cwd().openFile(filename, .{}) catch unreachable))) {
+pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !ReadByLineIterator(@TypeOf(getBufferedReader(std.fs.cwd().openFile(filename, .{}) catch unreachable))) {
     var file = try std.fs.cwd().openFile(filename, .{});
     var buf_reader = getBufferedReader(file);
     return readByLine(allocator, &file, buf_reader);
