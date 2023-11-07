@@ -66,7 +66,7 @@ fn printHashMap(comptime V: type, hash_map: std.StringHashMap(V)) void {
     std.debug.print(" }}\n", .{});
 }
 
-pub fn hashMinMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) struct { min: V, max: V } {
+pub fn hashMinMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?struct { min: V, max: V } {
     var min: V = undefined;
     var max: V = undefined;
     var it = hash_map.valueIterator();
@@ -74,13 +74,21 @@ pub fn hashMinMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) struct 
         min = val.*;
         max = val.*;
     } else {
-        unreachable;
+        return null;
     }
     while (it.next()) |val| {
         min = @min(min, val.*);
         max = @max(max, val.*);
     }
     return .{ .min = min, .max = max };
+}
+
+pub fn hashMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?V {
+    const minMax = hashMinMaxValue(V, hash_map);
+    if (minMax) |v| {
+        return v.max;
+    }
+    return null;
 }
 
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -122,10 +130,10 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
             try reg.put(instr.reg, target_val);
         }
         printHashMap(i32, reg);
-        max_ever = @max(max_ever, hashMinMaxValue(i32, reg).max);
+        max_ever = @max(max_ever, hashMaxValue(i32, reg) orelse 0);
     }
 
-    std.debug.print("part 1: {d}\n", .{hashMinMaxValue(i32, reg).max});
+    std.debug.print("part 1: {d}\n", .{hashMaxValue(i32, reg) orelse 0});
     std.debug.print("part 2: {d}\n", .{max_ever});
 }
 

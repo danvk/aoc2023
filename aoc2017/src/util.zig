@@ -39,38 +39,27 @@ pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !ReadByLine
 
 fn ReadByLineIterator(comptime ReaderType: type) type {
     return struct {
-        // Should be customizable! But also if you have lines of more than 64k you have other problems.
-        pub const MaxBufferSize: usize = 64 * 1024;
-
         allocator: std.mem.Allocator,
         file_to_close: *std.fs.File,
         reader: ReaderType,
-        last_read: ?[]const u8,
+        buffer: []u8,
 
         pub fn deinit(self: @This()) void {
-            if (self.last_read) |buf|
-                self.allocator.free(buf);
+            self.allocator.free(self.buffer);
             self.file_to_close.close();
         }
 
         pub fn next(self: *@This()) !?[]const u8 {
-            if (self.last_read) |buf| {
-                self.allocator.free(buf);
-                self.last_read = null;
-            }
-
-            const line = try self.reader.readUntilDelimiterOrEofAlloc(self.allocator, '\n', MaxBufferSize);
-            self.last_read = line;
-            return line;
+            return self.reader.readUntilDelimiterOrEof(self.buffer, '\n');
         }
     };
 }
 
-pub fn readByLine(allocator: std.mem.Allocator, fileToClose: *std.fs.File, reader: anytype) ReadByLineIterator(@TypeOf(reader)) {
+pub fn readByLine(allocator: std.mem.Allocator, fileToClose: *std.fs.File, reader: anytype) !ReadByLineIterator(@TypeOf(reader)) {
     return .{
         .allocator = allocator,
         .reader = reader,
-        .last_read = null,
+        .buffer = try allocator.alloc(u8, 4096),
         .file_to_close = fileToClose,
     };
 }
