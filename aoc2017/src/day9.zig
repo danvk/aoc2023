@@ -12,8 +12,16 @@ pub fn getScore(line: []const u8) u32 {
     while (i < line.len) {
         const c = line[i];
         if (in_garbage) {
-            if (c == '>') {
-                in_garbage = false;
+            switch (c) {
+                '>' => {
+                    in_garbage = false;
+                },
+                '!' => {
+                    i += 1;
+                },
+                else => {
+                    // ignore everything else
+                },
             }
         } else {
             switch (c) {
@@ -62,5 +70,8 @@ test "samples" {
     try expectEqual(@as(u32, 9), getScore("{{<ab>},{<ab>},{<ab>},{<ab>}}"));
 
     // {{<!!>},{<!!>},{<!!>},{<!!>}}, score of 1 + 2 + 2 + 2 + 2 = 9.
+    try expectEqual(@as(u32, 9), getScore("{{<!!>},{<!!>},{<!!>},{<!!>}}"));
+
     // {{<a!>},{<a!>},{<a!>},{<ab>}}, score of 1 + 2 = 3.
+    try expectEqual(@as(u32, 3), getScore("{{<a!>},{<a!>},{<a!>},{<ab>}}"));
 }
