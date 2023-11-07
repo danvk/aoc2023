@@ -123,6 +123,12 @@ So maybe just split, split, split?
 
 I continue to be surprised by the differences between `const` and `var`. You need to make your iterators `var`. Also the error you get if you forget the `init()` on a hash map is very cryptic!
 
+Thanks to my Stack Overflow question I'm very, very close to having the line iterator function I want. Writing the type signature of these functions is quite difficult, but `@TypeOf` is pretty powerful. The final (hopefully?) issue I'm running into is that you need two statements to get rid of this `const` error: https://ziggit.dev/t/what-does-error-expected-type-t-found-const-t-mean-where-t-is-some-type/1320. But how do you do that in a comptime expression?
+
+Some background on why Zig wants you to factor out a local variable here: https://github.com/ziglang/zig/issues/12414 (it prevents use-after-free bugs).
+
+You can use a labelled block as an expression, but not a bare block. To "return" from a labelled loop, you use a `break` statement.
+
 Is there anything like C++'s pass by value copying? I guess not if Zig is all about "no secret copying".
 
 zls is surprisingly bad at reporting errors. For example calling `std.debug.print` with the wrong number of parameters is not reported as an error.
@@ -147,3 +153,4 @@ I've at least learned something because it was clearer to me how to clean up som
 - The `std.meta.stringToEnum` trick is handy.
 - I wrote a `printHashMap` function but I'm surprised that I had to.
 - I continue to find postfix dereferencing (`x.*`) weird, but I guess this does make more sense than C (`*x`).
+- Why doesn't `std.testing.expectEqual` work with my `struct Instruction`?

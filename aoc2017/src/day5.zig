@@ -46,7 +46,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var nums = std.ArrayList(i32).init(allocator);
     defer nums.deinit();
 
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         const num = try std.fmt.parseInt(i32, line, 10);
         try nums.append(num);
     }

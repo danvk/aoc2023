@@ -43,7 +43,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     var sum: u32 = 0;
     var sum2: u32 = 0;
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         if (try is_valid(line, allocator)) {
             sum += 1;
         }

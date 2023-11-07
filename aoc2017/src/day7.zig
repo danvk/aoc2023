@@ -34,7 +34,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     var parents = std.StringHashMap([]const u8).init(allocator);
     defer parents.deinit();
 
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         // vpryah (310) -> iedlpkf, epeain
         // xnoux (41)
         var parts_it = std.mem.splitSequence(u8, line, " -> ");

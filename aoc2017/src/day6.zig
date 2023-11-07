@@ -57,7 +57,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var line_it = try util.iterLines(filename, allocator);
     defer line_it.deinit();
 
-    while (line_it.next()) |line| {
+    while (try line_it.next()) |line| {
         var nums = std.ArrayList(u32).init(allocator);
         defer nums.deinit();
         try util.readInts(line, &nums);
