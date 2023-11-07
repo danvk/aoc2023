@@ -128,3 +128,29 @@ Thanks to my Stack Overflow question I'm very, very close to having the line ite
 Some background on why Zig wants you to factor out a local variable here: https://github.com/ziglang/zig/issues/12414 (it prevents use-after-free bugs).
 
 You can use a labelled block as an expression, but not a bare block. To "return" from a labelled loop, you use a `break` statement.
+
+Is there anything like C++'s pass by value copying? I guess not if Zig is all about "no secret copying".
+
+zls is surprisingly bad at reporting errors. For example calling `std.debug.print` with the wrong number of parameters is not reported as an error.
+
+I'm just going to get a final answer for part two by hand:
+
+tylelk:
+  1614 (58) drfzng
+  1614 (579) yhonqw
+  1614 (504) wsyiyen
+  1623 (1215) dqwocyn
+  1614 (666) qqnroz
+
+The 1623 should be a 1614. So the 1215 needs to be a 1206.
+
+I've at least learned something because it was clearer to me how to clean up some repeated code in `main.zig` (d7aff8d). I'm a bit confused about `anyerror`. Putting all the `main` functions for each day in a struct requires me to declare their error sets. I can declare them as `anyerror`, but then Zig is unwilling to infer the error set on each of them. Declaring each `main` to return `anyerror` makes the problem go away. But what issue am I addressing here, exactly? Is there a downside to using `anyerror`?
+
+## Day 8
+
+- Is there a `toString()` convention for Zig structs?
+- Is it a convention that `allocator` is always passed first?
+- The `std.meta.stringToEnum` trick is handy.
+- I wrote a `printHashMap` function but I'm surprised that I had to.
+- I continue to find postfix dereferencing (`x.*`) weird, but I guess this does make more sense than C (`*x`).
+- Why doesn't `std.testing.expectEqual` work with my `struct Instruction`?
