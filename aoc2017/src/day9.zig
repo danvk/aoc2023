@@ -37,6 +37,7 @@ pub fn getScore(line: []const u8) u32 {
                     in_garbage = true;
                 },
                 else => {
+                    std.debug.print("Surprise char {c} @ {d}\n", .{ c, i });
                     unreachable;
                 },
             }
@@ -50,6 +51,7 @@ pub fn getScore(line: []const u8) u32 {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
     const contents = try util.readInputFile(filename, allocator);
+    defer allocator.free(contents);
     std.debug.print("part1: {d}\n", .{getScore(contents)});
 }
 

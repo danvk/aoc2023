@@ -158,3 +158,5 @@ I've at least learned something because it was clearer to me how to clean up som
 With my fancy new buffered reader iterator, I'm getting crashes. I don't think these are because of my iterator, though, I think they're because of the way I'm setting up the hash map.
 
 ## Day 9
+
+Iterating strings character-by-character: Zig's got this!
