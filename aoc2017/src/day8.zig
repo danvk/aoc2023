@@ -137,7 +137,7 @@ pub fn runOnFile(parent_allocator: std.mem.Allocator, filename: [:0]const u8) !v
             // uncommenting this causes a crash:
             try reg.put(my_reg, target_val);
         }
-        printHashMap(i32, reg);
+        // printHashMap(i32, reg);
         max_ever = @max(max_ever, hashMaxValue(i32, reg) orelse 0);
     }
 

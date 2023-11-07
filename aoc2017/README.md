@@ -155,4 +155,6 @@ I've at least learned something because it was clearer to me how to clean up som
 - I continue to find postfix dereferencing (`x.*`) weird, but I guess this does make more sense than C (`*x`).
 - Why doesn't `std.testing.expectEqual` work with my `struct Instruction`?
 
-expected type '[]const [:0]u8', found '*const [1][:0]const u8'
+With my fancy new buffered reader iterator, I'm getting crashes. I don't think these are because of my iterator, though, I think they're because of the way I'm setting up the hash map.
+
+## Day 9
