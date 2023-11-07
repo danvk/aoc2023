@@ -5,24 +5,33 @@ const assert = std.debug.assert;
 
 pub fn getScore(line: []const u8) u32 {
     var depth: u32 = 0;
-    // var in_garbage = false;
+    var in_garbage = false;
     var score: u32 = 0;
     var i: usize = 0;
 
     while (i < line.len) {
         const c = line[i];
-        switch (c) {
-            '{' => {
-                depth += 1;
-            },
-            '}' => {
-                score += depth;
-                depth -= 1;
-            },
-            ',' => {},
-            else => {
-                unreachable;
-            },
+        if (in_garbage) {
+            if (c == '>') {
+                in_garbage = false;
+            }
+        } else {
+            switch (c) {
+                '{' => {
+                    depth += 1;
+                },
+                '}' => {
+                    score += depth;
+                    depth -= 1;
+                },
+                ',' => {},
+                '<' => {
+                    in_garbage = true;
+                },
+                else => {
+                    unreachable;
+                },
+            }
         }
         i += 1;
     }
@@ -46,9 +55,12 @@ test "samples" {
     try expectEqual(@as(u32, 6), getScore("{{{}}}"));
     // {{{},{},{{}}}}, score of 1 + 2 + 3 + 3 + 3 + 4 = 16.
     try expectEqual(@as(u32, 16), getScore("{{{},{},{{}}}}"));
-
     // {<a>,<a>,<a>,<a>}, score of 1.
+    try expectEqual(@as(u32, 1), getScore("{<a>,<a>,<a>,<a>}"));
+
     // {{<ab>},{<ab>},{<ab>},{<ab>}}, score of 1 + 2 + 2 + 2 + 2 = 9.
+    try expectEqual(@as(u32, 9), getScore("{{<ab>},{<ab>},{<ab>},{<ab>}}"));
+
     // {{<!!>},{<!!>},{<!!>},{<!!>}}, score of 1 + 2 + 2 + 2 + 2 = 9.
     // {{<a!>},{<a!>},{<a!>},{<ab>}}, score of 1 + 2 = 3.
 }
