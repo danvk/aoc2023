@@ -38,10 +38,55 @@ pub fn hashOnce(nums: []u8, len: usize, state: State) State {
 
 pub fn hash(nums: []u8, lengths: []const u8) void {
     var state = State{ .pos = 0, .skip = 0 };
+    _ = hashWithState(nums, lengths, state);
+}
+
+pub fn hashWithState(nums: []u8, lengths: []const u8, init_state: State) State {
+    var state = State{
+        .pos = init_state.pos,
+        .skip = init_state.skip,
+    };
     for (lengths, 0..) |len, i| {
+        _ = i;
         state = hashOnce(nums, len, state);
-        std.debug.print("{d}: {any}\n", .{ i, nums });
+        // std.debug.print("{d}: {any}\n", .{ i, nums });
     }
+    return state;
+}
+
+pub fn hashString(allocator: std.mem.Allocator, str: []const u8) !void {
+    const n = str.len;
+    var lens = try std.fmt.allocPrint(allocator, "{s}.....", .{str});
+    defer allocator.free(lens);
+    lens[n] = 17;
+    lens[n + 1] = 31;
+    lens[n + 2] = 73;
+    lens[n + 3] = 47;
+    lens[n + 4] = 23;
+    var els: [256]u8 = undefined;
+    for (0..256) |i| {
+        els[i] = @as(u8, @intCast(i));
+    }
+    var state = State{ .pos = 0, .skip = 0 };
+    for (0..64) |_| {
+        state = hashWithState(&els, lens, state);
+    }
+    // els is now the "sparse hash"
+    printDenseHash(&els);
+}
+
+fn printDenseHash(els: []const u8) void {
+    var i: usize = 0;
+    while (i < els.len) : (i += 16) {
+        var n = els[i];
+        for (1..16) |d| {
+            n = n ^ els[i + d];
+            // std.debug.print("{d}: {d}\n", .{ d, els[i + d] });
+        }
+        // std.debug.print("dense: {d}\n", .{n});
+        std.debug.print("{x:0>2}", .{n});
+    }
+    std.debug.print("\n", .{});
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -61,6 +106,10 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const el0 = @as(u32, els[0]);
     const el1 = @as(u32, els[1]);
     std.debug.print("part1: {d} x {d} = {d}\n", .{ el0, el1, el0 * el1 });
+
+    assert(contents[contents.len - 1] != '\n');
+    std.debug.print("contents: '{s}'\n", .{contents});
+    try hashString(allocator, contents);
 }
 
 const expectEqual = std.testing.expectEqual;
@@ -71,4 +120,15 @@ test "samples part1" {
     hash(&els, &lens);
     std.debug.print("els: {any}\n", .{els});
     try expectEqual(@as(u32, 12), els[0] * els[1]);
+}
+
+test "print dense hash" {
+    printDenseHash(&[_]u8{ 65, 27, 9, 1, 4, 3, 40, 50, 91, 7, 6, 0, 2, 5, 68, 22 });
+}
+
+test "samples part 2" {
+    try hashString(std.testing.allocator, "");
+    try hashString(std.testing.allocator, "AoC 2017");
+    try hashString(std.testing.allocator, "1,2,3");
+    try hashString(std.testing.allocator, "1,2,4");
 }

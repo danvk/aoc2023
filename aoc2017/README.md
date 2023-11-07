@@ -164,3 +164,13 @@ Iterating strings character-by-character: Zig's got this!
 ## Day 10
 
 I generalized `readInts` to work with any integer type. Interesting that you can overflow by multiplying to `u8`s! I'm happy with my `reverse` implementation for circular lists.
+
+`23234babdc6afa036749cfa9e097de1b` is wrong.
+
+My answers are very close to the correct ones but not quite right!
+It turned out to be:
+
+    - 0..255
+    + 0..256
+
+In my initialization. I guess this didn't trip me up in part 1 because the answer only looked at the first two entries. Never will I ever assume closed intervals!
