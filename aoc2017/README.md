@@ -160,3 +160,7 @@ With my fancy new buffered reader iterator, I'm getting crashes. I don't think t
 ## Day 9
 
 Iterating strings character-by-character: Zig's got this!
+
+## Day 10
+
+I generalized `readInts` to work with any integer type. Interesting that you can overflow by multiplying to `u8`s! I'm happy with my `reverse` implementation for circular lists.

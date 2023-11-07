@@ -60,7 +60,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     while (try line_it.next()) |line| {
         var nums = std.ArrayList(u32).init(allocator);
         defer nums.deinit();
-        try util.readInts(line, &nums);
+        try util.readInts(u32, line, &nums);
 
         std.debug.print("Part 1: {any}\n", .{try part1_2(nums.items, allocator)});
     }
