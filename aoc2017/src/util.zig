@@ -23,12 +23,13 @@ pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]cons
 pub fn getBufferedReader(file: std.fs.File) @TypeOf(blk: {
     var raw_reader = file.reader();
     var buf_reader = std.io.bufferedReader(raw_reader);
-    var r = buf_reader.reader();
-    break :blk r;
+    var in_stream = buf_reader.reader();
+    break :blk in_stream;
 }) {
     var raw_reader = file.reader();
     var buf_reader = std.io.bufferedReader(raw_reader);
-    return buf_reader.reader();
+    var in_stream = buf_reader.reader();
+    return in_stream;
 }
 
 pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !ReadByLineIterator(@TypeOf(getBufferedReader(std.fs.cwd().openFile(filename, .{}) catch unreachable))) {
@@ -56,10 +57,12 @@ fn ReadByLineIterator(comptime ReaderType: type) type {
 }
 
 pub fn readByLine(allocator: std.mem.Allocator, fileToClose: *std.fs.File, reader: anytype) !ReadByLineIterator(@TypeOf(reader)) {
+    var buffer = try allocator.alloc(u8, 4096);
+    std.debug.print("buffer: {s}\n", .{&buffer});
     return .{
         .allocator = allocator,
         .reader = reader,
-        .buffer = try allocator.alloc(u8, 4096),
+        .buffer = buffer,
         .file_to_close = fileToClose,
     };
 }

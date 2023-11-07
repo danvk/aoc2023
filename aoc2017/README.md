@@ -154,3 +154,5 @@ I've at least learned something because it was clearer to me how to clean up som
 - I wrote a `printHashMap` function but I'm surprised that I had to.
 - I continue to find postfix dereferencing (`x.*`) weird, but I guess this does make more sense than C (`*x`).
 - Why doesn't `std.testing.expectEqual` work with my `struct Instruction`?
+
+expected type '[]const [:0]u8', found '*const [1][:0]const u8'

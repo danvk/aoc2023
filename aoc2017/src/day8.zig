@@ -93,11 +93,15 @@ pub fn hashMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?V {
 
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
+    return runOnFile(parent_allocator, filename);
+}
+
+pub fn runOnFile(parent_allocator: std.mem.Allocator, filename: [:0]const u8) !void {
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
     defer arena.deinit();
     var allocator = arena.allocator();
 
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try util.iterLines(filename, parent_allocator);
     defer line_it.deinit();
 
     var reg = std.StringHashMap(i32).init(allocator);
@@ -127,7 +131,11 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
                     target_val += instr.amount;
                 },
             }
-            try reg.put(instr.reg, target_val);
+            const my_reg = try allocator.dupe(u8, instr.reg);
+            std.debug.print("reg: {s} @ {any}\n", .{ my_reg, my_reg.ptr });
+
+            // uncommenting this causes a crash:
+            try reg.put(my_reg, target_val);
         }
         printHashMap(i32, reg);
         max_ever = @max(max_ever, hashMaxValue(i32, reg) orelse 0);
@@ -147,4 +155,14 @@ test "parse instruction" {
         .op = .@"<",
         .val = 9,
     } }, actual);
+}
+
+test "sample input" {
+    const filename: [:0]const u8 = "day8/sample.txt";
+    try runOnFile(std.testing.allocator, filename);
+}
+
+test "real input" {
+    const filename: [:0]const u8 = "day8/input.txt";
+    try runOnFile(std.testing.allocator, filename);
 }
