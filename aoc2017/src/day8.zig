@@ -95,7 +95,9 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     var reg = std.StringHashMap(i32).init(allocator);
     var max_ever: i32 = 0;
 
-    while (try line_it.next()) |line| {
+    while (try line_it.next()) |line_in| {
+        const line = try allocator.dupe(u8, line_in);
+        std.debug.print("line: '{s}'\n", .{line});
         const instr = try parseInstruction(allocator, line);
         const cond = instr.cond;
         const reg_val = reg.get(cond.reg) orelse 0;
