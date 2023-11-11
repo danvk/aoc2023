@@ -174,3 +174,7 @@ It turned out to be:
     + 0..256
 
 In my initialization. I guess this didn't trip me up in part 1 because the answer only looked at the first two entries. Never will I ever assume closed intervals!
+
+## Day 11
+
+Putting coordinates on hex grids is pretty confusing! I was tempted to implement Dijkstra for distance-to-origin but I knew it was overkill. I tried to write a direct formula but failed. I eventually wrote something that was recursive but only in the y-dimension.

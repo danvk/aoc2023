@@ -3,78 +3,88 @@ const util = @import("./util.zig");
 
 const assert = std.debug.assert;
 
-// 0    X   X   X   X
-// 1  X   X   X   X   X
-// 2    X   X   X   X
-
-// (0, 0) -> (0, 1), (1, 1)
-// (0, 1) -> (0, 0), (-1, 0)
-// (0, 2) -> (0, 1), (1, 1)
-
-// 0  X   X   X
-// 1    X   X   X
-// 2  X   o   X
-// 3    X   o   X
-// 4  X   X   X
-// 5    X   X   X
-
-// (1, 2) -> (1, 0), (0, 1), (1, 1), (0, 3), (1, 3), (1, 4)
-// (1, 3) -> (1, 1), (1, 2), (2, 2), (1, 4), (2, 4), (1, 5)
-// y even: x never increases
-// y odd: x never decreases
-
 const Dir = enum { nw, n, ne, se, s, sw };
+const DIRS = [_]Dir{ .nw, .n, .ne, .se, .s, .sw };
 
 const Cell = struct {
     x: i32,
     y: i32,
 
-    fn dxForY(self: Cell) i32 {
-        return switch (@mod(self.y, 2)) {
+    fn dyForX(self: Cell) i32 {
+        return switch (@mod(self.x, 2)) {
             0 => -1,
             1 => 0,
             else => unreachable,
         };
     }
 
-    pub fn neighbors(self: Cell, out: *std.ArrayList(Cell)) !void {
-        const x = self.x;
-        const y = self.y;
-        const dx = self.dxForY();
-        out.clearAndFree();
-        // TODO: rewrite using self.move()
-        out.append(Cell{ .x = x, .y = y - 2 });
-        out.append(Cell{ .x = x + dx, .y = y - 1 });
-        out.append(Cell{ .x = x + dx + 1, .y = y - 1 });
-        out.append(Cell{ .x = x + dx, .y = y + 1 });
-        out.append(Cell{ .x = x + dx + 1, .y = y + 1 });
-        out.append(Cell{ .x = x, .y = y + 2 });
-    }
+    // pub fn neighbors(self: Cell, out: *std.ArrayList(Cell)) !void {
+    //     const x = self.x;
+    //     const y = self.y;
+    //     const dx = self.dxForY();
+    //     out.clearAndFree();
+    //     out.append(Cell{ .x = x, .y = y - 1 });
+    //     out.append(Cell{ .x = x + dx, .y = y - 1 });
+    //     out.append(Cell{ .x = x + dx + 1, .y = y - 1 });
+    //     out.append(Cell{ .x = x + dx, .y = y + 1 });
+    //     out.append(Cell{ .x = x + dx + 1, .y = y + 1 });
+    //     out.append(Cell{ .x = x, .y = y + 1 });
+    // }
 
     pub fn move(self: Cell, dir: Dir) Cell {
         const x = self.x;
         const y = self.y;
-        const dx = self.dxForY();
+        const dy = self.dyForX();
         return switch (dir) {
-            .n => Cell{ .x = x, .y = y - 2 },
-            .nw => Cell{ .x = x + dx, .y = y - 1 },
-            .ne => Cell{ .x = x + dx + 1, .y = y - 1 },
-            .sw => Cell{ .x = x + dx, .y = y + 1 },
-            .se => Cell{ .x = x + dx + 1, .y = y + 1 },
-            .s => Cell{ .x = x, .y = y + 2 },
+            .n => Cell{ .x = x, .y = y - 1 },
+            .nw => Cell{ .x = x - 1, .y = y + dy },
+            .ne => Cell{ .x = x + 1, .y = y + dy },
+            .sw => Cell{ .x = x - 1, .y = y + dy + 1 },
+            .se => Cell{ .x = x + 1, .y = y + dy + 1 },
+            .s => Cell{ .x = x, .y = y + 1 },
         };
     }
 
     pub fn distFromOrigin(self: Cell) u32 {
-        const dx = 2 * std.math.absCast(self.x);
         const dy = std.math.absCast(self.y);
-        if (dx >= dy) {
+        const dx = std.math.absCast(self.x);
+        if (self.x == 0) {
+            // std.debug.print(".x=0 -> {d}\n", .{dy});
+            return dy;
+        } else if (self.y == 0) {
+            // std.debug.print(".y=0 -> {d}\n", .{dx});
             return dx;
+        } else if (self.x < 0) {
+            const flipCell = Cell{ .x = @as(i32, @intCast(dx)), .y = self.y };
+            // std.debug.pring("flipping {any} -> {any}\n", .{ self, flipCell });
+            return flipCell.distFromOrigin();
+        } else if (self.y < 0) {
+            return 1 + self.move(.sw).distFromOrigin();
+        } else {
+            return 1 + self.move(.nw).distFromOrigin();
         }
-        const yDist = std.math.divCeil(u32, dy - dx, 2) catch {
-            return 0;
-        };
-        return dx + yDist;
+        // assume: x > 0
+
+        // return @max(dx, dy);
+        // if (dx == 0 or dy == 0) {
+        //     return dx + dy;
+        // }
+        // const myD = dx + dy + @as(u32, @intCast(self.dyForX() + 1));
+        // var minD = myD + 1;
+        // var minDir = Dir.n;
+        // for (DIRS) |dir| {
+        //     var cell = self.move(dir);
+        //     var ndApprox = std.math.absCast(cell.x) + std.math.absCast(cell.y) + @as(u32, @intCast(1 + self.dyForX()));
+        //     if (ndApprox < myD) {
+        //         std.debug.print("{any} ({d}) {any} -> {any} ({d})\n", .{ self, dx + dy, dir, cell, ndApprox });
+        //         const nd = 1 + cell.distFromOrigin();
+        //         if (nd <= minD) {
+        //             minD = nd;
+        //             minDir = dir;
+        //         }
+        //     }
+        // }
+        // return minD;
     }
 };
 
