@@ -100,11 +100,26 @@ pub fn part1(str: []const u8) !u32 {
     return cell.distFromOrigin();
 }
 
+pub fn part2(str: []const u8) !u32 {
+    var maxD: u32 = 0;
+    var cell = Cell{ .x = 0, .y = 0 };
+    var it = std.mem.splitAny(u8, str, ",");
+    std.debug.print("  -> {any}\n", .{cell});
+    while (it.next()) |move| {
+        const dir = std.meta.stringToEnum(Dir, move) orelse unreachable;
+        cell = cell.move(dir);
+        const dist = cell.distFromOrigin();
+        maxD = @max(maxD, dist);
+    }
+    return maxD;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
     const contents = try util.readInputFile(filename, allocator);
     defer allocator.free(contents);
     std.debug.print("part1: {d}\n", .{try part1(contents)});
+    std.debug.print("part2: {d}\n", .{try part2(contents)});
 }
 
 const expectEqual = std.testing.expectEqual;
