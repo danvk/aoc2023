@@ -180,3 +180,7 @@ In my initialization. I guess this didn't trip me up in part 1 because the answe
 Putting coordinates on hex grids is pretty confusing! I was tempted to implement Dijkstra for distance-to-origin but I knew it was overkill. I tried to write a direct formula but failed. I eventually wrote something that was recursive but only in the y-dimension.
 
 This may have been the first day where the problem itself was more challenging for me than Zig.
+
+## Day 12
+
+First day where BFS is in play. It's going to be interesting to write a general Dijkstra in Zig.
