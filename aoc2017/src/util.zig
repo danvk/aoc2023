@@ -12,6 +12,14 @@ pub fn readInts(comptime inttype: type, line: []const u8, nums: *std.ArrayList(i
     }
 }
 
+pub fn splitIntoArrayList(input: []const u8, delim: []const u8, array_list: *std.ArrayList([]const u8)) !void {
+    array_list.clearAndFree();
+    var it = std.mem.splitSequence(u8, input, delim);
+    while (it.next()) |part| {
+        try array_list.append(part);
+    }
+}
+
 pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]const u8 {
     const file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();

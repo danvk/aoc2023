@@ -19,21 +19,13 @@ const Instruction = struct {
     cond: Condition,
 };
 
-fn splitIntoArrayList(input: []const u8, delim: []const u8, array_list: *std.ArrayList([]const u8)) !void {
-    array_list.clearAndFree();
-    var it = std.mem.splitSequence(u8, input, delim);
-    while (it.next()) |part| {
-        try array_list.append(part);
-    }
-}
-
 // Returned instruction is valid so long as line is.
 fn parseInstruction(allocator: std.mem.Allocator, line: []const u8) !Instruction {
     // aj dec -520 if icd < 9
     var parts = std.ArrayList([]const u8).init(allocator);
     defer parts.deinit();
 
-    try splitIntoArrayList(line, " ", &parts);
+    try util.splitIntoArrayList(line, " ", &parts);
     assert(parts.items.len == 7);
     const reg = parts.items[0];
     var op = std.meta.stringToEnum(Op, parts.items[1]) orelse unreachable;
