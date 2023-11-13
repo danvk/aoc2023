@@ -27,20 +27,20 @@ fn parseProgram(allocator: std.mem.Allocator, line: []const u8) !Program {
     };
 }
 
-pub fn findZeroClusterSize(allocator: std.mem.Allocator, programs: std.AutoHashMap(u32, Program)) !u32 {
+// Caller is responsible for freeing the returned Arraylist.
+pub fn findCluster(allocator: std.mem.Allocator, programs: std.AutoHashMap(u32, Program), seed: u32) !std.ArrayList(u32) {
     var seen = std.AutoHashMap(u32, void).init(allocator);
     defer seen.deinit();
 
     var fringe = std.ArrayList(u32).init(allocator);
-    defer fringe.deinit();
 
-    try fringe.append(0);
+    try fringe.append(seed);
     while (fringe.popOrNull()) |id| {
         if (seen.contains(id)) {
             continue;
         }
         try seen.put(id, undefined);
-        const prog = programs.get(id) orelse unreachable;
+        const prog = programs.get(id).?;
         for (prog.neighbors) |neighbor| {
             if (!seen.contains(neighbor)) {
                 try fringe.append(neighbor);
@@ -48,7 +48,34 @@ pub fn findZeroClusterSize(allocator: std.mem.Allocator, programs: std.AutoHashM
         }
     }
 
-    return seen.count();
+    var it = seen.keyIterator();
+    while (it.next()) |id| {
+        try fringe.append(id.*);
+    }
+
+    return fringe;
+}
+
+pub fn part2(allocator: std.mem.Allocator, programs: std.AutoHashMap(u32, Program)) !u32 {
+    var seen = std.AutoHashMap(u32, void).init(allocator);
+    defer seen.deinit();
+
+    var numClusters: u32 = 0;
+    var it = programs.keyIterator();
+    while (it.next()) |id| {
+        if (seen.contains(id.*)) {
+            continue;
+        }
+        numClusters += 1;
+
+        var cluster = try findCluster(allocator, programs, id.*);
+        defer cluster.deinit();
+        std.debug.print("Cluster: {any}\n", .{cluster.items});
+        for (cluster.items) |cluster_id| {
+            try seen.put(cluster_id, undefined);
+        }
+    }
+    return numClusters;
 }
 
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -73,12 +100,15 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     defer programs.deinit();
 
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        std.debug.print("line: {s}\n", .{line});
+        // std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
         const program = try parseProgram(allocator, line);
         // std.debug.print("{any}\n", .{program});
         try programs.putNoClobber(program.id, program);
     }
 
-    std.debug.print("part 1: {d}\n", .{try findZeroClusterSize(allocator, programs)});
+    var zeroCluster = try findCluster(allocator, programs, 0);
+    defer zeroCluster.deinit();
+    std.debug.print("part 1: {d}\n", .{zeroCluster.items.len});
+    std.debug.print("part 2: {d}\n", .{try part2(allocator, programs)});
 }

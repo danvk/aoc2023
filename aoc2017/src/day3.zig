@@ -10,7 +10,7 @@ const std = @import("std");
 // D4
 // R5
 
-const Dir = enum(u2) {
+pub const Dir = enum(u2) {
     right,
     up,
     left,
@@ -36,6 +36,8 @@ const Dir = enum(u2) {
         };
     }
 };
+
+pub const DIRS = [_]Dir{ .right, .up, .left, .down };
 
 fn part1(n: u32) u32 {
     var d = Dir.right;

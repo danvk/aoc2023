@@ -208,3 +208,4 @@ Another off-by-one, this one entirely idiotic and my own fault:
     - var numSet: u32 = 1;
     + var numSet: u32 = 0;
 
+Somehow I lost my part 2 solution for Day 12 which would have been helpful!
