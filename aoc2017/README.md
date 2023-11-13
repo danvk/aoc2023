@@ -194,3 +194,7 @@ This is useful! I've been writing `orelse unreachable` a lot.
 ## Day 13
 
 Some off-by-ones, but otherwise no problems. Having to cast between `u32` and `usize` is a bit annoying. I wonder why this isn't modeled in the same way as other errors, i.e. why don't you need to wrap integer casts with `try`?
+
+Part 2: first time I've had a performance issue! Building with `-O ReleaseFast` does result in a significantly faster program. But fast enough?
+
+Nope! My answer was 3,907,994. I killed my direct solution after delay=110,000 after 5 minutes, and presumably it was progressing quadratically. So… math for the win!
