@@ -120,7 +120,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     assert(contents[contents.len - 1] != '\n');
     std.debug.print("contents: '{s}'\n", .{contents});
-    try hashString(allocator, contents);
+    std.debug.print("{x:0>32}\n", .{try hashString(allocator, contents)});
 }
 
 const expectEqual = std.testing.expectEqual;

@@ -202,3 +202,9 @@ Nope! My answer was 3,907,994. I killed my direct solution after delay=110,000 a
 ## Day 14
 
 I'm surprised that `u128` is a thing!
+
+Another off-by-one, this one entirely idiotic and my own fault:
+
+    - var numSet: u32 = 1;
+    + var numSet: u32 = 0;
+
