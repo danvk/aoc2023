@@ -198,3 +198,7 @@ Some off-by-ones, but otherwise no problems. Having to cast between `u32` and `u
 Part 2: first time I've had a performance issue! Building with `-O ReleaseFast` does result in a significantly faster program. But fast enough?
 
 Nope! My answer was 3,907,994. I killed my direct solution after delay=110,000 after 5 minutes, and presumably it was progressing quadratically. So… math for the win!
+
+## Day 14
+
+I'm surprised that `u128` is a thing!
