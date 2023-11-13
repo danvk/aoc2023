@@ -41,6 +41,27 @@ fn printLayers(layers: std.AutoHashMap(u32, Layer), maxLayer: u32) void {
     }
 }
 
+fn part1(layers: std.AutoHashMap(u32, Layer), maxLayer: u32) u32 {
+    var damage: u32 = 0;
+    for (0..(maxLayer + 1)) |layer| {
+        if (layers.get(@as(u32, @intCast(layer)))) |scanner| {
+            if (scanner.pos == 0) {
+                const d = scanner.layer * scanner.range;
+                std.debug.print("take {d} damage at layer {d}\n", .{ d, layer });
+                damage += d;
+            }
+        }
+        var it = layers.valueIterator();
+        while (it.next()) |val| {
+            val.next();
+        }
+        // std.debug.print("{d}:\n", .{layer});
+        // printLayers(layers, maxLayer);
+        // std.debug.print("\n", .{});
+    }
+    return damage;
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -72,24 +93,6 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         maxLayer = @max(maxLayer, layer.layer);
     }
 
-    var damage: u32 = 0;
-    for (0..(maxLayer + 1)) |layer| {
-        if (layers.get(@as(u32, @intCast(layer)))) |scanner| {
-            if (scanner.pos == 0) {
-                const d = scanner.layer * scanner.range;
-                std.debug.print("take {d} damage at layer {d}\n", .{ d, layer });
-                damage += d;
-            }
-        }
-        var it = layers.valueIterator();
-        while (it.next()) |val| {
-            val.next();
-        }
-        std.debug.print("{d}:\n", .{layer});
-        printLayers(layers, maxLayer);
-        std.debug.print("\n", .{});
-    }
-
-    std.debug.print("part 1: {d}\n", .{damage});
+    std.debug.print("part 1: {d}\n", .{part1(layers, maxLayer)});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, programs)});
 }
