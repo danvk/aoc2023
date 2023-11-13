@@ -184,3 +184,13 @@ This may have been the first day where the problem itself was more challenging f
 ## Day 12
 
 First day where BFS is in play. It's going to be interesting to write a general Dijkstra in Zig.
+
+I find the two forms of iteration in Zig to be a bit confusing. You iterate over a slice with a `for` loop, which yields values, but you iterate over a HashMap with an iterator, which yields pointers.
+
+This is useful! I've been writing `orelse unreachable` a lot.
+
+> `.?` is a shorthand for `orelse unreachable`
+
+## Day 13
+
+Some off-by-ones, but otherwise no problems. Having to cast between `u32` and `usize` is a bit annoying. I wonder why this isn't modeled in the same way as other errors, i.e. why don't you need to wrap integer casts with `try`?
