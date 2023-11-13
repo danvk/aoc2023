@@ -2,6 +2,7 @@ const std = @import("std");
 const util = @import("./util.zig");
 const hashString = @import("./day10.zig").hashString;
 const Dir = @import("./day3.zig").Dir;
+const DIRS = @import("./day3.zig").DIRS;
 
 const assert = std.debug.assert;
 
@@ -33,7 +34,7 @@ const Coord = struct {
     x: i32,
     y: i32,
 
-    pub fn n4(self: @This(), dir: Dir) Coord {
+    pub fn move(self: @This(), dir: Dir) Coord {
         return Coord{
             .x = self.x + dir.dx(),
             .y = self.y + dir.dy(),
@@ -66,13 +67,64 @@ pub fn makeGrid(allocator: std.mem.Allocator, key: []const u8) !std.AutoHashMap(
     return grid;
 }
 
+// Caller is responsible for freeing the returned Arraylist.
+pub fn findCluster(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, void), seed: Coord) !std.ArrayList(Coord) {
+    var seen = std.AutoHashMap(Coord, void).init(allocator);
+    defer seen.deinit();
+
+    var fringe = std.ArrayList(Coord).init(allocator);
+
+    try fringe.append(seed);
+    while (fringe.popOrNull()) |coord| {
+        if (seen.contains(coord)) {
+            continue;
+        }
+        try seen.put(coord, undefined);
+        for (DIRS) |dir| {
+            const n = coord.move(dir);
+            if (grid.contains(n) and !seen.contains(n)) {
+                try fringe.append(n);
+            }
+        }
+    }
+
+    var it = seen.keyIterator();
+    while (it.next()) |id| {
+        try fringe.append(id.*);
+    }
+
+    return fringe;
+}
+
+fn numClusters(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, void)) !u32 {
+    var seen = std.AutoHashMap(Coord, void).init(allocator);
+    defer seen.deinit();
+
+    var num: u32 = 0;
+    var it = grid.keyIterator();
+    while (it.next()) |id| {
+        if (seen.contains(id.*)) {
+            continue;
+        }
+        num += 1;
+
+        var cluster = try findCluster(allocator, grid, id.*);
+        defer cluster.deinit();
+        // std.debug.print("Cluster: {any}\n", .{cluster.items});
+        for (cluster.items) |cluster_id| {
+            try seen.put(cluster_id, undefined);
+        }
+    }
+    return num;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const key = args[0];
 
     std.debug.print("part 1: {d}\n", .{try part1(allocator, key)});
     var grid = try makeGrid(allocator, key);
     defer grid.deinit();
-    // std.debug.print("part 2: {d}\n", .{part2(layers, maxLayer)});
+    std.debug.print("part 2: {d}\n", .{try numClusters(allocator, grid)});
 }
 
 const expectEqual = std.testing.expectEqual;

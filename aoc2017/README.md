@@ -208,4 +208,6 @@ Another off-by-one, this one entirely idiotic and my own fault:
     - var numSet: u32 = 1;
     + var numSet: u32 = 0;
 
-Somehow I lost my part 2 solution for Day 12 which would have been helpful!
+Somehow I lost my part 2 solution for Day 12 which would have been helpful! (It was in my undo buffer, fortunately. I lost it when I changed to `.?`.)
+
+Inching towards a general BFS. Today's is distinct from day 12's because I'm using coordinates as hash keys, not values.
