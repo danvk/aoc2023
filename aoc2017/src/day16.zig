@@ -3,14 +3,17 @@ const util = @import("./util.zig");
 
 const assert = std.debug.assert;
 
-const MoveType = enum { Spin, Exchange, Partner };
-const Move = union(MoveType) { Spin: u32, Exchange: struct {
+const Exchange = struct {
     posA: u32,
     posB: u32,
-}, Partner: struct {
+};
+const Partner = struct {
     a: u8,
     b: u8,
-} };
+};
+
+const MoveType = enum { Spin, Exchange, Partner };
+const Move = union(MoveType) { Spin: u32, Exchange: Exchange, Partner: Partner };
 
 fn parseMove(move: []const u8) !Move {
     const t = move[0];
@@ -49,19 +52,13 @@ fn spin(buf: []u8, amount: u32) void {
     }
 }
 
-fn exchange(buf: []u8, x: struct {
-    posA: u32,
-    posB: u32,
-}) void {
+fn exchange(buf: []u8, x: Exchange) void {
     const tmp = buf[x.posA];
     buf[x.posA] = buf[x.posB];
     buf[x.posB] = tmp;
 }
 
-fn partner(buf: []u8, p: struct {
-    a: u8,
-    b: u8,
-}) void {
+fn partner(buf: []u8, p: Partner) void {
     const posA = std.mem.indexOfScalar(u8, buf, p.a).?;
     const posB = std.mem.indexOfScalar(u8, buf, p.b).?;
     exchange(buf, .{ .posA = @intCast(posA), .posB = @intCast(posB) });
@@ -87,12 +84,19 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var parts = std.ArrayList([]const u8).init(allocator);
     defer parts.deinit();
 
+    var buf: [16]u8 = undefined;
+    for (buf, 0..) |_, i| {
+        buf[i] = 'a' + @as(u8, @intCast(i));
+    }
+    assert(buf[15] == 'p');
+
     try util.splitIntoArrayList(contents, ",", &parts);
     for (parts.items) |part| {
         const move = try parseMove(part);
         std.debug.print("{s} => {any}\n", .{ part, move });
+        doMove(&buf, move);
     }
-    // std.debug.print("part 1: {d}\n", .{zeroCluster.items.len});
+    std.debug.print("part 1: {s}\n", .{buf});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, programs)});
 }
 

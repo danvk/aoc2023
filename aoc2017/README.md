@@ -230,3 +230,7 @@ install transitive failure
 Which call has too few arguments? Would be nice to have a stack trace!
 
 Part 2 took a little care to get the synchronization right. The trick was to factor out a `getNext` helper and not try to do the synchronization at too low a level.
+
+## Day 16
+
+First day using a tagged union. It's a bit tedious. One realization was that using named structs works a lot better than anonymous ones since they're not compared structurally.
