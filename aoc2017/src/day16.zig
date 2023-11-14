@@ -34,6 +34,21 @@ fn parseMove(move: []const u8) !Move {
     };
 }
 
+fn spin(buf: []u8, amount: u32) void {
+    var tmp: [26]u8 = undefined;
+    const n = buf.len;
+    @memcpy(tmp[0..buf.len], buf);
+    for (buf, 0..) |_, i| {
+        if (i < amount) {
+            buf[i] = tmp[i + n - amount];
+            std.debug.print("s buf[{d}] = tmp[{d}]\n", .{ i, i + n - amount });
+        } else {
+            buf[i] = tmp[i - amount];
+            std.debug.print("c buf[{d}] = tmp[{d}]\n", .{ i, i - amount });
+        }
+    }
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -53,4 +68,12 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
     // std.debug.print("part 1: {d}\n", .{zeroCluster.items.len});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, programs)});
+}
+
+const expectEqual = std.testing.expectEqual;
+
+test "spin" {
+    var buf = [_]u8{ 'a', 'b', 'c', 'd', 'e' };
+    spin(&buf, 1);
+    try expectEqual([_]u8{ 'e', 'a', 'b', 'c', 'd' }, buf);
 }
