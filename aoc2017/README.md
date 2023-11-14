@@ -211,3 +211,20 @@ Another off-by-one, this one entirely idiotic and my own fault:
 Somehow I lost my part 2 solution for Day 12 which would have been helpful! (It was in my undo buffer, fortunately. I lost it when I changed to `.?`.)
 
 Inching towards a general BFS. Today's is distinct from day 12's because I'm using coordinates as hash keys, not values.
+
+I asked about the memory corruption issue with my line-by-line iterator on the Zig forum: https://ziggit.dev/t/help-debugging-memory-corruption-while-reading-a-file-with-a-buffered-reader-and-iterator/2203
+
+## Day 15
+
+This is an annoyance that I've run into a few times:
+
+```
+install transitive failure
+└─ install main transitive failure
+   └─ zig build-exe main Debug native 1 errors
+/opt/homebrew/Cellar/zig/0.11.0/lib/zig/std/fmt.zig:182:13: error: too few arguments
+            @compileError("too few arguments");
+            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
+
+Which call has too few arguments? Would be nice to have a stack trace!
