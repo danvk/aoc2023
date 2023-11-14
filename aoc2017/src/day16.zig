@@ -41,11 +41,37 @@ fn spin(buf: []u8, amount: u32) void {
     for (buf, 0..) |_, i| {
         if (i < amount) {
             buf[i] = tmp[i + n - amount];
-            std.debug.print("s buf[{d}] = tmp[{d}]\n", .{ i, i + n - amount });
+            // std.debug.print("s buf[{d}] = tmp[{d}]\n", .{ i, i + n - amount });
         } else {
             buf[i] = tmp[i - amount];
-            std.debug.print("c buf[{d}] = tmp[{d}]\n", .{ i, i - amount });
+            // std.debug.print("c buf[{d}] = tmp[{d}]\n", .{ i, i - amount });
         }
+    }
+}
+
+fn exchange(buf: []u8, x: struct {
+    posA: u32,
+    posB: u32,
+}) void {
+    const tmp = buf[x.posA];
+    buf[x.posA] = buf[x.posB];
+    buf[x.posB] = tmp;
+}
+
+fn partner(buf: []u8, p: struct {
+    a: u8,
+    b: u8,
+}) void {
+    const posA = std.mem.indexOfScalar(u8, buf, p.a).?;
+    const posB = std.mem.indexOfScalar(u8, buf, p.b).?;
+    exchange(buf, .{ .posA = @intCast(posA), .posB = @intCast(posB) });
+}
+
+fn doMove(buf: []u8, move: Move) void {
+    switch (move) {
+        .Exchange => |x| exchange(buf, x),
+        .Partner => |p| partner(buf, p),
+        .Spin => |s| spin(buf, s),
     }
 }
 
@@ -72,8 +98,14 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
 const expectEqual = std.testing.expectEqual;
 
-test "spin" {
+test "sample moves" {
     var buf = [_]u8{ 'a', 'b', 'c', 'd', 'e' };
     spin(&buf, 1);
     try expectEqual([_]u8{ 'e', 'a', 'b', 'c', 'd' }, buf);
+
+    exchange(&buf, .{ .posA = 3, .posB = 4 });
+    try expectEqual([_]u8{ 'e', 'a', 'b', 'd', 'c' }, buf);
+
+    partner(&buf, .{ .a = 'e', .b = 'b' });
+    try expectEqual([_]u8{ 'b', 'a', 'e', 'd', 'c' }, buf);
 }
