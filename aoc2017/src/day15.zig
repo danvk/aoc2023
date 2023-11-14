@@ -28,6 +28,36 @@ pub fn part1(a0: u32, b0: u32, n: usize) u32 {
     }
     return numMatches;
 }
+
+fn getNext(seed: u64, factor: u32, mult: u32) u64 {
+    var x = seed;
+    while (true) {
+        x = (x * factor) % MOD;
+        if (x % mult == 0) {
+            return x;
+        }
+    }
+}
+
+pub fn part2(a0: u32, b0: u32, n: usize) u32 {
+    var a: u64 = a0;
+    var b: u64 = b0;
+    var numMatches: u32 = 0;
+    for (0..n) |i| {
+        a = getNext(a, A_FACTOR, 4);
+        b = getNext(b, B_FACTOR, 8);
+
+        if (i < 4) {
+            std.debug.print("{d} A: {d:>10}  B: {d:>10}\n", .{ i, a, b });
+        }
+        if (a & MASK == b & MASK) {
+            numMatches += 1;
+            // std.debug.print("{d} match!\n", .{i});
+        }
+    }
+    return numMatches;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     _ = allocator;
     const a0_str = args[0];
@@ -37,6 +67,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const b0 = try std.fmt.parseInt(u32, b0_str, 10);
 
     std.debug.print("part 1: {d}\n", .{part1(a0, b0, 40_000_000)});
+    std.debug.print("part 2: {d}\n", .{part2(a0, b0, 5_000_000)});
 }
 
 const expectEqual = std.testing.expectEqual;

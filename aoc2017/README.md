@@ -228,3 +228,5 @@ install transitive failure
 ```
 
 Which call has too few arguments? Would be nice to have a stack trace!
+
+Part 2 took a little care to get the synchronization right. The trick was to factor out a `getNext` helper and not try to do the synchronization at too low a level.
