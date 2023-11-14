@@ -32,7 +32,7 @@ pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]cons
 pub fn iterLines(filename: []const u8, allocator: std.mem.Allocator) !ReadByLineIterator(@TypeOf(getBufferedReader(std.fs.cwd().openFile(filename, .{}) catch unreachable))) {
     var file = try std.fs.cwd().openFile(filename, .{});
     var buf_reader = getBufferedReader(file);
-    return readByLine(allocator, &file, buf_reader);
+    return readByLine(allocator, file, buf_reader);
 }
 
 pub fn getBufferedReader(file: std.fs.File) @TypeOf(blk: {
@@ -50,7 +50,7 @@ pub fn getBufferedReader(file: std.fs.File) @TypeOf(blk: {
 fn ReadByLineIterator(comptime ReaderType: type) type {
     return struct {
         allocator: std.mem.Allocator,
-        file_to_close: *std.fs.File,
+        file_to_close: std.fs.File,
         reader: ReaderType,
         buffer: []u8,
 
@@ -65,7 +65,7 @@ fn ReadByLineIterator(comptime ReaderType: type) type {
     };
 }
 
-pub fn readByLine(allocator: std.mem.Allocator, fileToClose: *std.fs.File, reader: anytype) !ReadByLineIterator(@TypeOf(reader)) {
+pub fn readByLine(allocator: std.mem.Allocator, fileToClose: std.fs.File, reader: anytype) !ReadByLineIterator(@TypeOf(reader)) {
     var buffer = try allocator.alloc(u8, 4096);
     std.debug.print("buffer: {s}\n", .{&buffer});
     return .{
