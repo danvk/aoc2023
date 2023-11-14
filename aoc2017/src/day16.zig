@@ -72,6 +72,15 @@ fn doMove(buf: []u8, move: Move) void {
     }
 }
 
+fn hashBuffer(buf: []u8) u128 {
+    var out: u128 = 0;
+    for (buf) |c| {
+        out <<= 8;
+        out += c;
+    }
+    return out;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -91,13 +100,46 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     assert(buf[15] == 'p');
 
     try util.splitIntoArrayList(contents, ",", &parts);
+    var moves = std.ArrayList(Move).init(allocator);
+    defer moves.deinit();
     for (parts.items) |part| {
         const move = try parseMove(part);
-        std.debug.print("{s} => {any}\n", .{ part, move });
-        doMove(&buf, move);
+        try moves.append(move);
     }
-    std.debug.print("part 1: {s}\n", .{buf});
-    // std.debug.print("part 2: {d}\n", .{try part2(allocator, programs)});
+
+    var seen = std.AutoHashMap(u128, usize).init(allocator);
+    defer seen.deinit();
+
+    var c: usize = 0;
+
+    for (1..100) |i| {
+        for (moves.items) |move| {
+            // std.debug.print("{s} => {any}\n", .{ part, move });
+            doMove(&buf, move);
+        }
+        const hash = hashBuffer(&buf);
+        std.debug.print("{d:>3} hash: {d} {s}\n", .{ i, hash, buf });
+        if (c == 0) {
+            if (seen.get(hash)) |prev| {
+                std.debug.print("found a cycle! {d} = {d}\n", .{ i, prev });
+                c = i;
+
+                // this means that the value after c cycles is the same as after prev cycles
+            } else {
+                try seen.putNoClobber(hash, i);
+            }
+        }
+
+        if (i == 0) {
+            std.debug.print("part 1: {s}\n", .{buf});
+        }
+    }
+
+    const n = 1_000_000_000;
+    const prev = 1 + ((n - 1) % 30);
+    std.debug.print("{d} is same as {d}\n", .{ n, prev });
+
+    std.debug.print("part 2: {s}\n", .{buf});
 }
 
 const expectEqual = std.testing.expectEqual;

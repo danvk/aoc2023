@@ -234,3 +234,16 @@ Part 2 took a little care to get the synchronization right. The trick was to fac
 ## Day 16
 
 First day using a tagged union. It's a bit tedious. One realization was that using named structs works a lot better than anonymous ones since they're not compared structurally.
+
+Part 2 is going to be fun! You can't just look at how the dance permutes the indices since the "partner" move looks at the values, not the positions.
+
+Unoptimized build: 100,000 dances in ~1min.
+Optimized build: 300,000 dances in ~20s
+=> 1M dances in 67s
+=> 1B dances in 67,000s = 18.7h
+
+so doable! but surely there's a better way.
+16! = 20,922,789,888,000
+so memoizing all the permutations probably won't help unless there's some surprise structure to it.
+
+Fortunately there's a cycle after only 30 dances.
