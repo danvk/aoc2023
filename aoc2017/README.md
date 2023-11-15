@@ -285,4 +285,4 @@ This makes a big difference:
 
 The former makes a change to a temporary I guess?
 
-My code Just Worked for part 2, 2 minutes in a debug build. I guess the 50M is big enough to weed out vector shifting implementations?
+My code Just Worked for part 2, 2 minutes in a debug build (1m40s opt). I guess the 50M is big enough to weed out vector shifting implementations?
