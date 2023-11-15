@@ -276,3 +276,13 @@ inserting 8 after 3: day17.Value{ .num = 3, .next = 6 }
     day17.Value{ .num = 7, .next = 2 },
     day17.Value{ .num = 8, .next = 6 }
 }
+
+This makes a big difference:
+
+    - const v = &vals.items[i];
+    - v.next = vals.items.len - 1;
+    + vals.items[i].next = vals.items.len - 1;
+
+The former makes a change to a temporary I guess?
+
+My code Just Worked for part 2, 2 minutes in a debug build. I guess the 50M is big enough to weed out vector shifting implementations?
