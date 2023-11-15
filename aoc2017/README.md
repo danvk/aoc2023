@@ -247,3 +247,32 @@ so doable! but surely there's a better way.
 so memoizing all the permutations probably won't help unless there's some surprise structure to it.
 
 Fortunately there's a cycle after only 30 dances.
+
+## Day 17
+
+Circular linked lists, always annoying!
+
+{
+    day17.Value{ .num = 0, .next = 5 },
+    day17.Value{ .num = 1, .next = 0 },
+    day17.Value{ .num = 2, .next = 4 },
+    day17.Value{ .num = 3, .next = 6 },  // <-
+    day17.Value{ .num = 4, .next = 3 },
+    day17.Value{ .num = 5, .next = 7 },
+    day17.Value{ .num = 6, .next = 1 },
+    day17.Value{ .num = 7, .next = 2 }
+}
+
+inserting 8 after 3: day17.Value{ .num = 3, .next = 6 }
+
+{
+    day17.Value{ .num = 0, .next = 5 },
+    day17.Value{ .num = 1, .next = 0 },
+    day17.Value{ .num = 2, .next = 4 },
+    day17.Value{ .num = 3, .next = 6 },
+    day17.Value{ .num = 4, .next = 3 },
+    day17.Value{ .num = 5, .next = 7 },
+    day17.Value{ .num = 6, .next = 1 },
+    day17.Value{ .num = 7, .next = 2 },
+    day17.Value{ .num = 8, .next = 6 }
+}
