@@ -44,15 +44,15 @@ fn part1(allocator: std.mem.Allocator, step: usize) !usize {
         }
         // insert the number
         const v = &vals.items[i];
-        std.debug.print("inserting {d} after {d}: {any}\n", .{ n, i, v });
+        // std.debug.print("inserting {d} after {d}: {any}\n", .{ n, i, v });
         try vals.append(Value{ .num = n, .next = v.next });
         vals.items[i].next = vals.items.len - 1;
 
         // advance to the new item
-        i = v.next;
+        i = vals.items[i].next;
 
-        printBuffer(vals.items, i);
-        std.debug.print("buf: {any}\n", .{vals.items});
+        // printBuffer(vals.items, i);
+        // std.debug.print("buf: {any}\n", .{vals.items});
     }
 
     const last = vals.items[vals.items.len - 1];
