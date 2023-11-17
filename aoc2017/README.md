@@ -289,7 +289,7 @@ My code Just Worked for part 2, 2 minutes in a debug build (1m40s opt). I guess 
 
 ## Day 18
 
-Interesting how having to pass in an allocator pushes you towards writing code that doesn't need to allocator memory.
+Interesting how having to pass in an allocator pushes you towards writing (more efficient) code that doesn't need to allocate memory.
 
 On destructuring assignment (or lack thereof):
 https://github.com/ziglang/zig/issues/3897#issuecomment-738984680

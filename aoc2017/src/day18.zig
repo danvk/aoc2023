@@ -102,9 +102,10 @@ const State = struct {
     pos: usize,
     regs: [26]i128,
     sound: i128,
+    recovered: ?i128,
 };
 
-fn execute(instr: Instruction, state: *State) void {
+fn execute1(instr: Instruction, state: *State) void {
     switch (instr) {
         .snd => |freq| {
             state.sound = valueOf(&state.regs, freq);
@@ -135,7 +136,7 @@ fn execute(instr: Instruction, state: *State) void {
             const v = valueOf(&state.regs, rv);
             if (v != 0) {
                 std.debug.print("Recovered sound {d}!\n", .{state.sound});
-                std.process.exit(0);
+                state.recovered = state.sound;
             } else {
                 std.debug.print("Did not recover sound\n", .{});
             }
@@ -152,6 +153,26 @@ fn execute(instr: Instruction, state: *State) void {
             }
         },
     }
+}
+
+fn part1(instructions: []Instruction) i128 {
+    var regs = std.mem.zeroes([26]i128);
+    var state = State{
+        .pos = 0,
+        .regs = regs,
+        .sound = 0,
+        .recovered = null,
+    };
+
+    while (state.pos >= 0 and state.pos < instructions.len) {
+        const instr = instructions[state.pos];
+        execute1(instr, &state);
+        if (state.recovered) |value| {
+            return value;
+        }
+        // std.debug.print("execute {any} -> {any}\n", .{ instr, state });
+    }
+    unreachable;
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -172,23 +193,10 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         // std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
         const instruction = try parseLine(line);
-        std.debug.print("{d:>3} {any}\n", .{ instructions.items.len, instruction });
+        // std.debug.print("{d:>3} {any}\n", .{ instructions.items.len, instruction });
         try instructions.append(instruction);
     }
 
-    var regs = std.mem.zeroes([26]i128);
-    var state = State{
-        .pos = 0,
-        .regs = regs,
-        .sound = 0,
-    };
-
-    while (state.pos >= 0 and state.pos < instructions.items.len) {
-        const instr = instructions.items[state.pos];
-        execute(instr, &state);
-        std.debug.print("execute {any} -> {any}\n", .{ instr, state });
-    }
-
-    // std.debug.print("part 1: {d}\n", .{try part1(allocator, step)});
+    std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, step)});
 }
