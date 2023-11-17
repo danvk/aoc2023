@@ -298,3 +298,4 @@ https://github.com/ziglang/zig/pull/17156
 I had to switch from i32 -> i128 to avoid an overflow. But nice that Zig crashed on this rather than giving me the wrong answer. Zig also made it clear that the problem underspecifies the `mod` behavior (what does it do with negatives?).
 
 I'm surprised there's no Queue built-in. There is a PriorityQueue.
+I found some code online for a queue and plugged it in. Part 2 went pretty well! I'm glad there were no errors.

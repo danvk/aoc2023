@@ -183,17 +183,27 @@ const State2 = struct {
     pos: usize,
     regs: [26]i128,
     produced: Queue(i128),
+    numSent: usize,
 };
 
-fn execute2(instr: Instruction, state: *State2) void {
+const StallState = enum { Stalled, NotStalled };
+
+fn execute2(instr: Instruction, state: *State2, other: *State2) !StallState {
     switch (instr) {
         .snd => |val| {
             const v = valueOf(&state.regs, val);
-            state.produced.enqueue(v);
+            try state.produced.enqueue(v);
             state.pos += 1;
+            state.numSent += 1;
         },
-        .rcv => |rv| {
-            _ = rv;
+        .rcv => |r| {
+            if (other.produced.dequeue()) |val| {
+                state.regs[r] = val;
+                state.pos += 1;
+            } else {
+                // stall! don't advance position so that we come back here.
+                return .Stalled;
+            }
         },
         .set => |rv| {
             state.regs[rv.a] = valueOf(&state.regs, rv.b);
@@ -227,18 +237,28 @@ fn execute2(instr: Instruction, state: *State2) void {
             }
         },
     }
+    return .NotStalled;
 }
 
 fn isDone(state: State2, numInstruction: usize) bool {
     return (state.pos < 0 or state.pos >= numInstruction);
 }
 
-fn executeUntilStallOrDone(state: *State2, instructions: []Instruction) !void {
-    _ = instructions;
-    _ = state;
+fn executeUntilStallOrDone(state: *State2, instructions: []Instruction, otherState: *State2) !void {
+    while (true) {
+        const instr = instructions[state.pos];
+        const stallState = try execute2(instr, state, otherState);
+        if (stallState == .Stalled) {
+            return;
+        }
+        if (isDone(state.*, instructions.len)) {
+            return;
+        }
+    }
+    unreachable;
 }
 
-fn part2(allocator: std.mem.Allocator, instructions: []Instruction) void {
+fn part2(allocator: std.mem.Allocator, instructions: []Instruction) !usize {
     const n = instructions.len;
     var regs0 = std.mem.zeroes([26]i128);
     var regs1 = std.mem.zeroes([26]i128);
@@ -246,25 +266,30 @@ fn part2(allocator: std.mem.Allocator, instructions: []Instruction) void {
         .pos = 0,
         .regs = regs0,
         .produced = Queue(i128).init(allocator),
+        .numSent = 0,
     };
     var state1 = State2{
         .pos = 0,
         .regs = regs1,
         .produced = Queue(i128).init(allocator),
+        .numSent = 0,
     };
+    state1.regs['p' - 'a'] = 1;
 
     while (true) {
-        try executeUntilStallOrDone(&state0, instructions);
+        try executeUntilStallOrDone(&state0, instructions, &state1);
         if (isDone(state0, n)) {
-            return;
+            std.debug.print("program 0 terminated\n", .{});
+            return state1.numSent;
         }
-        try executeUntilStallOrDone(&state1, instructions);
+        try executeUntilStallOrDone(&state1, instructions, &state0);
         if (isDone(state1, n)) {
-            return;
+            std.debug.print("program 1 terminated\n", .{});
+            return state1.numSent;
         }
         if (state0.produced.isEmpty() and state1.produced.isEmpty()) {
-            std.debug.print("deadlock!\n");
-            break;
+            std.debug.print("deadlock! 0: {d} / 1: {d}\n", .{ state0.numSent, state1.numSent });
+            return state1.numSent;
         }
     }
 }
@@ -291,6 +316,6 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         try instructions.append(instruction);
     }
 
-    std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
-    // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
+    // std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
+    std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
 }
