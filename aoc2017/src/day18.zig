@@ -198,5 +198,5 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
-    // std.debug.print("part 2: {d}\n", .{try part2(allocator, step)});
+    std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
 }
