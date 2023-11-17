@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const Queue = @import("./queue.zig").Queue;
 
 const assert = std.debug.assert;
 
@@ -23,7 +24,7 @@ const Instruction = union(Code) {
     add: RegAndValue,
     mul: RegAndValue,
     mod: RegAndValue,
-    rcv: RegOrValue,
+    rcv: u8,
     jgz: TwoRegValue,
 };
 
@@ -67,7 +68,10 @@ fn parseLine(line: []const u8) !Instruction {
     const args = instrRest.rest;
     return switch (instr) {
         .snd => Instruction{ .snd = try parseRegOrValue(args) },
-        .rcv => Instruction{ .rcv = try parseRegOrValue(args) },
+        .rcv => switch (try parseRegOrValue(args)) {
+            .Reg => |r| Instruction{ .rcv = r },
+            .Value => unreachable,
+        },
         .jgz => {
             const two = splitOne(args, " ").?;
             return Instruction{
@@ -98,14 +102,14 @@ fn parseLine(line: []const u8) !Instruction {
     };
 }
 
-const State = struct {
+const State1 = struct {
     pos: usize,
     regs: [26]i128,
     sound: i128,
     recovered: ?i128,
 };
 
-fn execute1(instr: Instruction, state: *State) void {
+fn execute1(instr: Instruction, state: *State1) void {
     switch (instr) {
         .snd => |freq| {
             state.sound = valueOf(&state.regs, freq);
@@ -133,7 +137,7 @@ fn execute1(instr: Instruction, state: *State) void {
             state.pos += 1;
         },
         .rcv => |rv| {
-            const v = valueOf(&state.regs, rv);
+            const v = state.regs[rv];
             if (v != 0) {
                 std.debug.print("Recovered sound {d}!\n", .{state.sound});
                 state.recovered = state.sound;
@@ -157,7 +161,7 @@ fn execute1(instr: Instruction, state: *State) void {
 
 fn part1(instructions: []Instruction) i128 {
     var regs = std.mem.zeroes([26]i128);
-    var state = State{
+    var state = State1{
         .pos = 0,
         .regs = regs,
         .sound = 0,
@@ -173,6 +177,96 @@ fn part1(instructions: []Instruction) i128 {
         // std.debug.print("execute {any} -> {any}\n", .{ instr, state });
     }
     unreachable;
+}
+
+const State2 = struct {
+    pos: usize,
+    regs: [26]i128,
+    produced: Queue(i128),
+};
+
+fn execute2(instr: Instruction, state: *State2) void {
+    switch (instr) {
+        .snd => |val| {
+            const v = valueOf(&state.regs, val);
+            state.produced.enqueue(v);
+            state.pos += 1;
+        },
+        .rcv => |rv| {
+            _ = rv;
+        },
+        .set => |rv| {
+            state.regs[rv.a] = valueOf(&state.regs, rv.b);
+            state.pos += 1;
+        },
+        .add => |rv| {
+            state.regs[rv.a] += valueOf(&state.regs, rv.b);
+            state.pos += 1;
+        },
+        .mul => |rv| {
+            state.regs[rv.a] *= valueOf(&state.regs, rv.b);
+            state.pos += 1;
+        },
+        .mod => |rv| {
+            // XXX check that this does the right modulus
+            const v = state.regs[rv.a];
+            const m = valueOf(&state.regs, rv.b);
+            assert(v >= 0);
+            assert(m >= 0);
+            state.regs[rv.a] = @mod(v, m);
+            state.pos += 1;
+        },
+        .jgz => |vv| {
+            const v = valueOf(&state.regs, vv.a);
+            if (v > 0) {
+                const offset = valueOf(&state.regs, vv.b);
+                // This is a doozy!
+                state.pos = @intCast(@as(i128, @intCast(state.pos)) + offset);
+            } else {
+                state.pos += 1;
+            }
+        },
+    }
+}
+
+fn isDone(state: State2, numInstruction: usize) bool {
+    return (state.pos < 0 or state.pos >= numInstruction);
+}
+
+fn executeUntilStallOrDone(state: *State2, instructions: []Instruction) !void {
+    _ = instructions;
+    _ = state;
+}
+
+fn part2(allocator: std.mem.Allocator, instructions: []Instruction) void {
+    const n = instructions.len;
+    var regs0 = std.mem.zeroes([26]i128);
+    var regs1 = std.mem.zeroes([26]i128);
+    var state0 = State2{
+        .pos = 0,
+        .regs = regs0,
+        .produced = Queue(i128).init(allocator),
+    };
+    var state1 = State2{
+        .pos = 0,
+        .regs = regs1,
+        .produced = Queue(i128).init(allocator),
+    };
+
+    while (true) {
+        try executeUntilStallOrDone(&state0, instructions);
+        if (isDone(state0, n)) {
+            return;
+        }
+        try executeUntilStallOrDone(&state1, instructions);
+        if (isDone(state1, n)) {
+            return;
+        }
+        if (state0.produced.isEmpty() and state1.produced.isEmpty()) {
+            std.debug.print("deadlock!\n");
+            break;
+        }
+    }
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -198,5 +292,5 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
-    std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
+    // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
 }
