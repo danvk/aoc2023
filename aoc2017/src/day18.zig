@@ -4,7 +4,7 @@ const util = @import("./util.zig");
 const assert = std.debug.assert;
 
 const RV = enum { Reg, Value };
-const RegOrValue = union(RV) { Reg: u8, Value: i32 };
+const RegOrValue = union(RV) { Reg: u8, Value: i128 };
 
 const Code = enum { snd, set, add, mul, mod, rcv, jgz };
 
@@ -27,13 +27,9 @@ const Instruction = union(Code) {
     jgz: TwoRegValue,
 };
 
-fn valueOfRegister(regs: []const i32, reg: u8) i32 {
-    return regs[reg - 'a'];
-}
-
-fn valueOf(regs: []const i32, rv: RegOrValue) i32 {
+fn valueOf(regs: []const i128, rv: RegOrValue) i128 {
     return switch (rv) {
-        .Reg => |reg| valueOfRegister(regs, reg),
+        .Reg => |reg| regs[reg],
         .Value => |v| v,
     };
 }
@@ -59,9 +55,9 @@ fn splitOne(line: []const u8, delim: []const u8) ?struct { head: []const u8, res
 fn parseRegOrValue(arg: []const u8) !RegOrValue {
     const r = arg[0];
     if (r >= 'a' and r <= 'z') {
-        return RegOrValue{ .Reg = r };
+        return RegOrValue{ .Reg = r - 'a' };
     }
-    const v = try std.fmt.parseInt(i32, arg, 10);
+    const v = try std.fmt.parseInt(i128, arg, 10);
     return RegOrValue{ .Value = v };
 }
 
@@ -85,10 +81,12 @@ fn parseLine(line: []const u8) !Instruction {
             const two = splitOne(args, " ").?;
             const a = two.head;
             assert(a.len == 1);
-            const r = a[0];
+            var r = a[0];
             assert(r >= 'a');
             assert(r <= 'z');
+            r -= 'a';
             const b = try parseRegOrValue(two.rest);
+            // XXX surely there is a better way?
             return switch (instr) {
                 .set => Instruction{ .set = .{ .a = r, .b = b } },
                 .add => Instruction{ .add = .{ .a = r, .b = b } },
@@ -98,6 +96,62 @@ fn parseLine(line: []const u8) !Instruction {
             };
         },
     };
+}
+
+const State = struct {
+    pos: usize,
+    regs: [26]i128,
+    sound: i128,
+};
+
+fn execute(instr: Instruction, state: *State) void {
+    switch (instr) {
+        .snd => |freq| {
+            state.sound = valueOf(&state.regs, freq);
+            state.pos += 1;
+        },
+        .set => |rv| {
+            state.regs[rv.a] = valueOf(&state.regs, rv.b);
+            state.pos += 1;
+        },
+        .add => |rv| {
+            state.regs[rv.a] += valueOf(&state.regs, rv.b);
+            state.pos += 1;
+        },
+        .mul => |rv| {
+            state.regs[rv.a] *= valueOf(&state.regs, rv.b);
+            state.pos += 1;
+        },
+        .mod => |rv| {
+            // XXX check that this does the right modulus
+            const v = state.regs[rv.a];
+            const m = valueOf(&state.regs, rv.b);
+            assert(v >= 0);
+            assert(m >= 0);
+            state.regs[rv.a] = @mod(v, m);
+            state.pos += 1;
+        },
+        .rcv => |rv| {
+            const v = valueOf(&state.regs, rv);
+            if (v != 0) {
+                std.debug.print("Recovered sound {d}!\n", .{state.sound});
+                std.process.exit(0);
+            } else {
+                std.debug.print("Did not recover sound\n", .{});
+            }
+            state.pos += 1;
+        },
+        .jgz => |vv| {
+            const v = valueOf(&state.regs, vv.a);
+            if (v > 0) {
+                const offset = valueOf(&state.regs, vv.b);
+                // This is a doozy!
+                state.pos = @intCast(@as(i128, @intCast(state.pos)) + offset);
+            } else {
+                state.pos += 1;
+            }
+        },
+    }
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -120,8 +174,19 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         const instruction = try parseLine(line);
         std.debug.print("{d:>3} {any}\n", .{ instructions.items.len, instruction });
         try instructions.append(instruction);
-        // std.debug.print("{any}\n", .{program});
-        // try programs.putNoClobber(program.id, program);
+    }
+
+    var regs = std.mem.zeroes([26]i128);
+    var state = State{
+        .pos = 0,
+        .regs = regs,
+        .sound = 0,
+    };
+
+    while (state.pos >= 0 and state.pos < instructions.items.len) {
+        const instr = instructions.items[state.pos];
+        execute(instr, &state);
+        std.debug.print("execute {any} -> {any}\n", .{ instr, state });
     }
 
     // std.debug.print("part 1: {d}\n", .{try part1(allocator, step)});

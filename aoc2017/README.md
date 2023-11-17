@@ -291,6 +291,8 @@ My code Just Worked for part 2, 2 minutes in a debug build (1m40s opt). I guess 
 
 Interesting how having to pass in an allocator pushes you towards writing code that doesn't need to allocator memory.
 
-On destructuring assignment:
+On destructuring assignment (or lack thereof):
 https://github.com/ziglang/zig/issues/3897#issuecomment-738984680
 https://github.com/ziglang/zig/pull/17156
+
+I had to switch from i32 -> i128 to avoid an overflow. But nice that Zig crashed on this rather than giving me the wrong answer. Zig also made it clear that the problem underspecifies the `mod` behavior (what does it do with negatives?).
