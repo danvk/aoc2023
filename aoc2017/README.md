@@ -286,3 +286,11 @@ This makes a big difference:
 The former makes a change to a temporary I guess?
 
 My code Just Worked for part 2, 2 minutes in a debug build (1m40s opt). I guess the 50M is big enough to weed out vector shifting implementations?
+
+## Day 18
+
+Interesting how having to pass in an allocator pushes you towards writing code that doesn't need to allocator memory.
+
+On destructuring assignment:
+https://github.com/ziglang/zig/issues/3897#issuecomment-738984680
+https://github.com/ziglang/zig/pull/17156
