@@ -16,7 +16,7 @@ pub fn splitOne(line: []const u8, delim: []const u8) ?struct { head: []const u8,
     const maybeIdx = std.mem.indexOf(u8, line, delim);
     // XXX is there a more idiomatic way to write this pattern?
     if (maybeIdx) |idx| {
-        return .{ .head = line[0..idx], .rest = line[(idx + 1)..] };
+        return .{ .head = line[0..idx], .rest = line[(idx + delim.len)..] };
     } else {
         return null;
     }
