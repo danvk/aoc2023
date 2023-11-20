@@ -17,7 +17,7 @@ const Pattern = struct {
     rows: usize,
     cols: usize,
 
-    fn at(self: @This(), p: Coord) u8 {
+    fn get(self: @This(), p: Coord) u8 {
         return self.buf[self.cols * p.y + p.x];
     }
 
@@ -53,6 +53,17 @@ const Pattern = struct {
         for (0..h) |y| {
             for (0..w) |x| {
                 dest.set(Coord{ .x = h - 1 - y, .y = x }, self.get(Coord{ .x = x, .y = y }));
+            }
+        }
+    }
+
+    fn print(self: @This()) void {
+        for (0..self.rows) |y| {
+            if (y > 0) {
+                std.debug.print("/", .{});
+            }
+            for (0..self.cols) |x| {
+                std.debug.print("{c}", .{self.get(Coord{ .x = x, .y = y })});
             }
         }
     }
@@ -136,9 +147,19 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     var rules = std.StringHashMap(Pattern).init(allocator);
     defer rules.deinit();
 
+    var scratch = std.ArrayList(Pattern).init(allocator);
+
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         var rule = try parseRule(allocator, line);
         std.debug.print("{s} -> {any}\n", .{ line, rule });
+
+        try allTransforms(allocator, rule.left, &scratch);
+        for (scratch.items) |left| {
+            // std.debug.print("  ", .{});
+            // left.print();
+            // std.debug.print("\n", .{});
+            try rules.put(left.buf, rule.right);
+        }
     }
 
     // try part1(allocator, maze, x0);
