@@ -43,16 +43,6 @@ fn valueOf(regs: []const i128, rv: RegOrValue) i128 {
 // rcv X recovers the frequency of the last sound played, but only when the value of X is not zero. (If it is zero, the command does nothing.)
 // jgz X Y jumps with an offset of the value of Y, but only if the value of X is greater than zero. (An offset of 2 skips the next instruction, an offset of -1 jumps to the previous instruction, and so on.)
 
-fn splitOne(line: []const u8, delim: []const u8) ?struct { head: []const u8, rest: []const u8 } {
-    const maybeIdx = std.mem.indexOf(u8, line, delim);
-    // XXX is there a more idiomatic way to write this pattern?
-    if (maybeIdx) |idx| {
-        return .{ .head = line[0..idx], .rest = line[(idx + 1)..] };
-    } else {
-        return null;
-    }
-}
-
 fn parseRegOrValue(arg: []const u8) !RegOrValue {
     const r = arg[0];
     if (r >= 'a' and r <= 'z') {
@@ -63,7 +53,7 @@ fn parseRegOrValue(arg: []const u8) !RegOrValue {
 }
 
 fn parseLine(line: []const u8) !Instruction {
-    const instrRest = splitOne(line, " ").?;
+    const instrRest = util.splitOne(line, " ").?;
     const instr: Code = std.meta.stringToEnum(Code, instrRest.head).?;
     const args = instrRest.rest;
     return switch (instr) {
@@ -73,7 +63,7 @@ fn parseLine(line: []const u8) !Instruction {
             .Value => unreachable,
         },
         .jgz => {
-            const two = splitOne(args, " ").?;
+            const two = util.splitOne(args, " ").?;
             return Instruction{
                 .jgz = .{
                     .a = try parseRegOrValue(two.head),
@@ -82,7 +72,7 @@ fn parseLine(line: []const u8) !Instruction {
             };
         },
         else => {
-            const two = splitOne(args, " ").?;
+            const two = util.splitOne(args, " ").?;
             const a = two.head;
             assert(a.len == 1);
             var r = a[0];

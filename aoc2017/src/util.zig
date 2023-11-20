@@ -12,6 +12,16 @@ pub fn readInts(comptime inttype: type, line: []const u8, nums: *std.ArrayList(i
     }
 }
 
+pub fn splitOne(line: []const u8, delim: []const u8) ?struct { head: []const u8, rest: []const u8 } {
+    const maybeIdx = std.mem.indexOf(u8, line, delim);
+    // XXX is there a more idiomatic way to write this pattern?
+    if (maybeIdx) |idx| {
+        return .{ .head = line[0..idx], .rest = line[(idx + 1)..] };
+    } else {
+        return null;
+    }
+}
+
 pub fn splitIntoArrayList(input: []const u8, delim: []const u8, array_list: *std.ArrayList([]const u8)) !void {
     array_list.clearAndFree();
     var it = std.mem.splitSequence(u8, input, delim);

@@ -307,3 +307,11 @@ A `usize` is an unsigned integer with the same width as a pointer.
 No major trouble on part 1. What's the most idiomatic way to return a string from a function in Zig?
 
 I'm having trouble imagining the approach where part 2 is difficult given a solution to part 1.
+
+## Day 20
+
+This one feels slightly math-y. In the long run, shouldn't the particle that stays the closest be the one with the lowest acceleration (L1 norm)? It seems like the initial position and velocity should only matter as tie-breakers.
+
+No tie-breakers needed, as it turns out!
+
+There must be some more helpful primitives I can factor out for parsing, that wound up being the biggest PITA.
