@@ -182,10 +182,10 @@ fn parseRule(allocator: std.mem.Allocator, line: []const u8) !Rule {
 // ..#
 // ###
 
-fn part1(allocator: std.mem.Allocator, rules: std.StringHashMap(Pattern)) !void {
+fn iterate(allocator: std.mem.Allocator, rules: std.StringHashMap(Pattern), numIters: usize) !void {
     var pat = try parsePattern(allocator, ".#./..#/###");
 
-    for (0..5) |iter| {
+    for (0..numIters) |iter| {
         var n: usize = 0;
         var m: usize = 0;
         if (pat.rows % 2 == 0) {
@@ -210,17 +210,17 @@ fn part1(allocator: std.mem.Allocator, rules: std.StringHashMap(Pattern)) !void 
             for (0..numCells) |xi| {
                 const x0 = n * xi;
                 pat.sliceInto(Coord{ .x = x0, .y = y0 }, dims, &slice);
-                std.debug.print("Looking up:", .{});
-                slice.print();
-                std.debug.print("\n", .{});
+                // std.debug.print("Looking up:", .{});
+                // slice.print();
+                // std.debug.print("\n", .{});
                 var rep = rules.get(slice.buf).?;
                 rep.sliceIntoAt(Coord{ .x = 0, .y = 0 }, outDims, &out, Coord{ .x = m * xi, .y = m * yi });
             }
         }
         pat = out;
-        std.debug.print("After {d} iters:\n", .{iter + 1});
-        pat.printSquare();
-        std.debug.print("\n{d} set\n", .{pat.numSet()});
+        std.debug.print("After {d} iters: {d} set\n", .{ iter + 1, pat.numSet() });
+        // pat.printSquare();
+        // std.debug.print("\n{d} set\n", .{pat.numSet()});
     }
 }
 
@@ -265,7 +265,8 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
         std.debug.print("\n", .{});
     }
 
-    try part1(allocator, rules);
+    try iterate(allocator, rules, 5);
+    try iterate(allocator, rules, 18);
 
     // try part1(allocator, maze, x0);
 

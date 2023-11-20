@@ -332,3 +332,5 @@ I ran the simulation for 100 ticks and then 1000 and got no new collisions, so I
 There's always a problem involving rotations and I always find it annoying.
 
 Arenas and Rust-style Lifetime annotations solve related problems. If I allocate all the scratch stuff in an arena, I can freely share references to it from anything else allocated in that same arena.
+
+Part 2: 18 iterations is nowhere near enough to cause problems.
