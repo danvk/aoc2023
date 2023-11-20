@@ -109,6 +109,7 @@ const Pattern = struct {
 };
 
 fn allTransforms(allocator: std.mem.Allocator, pat: Pattern, out: *std.ArrayList(Pattern)) !void {
+    // XXX this definitely isn't the minimal set of rotations + flips.
     out.clearAndFree();
     try out.append(pat);
 
@@ -124,21 +125,13 @@ fn allTransforms(allocator: std.mem.Allocator, pat: Pattern, out: *std.ArrayList
     pat.flipX(&flipX);
     var flipY = try createPattern(allocator, pat.rows, pat.cols);
     pat.flipY(&flipY);
-    var flipXY = try createPattern(allocator, pat.rows, pat.cols);
-    flipY.flipX(&flipXY);
+    // var flipXY = try createPattern(allocator, pat.rows, pat.cols);
+    // flipY.flipX(&flipXY);
     try out.append(flipX);
     try out.append(flipY);
-    try out.append(flipXY);
+    // try out.append(flipXY);
 
     lastPat = flipX;
-    for (0..3) |_| {
-        var rot = try createPattern(allocator, pat.rows, pat.cols);
-        lastPat.rotCw(&rot);
-        try out.append(rot);
-        lastPat = rot;
-    }
-
-    lastPat = flipY;
     for (0..3) |_| {
         var rot = try createPattern(allocator, pat.rows, pat.cols);
         lastPat.rotCw(&rot);
