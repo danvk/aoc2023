@@ -12,6 +12,11 @@ const Coord = struct {
     y: usize,
 };
 
+const Size = struct {
+    width: usize,
+    height: usize,
+};
+
 const Pattern = struct {
     buf: []u8,
     rows: usize,
@@ -66,6 +71,20 @@ const Pattern = struct {
                 std.debug.print("{c}", .{self.get(Coord{ .x = x, .y = y })});
             }
         }
+    }
+
+    fn sliceIntoAt(self: @This(), pos: Coord, size: Size, dest: *@This(), destPos: Coord) void {
+        const x0 = destPos.x;
+        const y0 = destPos.y;
+        for (0..size.width) |x| {
+            for (0..size.height) |y| {
+                dest.set(Coord{ .x = x0 + x, .y = y0 + y }, self.get(Coord{ .x = x + pos.x, .y = y + pos.y }));
+            }
+        }
+    }
+
+    fn sliceInto(self: @This(), pos: Coord, size: Size, dest: *@This()) void {
+        self.sliceIntoAt(pos, size, dest, Coord{ .x = 0, .y = 0 });
     }
 };
 
@@ -128,6 +147,52 @@ fn parseRule(allocator: std.mem.Allocator, line: []const u8) !Rule {
     return Rule{ .left = left, .right = right };
 }
 
+// .#.
+// ..#
+// ###
+
+fn part1(allocator: std.mem.Allocator, rules: std.StringHashMap(Pattern)) !void {
+    var pat = try parsePattern(allocator, ".#./..#/###");
+
+    for (0..5) |iter| {
+        var n: usize = 0;
+        var m: usize = 0;
+        if (pat.rows % 2 == 0) {
+            // break the pixels up into 2x2 squares, and convert each 2x2 square into a 3x3 square by following the corresponding enhancement rule.
+            n = 2;
+            m = 3;
+        } else if (pat.rows % 3 == 0) {
+            // break the pixels up into 3x3 squares, and convert each 3x3 square into a 4x4 square by following the corresponding enhancement rule.
+            n = 3;
+            m = 4;
+        } else {
+            unreachable;
+        }
+
+        const numCells = pat.rows / n;
+        var slice = try createPattern(allocator, n, n);
+        var out = try createPattern(allocator, numCells * m, numCells * m);
+        const dims = Size{ .width = n, .height = n };
+        const outDims = Size{ .width = m, .height = m };
+        for (0..numCells) |yi| {
+            var y0 = n * yi;
+            for (0..numCells) |xi| {
+                const x0 = n * xi;
+                pat.sliceInto(Coord{ .x = x0, .y = y0 }, dims, &slice);
+                std.debug.print("Looking up:", .{});
+                pat.print();
+                std.debug.print("\n", .{});
+                var rep = rules.get(pat.buf).?;
+                rep.sliceIntoAt(Coord{ .x = 0, .y = 0 }, outDims, &out, Coord{ .x = m * xi, .y = m * yi });
+            }
+        }
+        pat = out;
+        std.debug.print("After {d} iters:", .{iter + 1});
+        pat.print();
+        std.debug.print("", .{});
+    }
+}
+
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     // XXX why is ArenaAllocator in std.heap rather than std.mem?
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
@@ -161,6 +226,15 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
             try rules.put(left.buf, rule.right);
         }
     }
+
+    var it = rules.iterator();
+    while (it.next()) |entry| {
+        std.debug.print("{s} -> ", .{entry.key_ptr.*});
+        entry.value_ptr.print();
+        std.debug.print("\n", .{});
+    }
+
+    try part1(allocator, rules);
 
     // try part1(allocator, maze, x0);
 
