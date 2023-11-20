@@ -299,3 +299,9 @@ I had to switch from i32 -> i128 to avoid an overflow. But nice that Zig crashed
 
 I'm surprised there's no Queue built-in. There is a PriorityQueue.
 I found some code online for a queue and plugged it in. Part 2 went pretty well! I'm glad there were no errors.
+
+A `usize` is an unsigned integer with the same width as a pointer.
+
+## Day 19
+
+No major trouble on part 1. What's the most idiomatic way to return a string from a function in Zig?

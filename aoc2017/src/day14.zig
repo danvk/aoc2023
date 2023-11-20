@@ -1,8 +1,9 @@
 const std = @import("std");
 const util = @import("./util.zig");
 const hashString = @import("./day10.zig").hashString;
-const Dir = @import("./day3.zig").Dir;
-const DIRS = @import("./day3.zig").DIRS;
+const Dir = @import("./dir.zig").Dir;
+const DIRS = @import("./dir.zig").DIRS;
+const Coord = @import("./dir.zig").Coord;
 
 const assert = std.debug.assert;
 
@@ -29,18 +30,6 @@ pub fn part1(allocator: std.mem.Allocator, key: []const u8) !u32 {
     }
     return numSet;
 }
-
-const Coord = struct {
-    x: i32,
-    y: i32,
-
-    pub fn move(self: @This(), dir: Dir) Coord {
-        return Coord{
-            .x = self.x + dir.dx(),
-            .y = self.y + dir.dy(),
-        };
-    }
-};
 
 // caller is responsible for freeing hash map
 pub fn makeGrid(allocator: std.mem.Allocator, key: []const u8) !std.AutoHashMap(Coord, void) {

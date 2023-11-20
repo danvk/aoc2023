@@ -1,4 +1,6 @@
 const std = @import("std");
+const dir = @import("./dir.zig");
+const Dir = dir.Dir;
 
 // R1
 // U1
@@ -9,35 +11,6 @@ const std = @import("std");
 // L4
 // D4
 // R5
-
-pub const Dir = enum(u2) {
-    right,
-    up,
-    left,
-    down,
-    pub fn ccw(self: Dir) Dir {
-        const n: u32 = @intFromEnum(self);
-        return @as(Dir, @enumFromInt((n + 1) % 4));
-    }
-    pub fn dx(this: Dir) i32 {
-        return switch (this) {
-            Dir.left => -1,
-            Dir.right => 1,
-            Dir.up => 0,
-            Dir.down => 0,
-        };
-    }
-    pub fn dy(this: Dir) i32 {
-        return switch (this) {
-            Dir.left => 0,
-            Dir.right => 0,
-            Dir.up => -1,
-            Dir.down => 1,
-        };
-    }
-};
-
-pub const DIRS = [_]Dir{ .right, .up, .left, .down };
 
 fn part1(n: u32) u32 {
     var d = Dir.right;
