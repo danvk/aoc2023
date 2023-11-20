@@ -12,8 +12,11 @@ fn part1(allocator: std.mem.Allocator, maze: std.AutoHashMap(Coord, u8), x0: i32
     var letters = std.ArrayList(u8).init(allocator);
     defer letters.deinit();
 
+    var numSteps: usize = 0;
+
     while (true) {
         const c = maze.get(pos).?;
+        numSteps += 1;
         if (c == '+') {
             // var goal: u8 = '|';
             // if (d == Dir.down or d == Dir.up) {
@@ -49,6 +52,7 @@ fn part1(allocator: std.mem.Allocator, maze: std.AutoHashMap(Coord, u8), x0: i32
     }
 
     std.debug.print("part 1: {s}\n", .{letters.items});
+    std.debug.print("part 2: {d}\n", .{numSteps});
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {

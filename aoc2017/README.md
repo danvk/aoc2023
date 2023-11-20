@@ -305,3 +305,5 @@ A `usize` is an unsigned integer with the same width as a pointer.
 ## Day 19
 
 No major trouble on part 1. What's the most idiomatic way to return a string from a function in Zig?
+
+I'm having trouble imagining the approach where part 2 is difficult given a solution to part 1.
