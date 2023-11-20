@@ -62,15 +62,23 @@ const Pattern = struct {
         }
     }
 
-    fn print(self: @This()) void {
+    fn printDelim(self: @This(), delim: []const u8) void {
         for (0..self.rows) |y| {
             if (y > 0) {
-                std.debug.print("/", .{});
+                std.debug.print("{s}", .{delim});
             }
             for (0..self.cols) |x| {
                 std.debug.print("{c}", .{self.get(Coord{ .x = x, .y = y })});
             }
         }
+    }
+
+    fn print(self: @This()) void {
+        self.printDelim("/");
+    }
+
+    fn printSquare(self: @This()) void {
+        self.printDelim("\n");
     }
 
     fn sliceIntoAt(self: @This(), pos: Coord, size: Size, dest: *@This(), destPos: Coord) void {
@@ -86,10 +94,24 @@ const Pattern = struct {
     fn sliceInto(self: @This(), pos: Coord, size: Size, dest: *@This()) void {
         self.sliceIntoAt(pos, size, dest, Coord{ .x = 0, .y = 0 });
     }
+
+    fn numSet(self: @This()) usize {
+        var n: usize = 0;
+        for (0..self.rows) |y| {
+            for (0..self.cols) |x| {
+                if (self.get(Coord{ .x = x, .y = y }) == '#') {
+                    n += 1;
+                }
+            }
+        }
+        return n;
+    }
 };
 
 fn allTransforms(allocator: std.mem.Allocator, pat: Pattern, out: *std.ArrayList(Pattern)) !void {
     out.clearAndFree();
+    try out.append(pat);
+
     var lastPat = pat;
     for (0..3) |_| {
         var rot = try createPattern(allocator, pat.rows, pat.cols);
@@ -107,6 +129,22 @@ fn allTransforms(allocator: std.mem.Allocator, pat: Pattern, out: *std.ArrayList
     try out.append(flipX);
     try out.append(flipY);
     try out.append(flipXY);
+
+    lastPat = flipX;
+    for (0..3) |_| {
+        var rot = try createPattern(allocator, pat.rows, pat.cols);
+        lastPat.rotCw(&rot);
+        try out.append(rot);
+        lastPat = rot;
+    }
+
+    lastPat = flipY;
+    for (0..3) |_| {
+        var rot = try createPattern(allocator, pat.rows, pat.cols);
+        lastPat.rotCw(&rot);
+        try out.append(rot);
+        lastPat = rot;
+    }
 }
 
 // caller is responsible for freeing returned buffer
@@ -180,16 +218,16 @@ fn part1(allocator: std.mem.Allocator, rules: std.StringHashMap(Pattern)) !void 
                 const x0 = n * xi;
                 pat.sliceInto(Coord{ .x = x0, .y = y0 }, dims, &slice);
                 std.debug.print("Looking up:", .{});
-                pat.print();
+                slice.print();
                 std.debug.print("\n", .{});
-                var rep = rules.get(pat.buf).?;
+                var rep = rules.get(slice.buf).?;
                 rep.sliceIntoAt(Coord{ .x = 0, .y = 0 }, outDims, &out, Coord{ .x = m * xi, .y = m * yi });
             }
         }
         pat = out;
-        std.debug.print("After {d} iters:", .{iter + 1});
-        pat.print();
-        std.debug.print("", .{});
+        std.debug.print("After {d} iters:\n", .{iter + 1});
+        pat.printSquare();
+        std.debug.print("\n{d} set\n", .{pat.numSet()});
     }
 }
 

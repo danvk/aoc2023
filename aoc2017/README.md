@@ -326,3 +326,9 @@ I'm extremely surprised this isn't a compiler error:
 So `undefined` is assignable to `i32`?
 
 I ran the simulation for 100 ticks and then 1000 and got no new collisions, so I plugged in the answer. It was right! No math needed.
+
+## Day 21
+
+There's always a problem involving rotations and I always find it annoying.
+
+Arenas and Rust-style Lifetime annotations solve related problems. If I allocate all the scratch stuff in an arena, I can freely share references to it from anything else allocated in that same arena.
