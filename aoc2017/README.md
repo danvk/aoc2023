@@ -315,3 +315,14 @@ This one feels slightly math-y. In the long run, shouldn't the particle that sta
 No tie-breakers needed, as it turns out!
 
 There must be some more helpful primitives I can factor out for parsing, that wound up being the biggest PITA.
+
+For part 2, the interesting part is "after all collisions are resolved". One idea for determining this is to look at the pairwise distances. If no two particles get closer to each other after a tick, then we're done. There are 1000 particles, so 1M pairwise distances. But maybe lots of them annihilate in the first few ticks?
+
+I'm extremely surprised this isn't a compiler error:
+
+    var coords = std.AutoHashMap(Vec3, i32).init(allocator);
+    try coords.putNoClobber(particle.p, undefined);
+
+So `undefined` is assignable to `i32`?
+
+I ran the simulation for 100 ticks and then 1000 and got no new collisions, so I plugged in the answer. It was right! No math needed.

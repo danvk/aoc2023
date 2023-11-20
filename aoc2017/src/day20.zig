@@ -24,9 +24,14 @@ const Vec3 = struct {
     }
 };
 const Particle = struct {
+    id: usize,
     p: Vec3,
     v: Vec3,
     a: Vec3,
+    fn tick(self: *@This()) void {
+        self.v.addTo(self.a);
+        self.p.addTo(self.v);
+    }
 };
 
 fn parseVec3(buf: []const u8) !Vec3 {
@@ -43,7 +48,7 @@ fn parseVec3(buf: []const u8) !Vec3 {
     return Vec3{ .x = x, .y = y, .z = z };
 }
 
-fn parseLine(line: []const u8) !Particle {
+fn parseLine(id: usize, line: []const u8) !Particle {
     var left = std.mem.indexOfScalar(u8, line, '<').?;
     var right = std.mem.indexOfScalar(u8, line, '>').?;
     const p = try parseVec3(line[left + 1 .. right]);
@@ -60,7 +65,38 @@ fn parseLine(line: []const u8) !Particle {
     right = std.mem.indexOfScalar(u8, buf, '>').?;
     const a = try parseVec3(buf[left + 1 .. right]);
 
-    return Particle{ .p = p, .v = v, .a = a };
+    return Particle{ .id = id, .p = p, .v = v, .a = a };
+}
+
+fn tick(allocator: std.mem.Allocator, particlesList: *std.ArrayList(Particle)) !void {
+    var coords = std.AutoHashMap(Vec3, i32).init(allocator);
+    defer coords.deinit();
+    var toRemove = std.ArrayList(usize).init(allocator);
+    defer toRemove.deinit();
+    var particles = particlesList.items;
+    for (particles) |*particle| {
+        particle.tick();
+    }
+
+    for (particles, 0..) |*particle, i| {
+        if (coords.get(particle.p)) |other_i| {
+            if (other_i != -1) {
+                try toRemove.append(@intCast(other_i));
+                try coords.put(particle.p, -1);
+            }
+            try toRemove.append(i);
+        } else {
+            try coords.putNoClobber(particle.p, @intCast(i));
+        }
+    }
+
+    // Remove items from the back.
+    // This won't invalidate earlier indices and is O(len(toRemove)).
+    std.mem.sort(usize, toRemove.items, {}, std.sort.desc(usize));
+    for (toRemove.items) |i| {
+        const p = particlesList.swapRemove(i);
+        std.debug.print("Particle {d} is annihilated\n", .{p.id});
+    }
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -79,21 +115,32 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     var n: usize = 0;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        const particle = try parseLine(line);
+        const particle = try parseLine(n, line);
         try particles.append(particle);
 
-        std.debug.print("{d}\t{d}\t{any}\n", .{ particle.a.l1norm(), n, particle });
+        // std.debug.print("{d}\t{d}\t{any}\n", .{ particle.a.l1norm(), n, particle });
         n += 1;
     }
+
+    for (0..1000) |i| {
+        std.debug.print("Tick {d} starts with {d} particles.\n", .{ i, particles.items.len });
+        try tick(allocator, &particles);
+        if (particles.items.len <= 1) {
+            break;
+        }
+    }
+
+    // Checked via command line that all initial positions are unique.
 
     // std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
 }
 
 test "parseLine" {
-    const p = try parseLine("p=< 3,0,0>, v=< 2,0,0>, a=<-1,0,0>");
+    const p = try parseLine(0, "p=< 3,0,0>, v=< 2,0,0>, a=<-1,0,0>");
     try std.testing.expectEqualDeep(Vec3{ .x = 3, .y = 0, .z = 0 }, p.p);
     try std.testing.expectEqualDeep(Particle{
+        .id = 0,
         .p = Vec3{ .x = 3, .y = 0, .z = 0 },
         .v = Vec3{ .x = 2, .y = 0, .z = 0 },
         .a = Vec3{ .x = -1, .y = 0, .z = 0 },
