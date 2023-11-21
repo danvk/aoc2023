@@ -34,7 +34,7 @@ fn advance(grid: *std.AutoHashMap(Coord, bool), carrier: Carrier) !struct { Carr
     }, infected };
 }
 
-fn part1(grid: *std.AutoHashMap(Coord, bool), w: usize, numRounds: usize) !usize {
+fn part1(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, bool), w: usize, numRounds: usize) !usize {
     assert(w % 2 == 1);
     const mid: i32 = @intCast((w + 1) / 2);
     var curNode = Coord{ .x = mid, .y = mid };
@@ -52,7 +52,7 @@ fn part1(grid: *std.AutoHashMap(Coord, bool), w: usize, numRounds: usize) !usize
             numInfects += 1;
         }
 
-        printGrid(grid);
+        try printGrid(allocator, grid);
     }
     return numInfects;
 }
@@ -116,6 +116,6 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     assert(w == h);
 
     try printGrid(allocator, grid);
-    std.debug.print("part 1: {d}\n", .{try part1(&grid, w, 7)});
+    // std.debug.print("part 1: {d}\n", .{try part1(allocator, &grid, w, 7)});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
 }
