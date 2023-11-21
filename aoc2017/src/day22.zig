@@ -35,11 +35,13 @@ fn advance(grid: *std.AutoHashMap(Coord, bool), carrier: Carrier) !struct { Carr
 }
 
 fn part1(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, bool), w: usize, numRounds: usize) !usize {
+    _ = allocator;
     assert(w % 2 == 1);
-    const mid: i32 = @intCast((w + 1) / 2);
+    const mid: i32 = @intCast((w - 1) / 2);
     var curNode = Coord{ .x = mid, .y = mid };
     var curDir = Dir.up;
     var carrier = Carrier{ .pos = curNode, .dir = curDir };
+    std.debug.print("start state: {any}\n", .{carrier});
 
     var numInfects: usize = 0;
 
@@ -52,7 +54,7 @@ fn part1(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, bool), w: u
             numInfects += 1;
         }
 
-        try printGrid(allocator, grid);
+        // try printGrid(allocator, grid.*);
     }
     return numInfects;
 }
@@ -73,13 +75,18 @@ fn printGrid(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, bool)) !
         maxY = @max(maxY, y);
     }
 
-    const w = maxX - minX + 1;
-    const h = maxY - minY + 1;
+    const w: usize = @intCast(maxX - minX + 1);
+    const h: usize = @intCast(maxY - minY + 1);
     var buf = try allocator.alloc(u8, w);
     defer allocator.free(buf);
     for (0..h) |y| {
         for (0..w) |x| {
-            buf[x] = grid.get(Coord{ .x = x, .y = y } orelse '.');
+            const v = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }) orelse false;
+            if (v) {
+                buf[x] = '#';
+            } else {
+                buf[x] = '.';
+            }
         }
         std.debug.print("{s}\n", .{buf});
     }
@@ -104,11 +111,15 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         w = line.len;
         for (line, 0..) |c, i| {
+            var v = false;
             if (c == '.') {
-                continue;
+                v = false;
+            } else if (c == '#') {
+                v = true;
+            } else {
+                unreachable;
             }
-            assert(c == '#');
-            try grid.putNoClobber(Coord{ .x = @intCast(i), .y = y }, true);
+            try grid.putNoClobber(Coord{ .x = @intCast(i), .y = y }, v);
         }
         y += 1;
     }
@@ -116,6 +127,6 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     assert(w == h);
 
     try printGrid(allocator, grid);
-    // std.debug.print("part 1: {d}\n", .{try part1(allocator, &grid, w, 7)});
+    std.debug.print("part 1: {d}\n", .{try part1(allocator, &grid, w, 10_000)});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
 }
