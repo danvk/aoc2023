@@ -171,9 +171,12 @@ const Rule = struct {
 };
 
 fn parseRule(allocator: std.mem.Allocator, line: []const u8) !Rule {
-    var parts = util.splitOne(line, " => ").?;
-    var left = try parsePattern(allocator, parts.head);
-    var right = try parsePattern(allocator, parts.rest);
+    var buf: [2][]const u8 = undefined;
+    // var parts = util.splitOne(line, " => ").?;
+    var parts = util.splitIntoBuf(line, " => ", &buf);
+    assert(parts.len == 2);
+    var left = try parsePattern(allocator, parts[0]);
+    var right = try parsePattern(allocator, parts[1]);
 
     return Rule{ .left = left, .right = right };
 }

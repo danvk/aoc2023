@@ -346,4 +346,4 @@ You use `@as`:
 
   try expectEqualDeep(@as([]const u8, "abc"), parts[0]);
 
-The "Deep" makes it not compare pointers.
+The "Deep" makes it not compare pointers. I still have no idea how to use `expectEqualDeep` to check the entire slice in one statement.
