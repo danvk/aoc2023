@@ -335,7 +335,7 @@ Arenas and Rust-style Lifetime annotations solve related problems. If I allocate
 
 Part 2: 18 iterations is nowhere near enough to cause problems.
 
-I'm thinking that a `splitIntoBuf` and `parseIntsIntoBuf` helper would be very useful for parsing.
+I'm thinking that a `splitIntoBuf` and `extractIntsIntoBuf` helper would be very useful for parsing.
 
 How do I fix this?
 
@@ -347,3 +347,8 @@ You use `@as`:
   try expectEqualDeep(@as([]const u8, "abc"), parts[0]);
 
 The "Deep" makes it not compare pointers. I still have no idea how to use `expectEqualDeep` to check the entire slice in one statement.
+(It looks like `std.mem.eql` is an easier way to compare slices.)
+
+## Day 22
+
+5328 = too low
