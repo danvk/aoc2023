@@ -28,6 +28,21 @@ pub fn splitIntoArrayList(input: []const u8, delim: []const u8, array_list: *std
     while (it.next()) |part| {
         try array_list.append(part);
     }
+    // std.fmt.bufPrint(buf: []u8, comptime fmt: []const u8, args: anytype)
+    // std.fmt.bufPrintIntToSlice(buf: []u8, value: anytype, base: u8, case: Case, options: FormatOptions)
+}
+
+pub fn splitIntoBuf(line: []const u8, delim: []const u8, out: [][]const u8) [][]const u8 {
+    var buf = line;
+    var i: usize = 0;
+    while (splitOne(buf, delim)) |split| {
+        out[i] = split.head;
+        buf = split.rest;
+        i += 1;
+    }
+    out[i] = buf;
+    i += 1;
+    return out[0..i];
 }
 
 pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]const u8 {
@@ -84,4 +99,19 @@ pub fn readByLine(allocator: std.mem.Allocator, fileToClose: *std.fs.File, reade
         .buffer = buffer,
         .file_to_close = fileToClose,
     };
+}
+
+const expectEqual = std.testing.expectEqual;
+const expectEqualDeep = std.testing.expectEqualDeep;
+
+test "splitIntoBuf" {
+    var buf: [8][]const u8 = undefined;
+    const parts = splitIntoBuf("abc,def,,gh12", ",", &buf);
+    try expectEqual(@as(usize, 4), parts.len);
+    try expectEqualDeep(@as([]const u8, "abc"), parts[0]);
+    try expectEqualDeep(@as([]const u8, "def"), parts[1]);
+    try expectEqualDeep(@as([]const u8, ""), parts[2]);
+    try expectEqualDeep(@as([]const u8, "gh12"), parts[3]);
+    // const expected = [_][]const u8{ "abc", "def", "", "gh12" };
+    // expectEqualDeep(expected, parts);
 }
