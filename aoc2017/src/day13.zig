@@ -33,17 +33,14 @@ const Layer = struct {
     }
 };
 
-fn parseLayer(allocator: std.mem.Allocator, line: []const u8) !Layer {
-    var parts = std.ArrayList([]const u8).init(allocator);
-    try util.splitIntoArrayList(line, ": ", &parts);
-    assert(parts.items.len == 2);
-
-    const layer = try std.fmt.parseInt(u32, parts.items[0], 10);
-    const range = try std.fmt.parseInt(u32, parts.items[1], 10);
+fn parseLayer(line: []const u8) !Layer {
+    var buf: [2]u32 = undefined;
+    const ints = try util.extractIntsIntoBuf(u32, line, &buf);
+    assert(ints.len == 2);
 
     return Layer{
-        .layer = layer,
-        .range = range,
+        .layer = ints[0],
+        .range = ints[1],
     };
 }
 
@@ -137,7 +134,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         // std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
-        const layer = try parseLayer(allocator, line);
+        const layer = try parseLayer(line);
         // std.debug.print("{any}\n", .{program});
         try layers.putNoClobber(layer.layer, layer);
         maxLayer = @max(maxLayer, layer.layer);
