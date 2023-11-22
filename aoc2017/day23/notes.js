@@ -1,9 +1,9 @@
 let h = 0;
 
-// let b=109300
-// let c=126300
-let b = 93
-let c = 1000
+let b=109300
+let c=126300
+// let b = 93
+// let c = 1000
 
 function isComposite(b) {
     for (let d = 2; d <= Math.sqrt(b); d++) {
