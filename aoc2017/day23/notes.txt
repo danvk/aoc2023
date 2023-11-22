@@ -1,0 +1,39 @@
+b = 93
+c = b
+if (a != 0) {
+    b *= 100
+    b += 100000  # b = 109300
+    c = b
+    c += 17000   # c = 126300
+}
+C: f = 1
+d = 2
+B: e = 2
+A: g = d
+g *= e
+g -= b
+if (g == 0) {
+    f = 0
+}
+e += 1
+g = e
+g -= b
+if (g != 0) {
+    goto A
+}
+d += 1
+g = d
+g -= b
+if (g != 0) {
+    goto B
+}
+if (f == 0) {
+    h += 1
+}
+g = b
+g -= c
+if (g == 0) {
+    terminate
+}
+b += 17
+goto C;

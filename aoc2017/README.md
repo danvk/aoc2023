@@ -358,3 +358,5 @@ Some wrong answers due to off-by-one errors in part 1. I think I found a compile
 ## Day 23
 
 Very curious what part 2 will be because part 1 is just a minor tweak of day 18.
+
+OK, I need to figure out what the program is doing. There have been a few others like this, too.

@@ -133,6 +133,23 @@ fn part1(instructions: []Instruction) usize {
     return state.numMuls;
 }
 
+fn part2(instructions: []Instruction) i128 {
+    var regs = std.mem.zeroes([26]i128);
+    var state = State{
+        .pos = 0,
+        .regs = regs,
+        .numMuls = 0,
+    };
+    state.regs[0] = 1;
+
+    while (state.pos >= 0 and state.pos < instructions.len) {
+        const instr = instructions[state.pos];
+        execute(instr, &state);
+        std.debug.print("{any}\n", .{state});
+    }
+    return state.regs[7];
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -156,5 +173,5 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
-    // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
+    std.debug.print("part 2: {d}\n", .{part2(instructions.items)});
 }
