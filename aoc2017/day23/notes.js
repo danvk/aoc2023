@@ -1,7 +1,12 @@
 let h = 0;
 
+// let b=109300
+// let c=126300
+let b = 93
+let c = 1000
+
 // 1000 iterations
-for (let b=109300; b <= 126300; b += 17) {
+for (; b <= c; b += 17) {
     let f = 1
     let d = 2
     do {
