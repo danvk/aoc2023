@@ -11,6 +11,12 @@ while (true) {
             }
             e += 1
         } while (e != b)
+        # terminates when e = b
+        # last check is when e = b - 1
+        # so this is just:
+        #    if (d * (b - 1) == b) { f = 0 }
+        # -> if (d * b - d == b) { f = 0 }
+        # -> if (d * b == d + b) { f = 0 }
         d += 1
     } while (d != b);
     if (f == 0) {
