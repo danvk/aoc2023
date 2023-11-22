@@ -6,7 +6,7 @@ let b = 93
 let c = 1000
 
 function isComposite(b) {
-    for (let d = 2; d < b; d++) {
+    for (let d = 2; d <= Math.sqrt(b); d++) {
         if (b % d == 0) {
             return true;
         }
