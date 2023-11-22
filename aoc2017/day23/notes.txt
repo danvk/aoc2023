@@ -6,26 +6,17 @@ while (true) {
     do {
         e = 2
         do {
-            g = d
-            g *= e
-            g -= b
-            if (g == 0) {
+            if (d * e == b) {
                 f = 0
             }
             e += 1
-            g = e
-            g -= b
-        } while (g != 0)
+        } while (e != b)
         d += 1
-        g = d
-        g -= b
-    } while (g != 0);
+    } while (d != b);
     if (f == 0) {
         h += 1
     }
-    g = b
-    g -= c
-    if (g == 0) {
+    if (b == c) {
         break;
     }
     b += 17
