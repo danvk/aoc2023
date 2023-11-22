@@ -92,6 +92,77 @@ fn printGrid(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, bool)) !
     }
 }
 
+const State = enum { Clean, Weakened, Infected, Flagged };
+
+fn advance2(grid: *std.AutoHashMap(Coord, State), carrier: Carrier) !struct { Carrier, bool } {
+    const c = grid.get(carrier.pos) orelse .Clean;
+    var dir = carrier.dir;
+    switch (c) {
+        .Clean => {
+            // If it is clean, it turns left.
+            dir = dir.ccw();
+        },
+        .Weakened => {
+            // If it is weakened, it does not turn, and will continue moving in the same direction.
+        },
+        .Infected => {
+            // If it is infected, it turns right.
+            dir = dir.cw();
+        },
+        .Flagged => {
+            // If it is flagged, it reverses direction, and will go back the way it came.
+            dir = dir.cw().cw();
+        },
+    }
+
+    // Clean nodes become weakened.
+    // Weakened nodes become infected.
+    // Infected nodes become flagged.
+    // Flagged nodes become clean.
+    const nextState: State = switch (c) {
+        .Clean => .Weakened,
+        .Weakened => .Infected,
+        .Infected => .Flagged,
+        .Flagged => .Clean,
+    };
+    const infected = nextState == .Infected;
+
+    try grid.put(carrier.pos, nextState);
+
+    // The virus carrier moves forward one node in the direction it is facing.
+    const next = carrier.pos.move(dir);
+    return .{ Carrier{
+        .pos = next,
+        .dir = dir,
+    }, infected };
+}
+
+fn part2(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, State), w: usize, numRounds: usize) !usize {
+    _ = allocator;
+    assert(w % 2 == 1);
+    const mid: i32 = @intCast((w - 1) / 2);
+    var curNode = Coord{ .x = mid, .y = mid };
+    var curDir = Dir.up;
+    var carrier = Carrier{ .pos = curNode, .dir = curDir };
+    std.debug.print("start state: {any}\n", .{carrier});
+
+    var numInfects: usize = 0;
+
+    for (0..numRounds) |i| {
+        _ = i;
+        var pair = try advance2(grid, carrier);
+        carrier = pair[0];
+        const causedInfection = pair[1];
+        // std.debug.print("{d} infect? {any}\n", .{ i, causedInfection });
+        if (causedInfection) {
+            numInfects += 1;
+        }
+
+        // try printGrid(allocator, grid.*);
+    }
+    return numInfects;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -127,6 +198,15 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     assert(w == h);
 
     try printGrid(allocator, grid);
+    var part2Grid = std.AutoHashMap(Coord, State).init(allocator);
+    defer part2Grid.deinit();
+    var it = grid.iterator();
+    while (it.next()) |entry| {
+        if (entry.value_ptr.*) {
+            try part2Grid.put(entry.key_ptr.*, .Infected);
+        }
+    }
     std.debug.print("part 1: {d}\n", .{try part1(allocator, &grid, w, 10_000)});
-    // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
+
+    std.debug.print("part 2: {d}\n", .{try part2(allocator, &part2Grid, w, 10_000_000)});
 }
