@@ -354,3 +354,7 @@ The "Deep" makes it not compare pointers. I still have no idea how to use `expec
 5328 = too low
 
 Some wrong answers due to off-by-one errors in part 1. I think I found a compiler bug: there _was_ an error, but it was reported in a completely unrelated place.
+
+## Day 23
+
+Very curious what part 2 will be because part 1 is just a minor tweak of day 18.
