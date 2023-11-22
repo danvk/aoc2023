@@ -362,3 +362,5 @@ Very curious what part 2 will be because part 1 is just a minor tweak of day 18.
 OK, I need to figure out what the program is doing. There have been a few others like this, too.
 
 Well that was fun. No real programming for part 2, just carefully rewriting `jnz` instructions to if statements and loops, then simplifying until it became clear what was going on. I wound up rewriting the program as JavaScript. Probably the most interesting problem so far!
+
+## Day 24
