@@ -383,3 +383,5 @@ Yep!
 ## Day 25
 
 Parsing this is going to be fun.
+Actually not too bad -- I guess I've gotten better at Zig!
+I'm the 6,675th person to complete the 2017 Advent of Code.

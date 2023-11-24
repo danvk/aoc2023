@@ -99,6 +99,29 @@ fn parseInput(allocator: std.mem.Allocator, lines: [][]const u8) !TuringMachine 
     };
 }
 
+fn execute(allocator: std.mem.Allocator, machine: TuringMachine) !usize {
+    var regs = std.AutoHashMap(i128, u8).init(allocator);
+
+    var pos: i128 = 0;
+    var state = machine.startState;
+    for (0..machine.diagnosticSteps) |_| {
+        var val = regs.get(pos) orelse 0;
+        var instr = machine.states[state - 'A'].instr[val];
+        try regs.put(pos, instr.write);
+        pos += instr.move;
+        state = instr.nextState;
+    }
+
+    var it = regs.valueIterator();
+    var count: usize = 0;
+    while (it.next()) |v| {
+        if (v.* == 1) {
+            count += 1;
+        }
+    }
+    return count;
+}
+
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
     defer arena.deinit();
@@ -112,6 +135,6 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     var machine = try parseInput(allocator, lines.items);
     std.debug.print("machine: {any}\n", .{machine});
 
-    // std.debug.print("part 1: {d}\n", .{part1(&components.items)});
+    std.debug.print("part 1: {d}\n", .{try execute(allocator, machine)});
     // std.debug.print("part 2: {any}\n", .{part1(&components.items)});
 }
