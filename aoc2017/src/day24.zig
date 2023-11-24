@@ -9,10 +9,15 @@ const Component = struct {
     used: bool,
 };
 
-fn findStrongest(components: *[]Component, startPin: u32) u32 {
-    var best: u32 = 0;
+const Result = struct {
+    length: usize,
+    strength: usize,
+};
+
+fn findStrongest(components: *[]Component, startPin: u32) Result {
+    var best = Result{ .length = 0, .strength = 0 };
     var i: usize = 0;
-    var bestI: usize = 0;
+    // var bestI: usize = 0;
     // XXX how can I write this as a for loop?
     while (i < components.len) : (i += 1) {
         var component = components.*[i];
@@ -28,21 +33,24 @@ fn findStrongest(components: *[]Component, startPin: u32) u32 {
         components.*[i].used = true;
         const strength = pins[0] + pins[1];
         const otherPin = strength - startPin;
-        const thisBest = strength + findStrongest(components, otherPin);
-        best = @max(best, thisBest);
-        if (best == thisBest) {
-            bestI = i;
+        const rec = findStrongest(components, otherPin);
+        const thisBest = Result{ .length = 1 + rec.length, .strength = rec.strength + strength };
+        if (thisBest.length > best.length or (thisBest.length == best.length and thisBest.strength >= best.strength)) {
+            best = thisBest;
         }
+        // if (best == thisBest) {
+        //     bestI = i;
+        // }
         components.*[i].used = false;
     }
 
     if (startPin == 0) {
-        std.debug.print("best: {any} {d}\n", .{ components.*[bestI], best });
+        // std.debug.print("best: {any} {d}\n", .{ components.*[bestI], best });
     }
     return best;
 }
 
-fn part1(components: *[]Component) u32 {
+fn part1(components: *[]Component) Result {
     return findStrongest(components, 0);
 }
 
@@ -79,6 +87,6 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
 
     std.debug.print("components: {any}\n", .{components.items});
 
-    std.debug.print("part 1: {d}\n", .{part1(&components.items)});
-    // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
+    // std.debug.print("part 1: {d}\n", .{part1(&components.items)});
+    std.debug.print("part 2: {any}\n", .{part1(&components.items)});
 }
