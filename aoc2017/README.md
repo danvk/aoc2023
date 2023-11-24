@@ -377,3 +377,9 @@ Or maybe I don't need to solve that problem? There are a few interesting pattern
 Maybe doing that will reveal more structure? It will at least reduce the number of nodes.
 
 I guess the input isn't long enough to require anything fancy :(. I just brute forced my way through part 1 and I think the same will work for part 2.
+
+Yep!
+
+## Day 25
+
+Parsing this is going to be fun.

@@ -23,6 +23,7 @@ const day21 = @import("./day21.zig").main;
 const day22 = @import("./day22.zig").main;
 const day23 = @import("./day23.zig").main;
 const day24 = @import("./day24.zig").main;
+const day25 = @import("./day25.zig").main;
 
 const Day = struct {
     name: []const u8,
@@ -54,6 +55,7 @@ const DAYS = [_]Day{
     Day{ .name = "day22", .main = day22 },
     Day{ .name = "day23", .main = day23 },
     Day{ .name = "day24", .main = day24 },
+    Day{ .name = "day25", .main = day25 },
 };
 
 pub fn main() !void {
