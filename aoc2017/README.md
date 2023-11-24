@@ -364,3 +364,16 @@ OK, I need to figure out what the program is doing. There have been a few others
 Well that was fun. No real programming for part 2, just carefully rewriting `jnz` instructions to if statements and loops, then simplifying until it became clear what was going on. I wound up rewriting the program as JavaScript. Probably the most interesting problem so far!
 
 ## Day 24
+
+This one is interesting! You can represent the components as a bidirectional graph, where each pin is a node and a component is a link between the two pins. Then each pin has a link to the other pins with the same number. Then I think the problem is just max flow.
+
+I'd like to think about how to implement max flow! I think it's some sort of dynamic programming algorithm. The obvious thing to me is to have a grid of start/end nodes and the max flow path between them. But that doesn't have an optimal substructure: it's not clear how to add the next node to the graph given the existing paths.
+
+Or maybe I don't need to solve that problem? There are a few interesting patterns in my data:
+
+- There are 5 pins that only occur once. These would have to be terminal pins.
+- There are 16 pins that only occur twice. So these can all be pre-linked together.
+
+Maybe doing that will reveal more structure? It will at least reduce the number of nodes.
+
+I guess the input isn't long enough to require anything fancy :(. I just brute forced my way through part 1 and I think the same will work for part 2.

@@ -3,6 +3,49 @@ const util = @import("./util.zig");
 
 const assert = std.debug.assert;
 
+const Component = struct {
+    id: usize,
+    pins: [2]u32,
+    used: bool,
+};
+
+fn findStrongest(components: *[]Component, startPin: u32) u32 {
+    var best: u32 = 0;
+    var i: usize = 0;
+    var bestI: usize = 0;
+    // XXX how can I write this as a for loop?
+    while (i < components.len) : (i += 1) {
+        var component = components.*[i];
+        // std.debug.print("try component {d}: {any}\n", .{ i, component });
+        if (component.used) {
+            continue;
+        }
+        const pins = component.pins;
+        if (pins[0] != startPin and pins[1] != startPin) {
+            continue;
+        }
+
+        components.*[i].used = true;
+        const strength = pins[0] + pins[1];
+        const otherPin = strength - startPin;
+        const thisBest = strength + findStrongest(components, otherPin);
+        best = @max(best, thisBest);
+        if (best == thisBest) {
+            bestI = i;
+        }
+        components.*[i].used = false;
+    }
+
+    if (startPin == 0) {
+        std.debug.print("best: {any} {d}\n", .{ components.*[bestI], best });
+    }
+    return best;
+}
+
+fn part1(components: *[]Component) u32 {
+    return findStrongest(components, 0);
+}
+
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
     defer arena.deinit();
@@ -17,21 +60,25 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
 
     var buf: [1024]u8 = undefined;
 
-    var components = std.ArrayList([2]u32).init(allocator);
+    var components = std.ArrayList(Component).init(allocator);
     defer components.deinit();
 
+    var i: usize = 0;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         // I guess fixed-size arrays are copied by value?
         var pin_buf: [2]u32 = undefined;
         var pins = try util.extractIntsIntoBuf(u32, line, &pin_buf);
         assert(pins.len == 2);
-        try components.append(pin_buf);
+        try components.append(Component{
+            .id = i,
+            .pins = pin_buf,
+            .used = false,
+        });
+        i += 1;
     }
 
     std.debug.print("components: {any}\n", .{components.items});
 
-    // try part1(allocator, maze, x0);
-
-    // std.debug.print("part 1: {d}\n", .{part1(instructions.items)});
+    std.debug.print("part 1: {d}\n", .{part1(&components.items)});
     // std.debug.print("part 2: {d}\n", .{try part2(allocator, instructions.items)});
 }
