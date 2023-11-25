@@ -16,8 +16,7 @@ pub const ReadByLineIterator = struct {
             self.stream = self.buf_reader.reader();
         }
         if (self.stream) |stream| {
-            var slice = try stream.readUntilDelimiterOrEof(&self.buf, '\n');
-            return slice;
+            return stream.readUntilDelimiterOrEof(&self.buf, '\n');
         }
         unreachable;
     }
@@ -27,6 +26,8 @@ pub const ReadByLineIterator = struct {
     }
 };
 
+// Iterate over the lines in the file using a buffered reader.
+// Caller is responsible for calling deinit() on returned iterator when done.
 pub fn iterLines(filename: []const u8) !ReadByLineIterator {
     var file = try std.fs.cwd().openFile(filename, .{});
     var reader = file.reader();

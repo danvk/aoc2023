@@ -445,3 +445,13 @@ This is interesting!
     * Memory is a resource.
     * Together we serve the users.
 
+I took another crack at `ReadByLineIterator` having completed the whole AoC. I got it working with only a little fuss. The "types that dare not speak their name" aren't actually a big deal. You can name them just fine. The problem was exactly what was pointed out on the Zig forum:
+
+> std.io.BufferedReader.reader() returns a Reader with a context of *Self (meaning a pointer to the std.io.BufferedReader). In your case, this is a pointer to the stack-allocated buf_reader which gets invalidated after getBufferedReader returns.
+
+So while I can stack-allocate the file, reader and buffered reader in the `iterLines` function, I need to lazily initialize the `stream` (`Reader`) in a method once the `buf_reader` has its final memory address. Once I do this it works pretty nicely.
+
+This makes me think two things:
+
+1. This went a lot better than it did a week or two ago, so I've clearly learned something about Zig.
+2. Building a mental model for the implicit copying that goes on is the key breakthrough that made this click.
