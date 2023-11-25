@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -10,6 +11,7 @@ const Program = struct {
 
 fn parseProgram(allocator: std.mem.Allocator, line: []const u8) !Program {
     var parts = std.ArrayList([]const u8).init(allocator);
+    defer parts.deinit();
     try util.splitIntoArrayList(line, " <-> ", &parts);
     assert(parts.items.len == 2);
 
@@ -85,24 +87,26 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     const filename = args[0];
 
-    var file = try std.fs.cwd().openFile(filename, .{});
-    defer file.close();
+    // var file = try std.fs.cwd().openFile(filename, .{});
+    // defer file.close();
+    // var buf_reader = std.io.bufferedReader(file.reader());
+    // var in_stream = buf_reader.reader();
+    // var buf: [1024]u8 = undefined;
 
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-
-    var buf: [1024]u8 = undefined;
-
-    // var line_it = try util.iterLines(filename, allocator);
-    // defer line_it.deinit();
+    var line_it = try bufIter.iterLines(filename);
+    defer line_it.deinit();
 
     var programs = std.AutoHashMap(u32, Program).init(allocator);
     defer programs.deinit();
 
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
-        // std.debug.print("line: {s}\n", .{line});
+    // while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try line_it.next()) |line| {
+        std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
-        const program = try parseProgram(allocator, line);
+        var program = try parseProgram(allocator, line);
+        // const heapProgram = try allocator.create(Program);
+        // heapProgram.* = program;
+
         // std.debug.print("{any}\n", .{program});
         try programs.putNoClobber(program.id, program);
     }

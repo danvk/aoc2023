@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -26,7 +27,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     defer arena.deinit();
     var allocator = arena.allocator();
 
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try bufIter.iterLines(filename);
     defer line_it.deinit();
 
     var programs = std.StringHashMap(Program).init(allocator);

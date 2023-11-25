@@ -34,7 +34,8 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
 
-    var buf_reader = std.io.bufferedReader(file.reader());
+    var reader = file.reader();
+    var buf_reader = std.io.bufferedReader(reader);
     var in_stream = buf_reader.reader();
     var buf: [4096]u8 = undefined;
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {

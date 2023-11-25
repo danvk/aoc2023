@@ -93,7 +93,7 @@ Short integer loops are certainly fast! 0.25s for both parts.
 
 ## Day 6
 
-Perhaps the values in each bank will always be below 256, but I wasn't sure about part 2 so I chose to represent them as a `[]u32`. This mean that I couldn't use `StringHashMap`. Slices can't go through an `AutoHashMap` (it's ambiguous what you want) so I had to roll my own hashing function. Fortunately there was a unit test in `auto_hash.zig` that showed me how to do what I wanted. My first try failed until I looked at the unit test more closely. "Shallow" is really, truly shallow (just comparing pointers). What I wanted was "deep" but not deep recursive.
+Perhaps the values in each bank will always be below 256, but I wasn't sure about part 2 so I chose to represent them as a `[]u32`. This meant that I couldn't use `StringHashMap`. Slices can't go through an `AutoHashMap` (it's ambiguous what you want) so I had to roll my own hashing function. Fortunately there was a unit test in `auto_hash.zig` that showed me how to do what I wanted. My first try failed until I looked at the unit test more closely. "Shallow" is really, truly shallow (just comparing pointers). What I wanted was "deep" but not deep recursive.
 
 ... and of course part 2 didn't need `u32` :/ I'm sure this will come in handy again sometime.
 
@@ -163,7 +163,7 @@ Iterating strings character-by-character: Zig's got this!
 
 ## Day 10
 
-I generalized `readInts` to work with any integer type. Interesting that you can overflow by multiplying to `u8`s! I'm happy with my `reverse` implementation for circular lists.
+I generalized `readInts` to work with any integer type. Interesting that you can overflow by multiplying two `u8`s! I'm happy with my `reverse` implementation for circular lists.
 
 `23234babdc6afa036749cfa9e097de1b` is wrong.
 
@@ -380,8 +380,78 @@ I guess the input isn't long enough to require anything fancy :(. I just brute f
 
 Yep!
 
+After looking up Max Flow on Wikipedia, it's not at all analogous to this problem. This would be more like shortest path with negative edge weights. Max flow is the maximum flow across all paths with limited capacity on each node, not just a single path.
+
 ## Day 25
 
 Parsing this is going to be fun.
 Actually not too bad -- I guess I've gotten better at Zig!
 I'm the 6,675th person to complete the 2017 Advent of Code.
+
+General impressions:
+
+- The 2017 Advent of Code was really, really easy. Day 23 was the only one that required much thought. There were a few problems (day 16, day 24) where it could have been interesting with a larger input but wasn't.
+- I definitely "got the hang of" Zig after ~15 days. I was particularly happy with how few iterations my parser on day 25 took.
+- JavaScript/TypeScript's choice to just have a single `number` type is a massive simplification. There's so much ceremony around numeric type conversions in Zig (and Rust).
+- The "error union" pattern is neat because you almost never wind up having to explicitly write the error types. But it's also interesting what's considered an "error union" type error vs. what's not. Memory allocation failure is something you need to think about. But numeric overflow or failed `@intCast` is not.
+- It's annoying how any function that takes an allocator needs a `try`. But it's not annoying how this pushes you to write allocation-free versions of your code, e.g. using a buffer.
+- `zls` is shockingly bad. It will point out syntax errors and undeclared variables, but that's about it. Calling non-existent methods of functions in a module is OK. Calling a function with the wrong number of arguments is also OK. And it's not able to follow along with the types when you iterate over a hash map, say.
+- I was much happier with my VS Code Zig experience when I turned off inlays and stopped expecting `zls` to be helpful.
+- Good in-editor error checking for `std.debug.print` would have saved me at least half my round trips to build from the CLI.
+- The `comptime` idea is pretty neat. Rather than having a different type-level language, it's all just Zig. I came to appreciate this when I realized that you could put literally any code in a `@TypeOf` expression.
+- I'm most baffled by "types that dare not speak their name." There are a lot of these in Zig, e.g. a buffered reader. This is a barrier to abstraction since you have to annotate all parameter and return types. I was shocked how difficult (maybe impossible) it is to encapsulate reading the lines of a file via a buffered reader.
+- I'd known about "arenas" since college but had never used one. They're quite convenient! They basically let you pretend you're working in a garbage-collected environment for a limited time. Allocating lots of values in an arena is kind of like having them all share a lifetime annotation in Rust.
+- Zig advertises "no hidden memory allocations" which I guess is technically true. I misinterpreted this as "no hidden copies" which most definitely isn't. It took me a while to realize that `struct`s and many other types are copied when you assign them, which leads to aliasing problems.
+- I still find the type syntax hard to parse. There's a lot of information being conveyed through punctuation in slice types.
+- Some errors that are confusing:
+  - Forgetting to put `try` in front of a function call.
+  - Forgetting to put `.init(allocator)` at the end of the line when you initialize a hash map.
+  - A `const` in the middle of a type.
+  - Type errors involving `std.testing.expectEqual` and strings.
+  - When you specify the wrong number of elements to `std.debug.print`, it doesn't always tell you _where_ the erroneous print statement is.
+  - A surprising non-error: you can put `undefined` in a hashmap with `u32` values. I guess it just inserts garbage?
+- I like that unit testing is built-in. It feels weird to me that this is standardized (`zig test`) while building is not.
+- Functional programming constructs aren't especially useful without closures.
+- No regex or scanf in Zig, so parsing is just split, split, split.
+- I've heard Zig described as a C replacement, rather than a C++ replacement. But that doesn't feel entirely fair: it let's you define methods on `struct`s, which feels very object-y. I guess the thing it _doesn't_ have is inheritance, but is that really what defines C++? I don't think so. You can definitely replace C++ with Zig.
+- I was surprised there wasn't any sort of `toString()` convention for handling `{s}` or `{any}` in format strings.
+- I was confused that `for` lets you iterate some things (slices) but for others you have to use an iterator and `while`.
+- I wish Zig had destructuring assignment. It sounds like it will get it for tuples.
+- The difference between `var` and `const` in Zig is quite different than it is in JS.
+- Making function parameters immutable is an interesting (and different) design choice than JS. The "pass a pointer if you want to mutate it" convention felt very familiar to me from Google-style C++.
+- Some Zig conventions:
+  - allocator first
+  - passing types as the first parameter to functions
+- It seems like there's nothing between `anytype` and a concrete type? Are there type bounds in Zig? This feels like C++'s SFINAE.
+- Capture is pretty intuitive, I just wish it worked better with zls.
+
+I should play around with building Bun.
+
+This is interesting!
+
+    $ zig zen
+
+    * Communicate intent precisely.
+    * Edge cases matter.
+    * Favor reading code over writing code.
+    * Only one obvious way to do things.
+    * Runtime crashes are better than bugs.
+    * Compile errors are better than runtime crashes.
+    * Incremental improvements.
+    * Avoid local maximums.
+    * Reduce the amount one must remember.
+    * Focus on code rather than style.
+    * Resource allocation may fail; resource deallocation must succeed.
+    * Memory is a resource.
+    * Together we serve the users.
+
+I took another crack at `ReadByLineIterator` having completed the whole AoC. I got it working with only a little fuss. The "types that dare not speak their name" aren't actually a big deal. You can name them just fine. The problem was exactly what was pointed out on the Zig forum:
+
+> std.io.BufferedReader.reader() returns a Reader with a context of *Self (meaning a pointer to the std.io.BufferedReader). In your case, this is a pointer to the stack-allocated buf_reader which gets invalidated after getBufferedReader returns.
+
+So while I can stack-allocate the file, reader and buffered reader in the `iterLines` function, I need to lazily initialize the `stream` (`Reader`) in a method once the `buf_reader` has its final memory address. Once I do this it works pretty nicely.
+
+This makes me think two things:
+
+1. This went a lot better than it did a week or two ago, so I've clearly learned something about Zig.
+2. Building a mental model for the implicit copying that goes on is the key breakthrough that made this click.

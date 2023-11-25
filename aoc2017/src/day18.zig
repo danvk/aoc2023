@@ -1,6 +1,7 @@
 const std = @import("std");
 const util = @import("./util.zig");
 const Queue = @import("./queue.zig").Queue;
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -53,33 +54,33 @@ fn parseRegOrValue(arg: []const u8) !RegOrValue {
 }
 
 fn parseLine(line: []const u8) !Instruction {
-    const instrRest = util.splitOne(line, " ").?;
-    const instr: Code = std.meta.stringToEnum(Code, instrRest.head).?;
-    const args = instrRest.rest;
+    var buf: [3][]const u8 = undefined;
+    const parts = util.splitIntoBuf(line, " ", &buf);
+    const instr: Code = std.meta.stringToEnum(Code, parts[0]).?;
+    const args = parts[1..];
     return switch (instr) {
-        .snd => Instruction{ .snd = try parseRegOrValue(args) },
-        .rcv => switch (try parseRegOrValue(args)) {
+        .snd => Instruction{ .snd = try parseRegOrValue(args[0]) },
+        .rcv => switch (try parseRegOrValue(args[0])) {
             .Reg => |r| Instruction{ .rcv = r },
             .Value => unreachable,
         },
         .jgz => {
-            const two = util.splitOne(args, " ").?;
             return Instruction{
                 .jgz = .{
-                    .a = try parseRegOrValue(two.head),
-                    .b = try parseRegOrValue(two.rest),
+                    .a = try parseRegOrValue(args[0]),
+                    .b = try parseRegOrValue(args[1]),
                 },
             };
         },
         else => {
-            const two = util.splitOne(args, " ").?;
-            const a = two.head;
+            assert(args.len == 2);
+            const a = args[0];
             assert(a.len == 1);
             var r = a[0];
             assert(r >= 'a');
             assert(r <= 'z');
             r -= 'a';
-            const b = try parseRegOrValue(two.rest);
+            const b = try parseRegOrValue(args[1]);
             // XXX surely there is a better way?
             return switch (instr) {
                 .set => Instruction{ .set = .{ .a = r, .b = b } },
@@ -287,18 +288,12 @@ fn part2(allocator: std.mem.Allocator, instructions: []Instruction) !usize {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var file = try std.fs.cwd().openFile(filename, .{});
-    defer file.close();
-
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-
-    var buf: [1024]u8 = undefined;
+    var lines_it = try bufIter.iterLines(filename);
 
     var instructions = std.ArrayList(Instruction).init(allocator);
     defer instructions.deinit();
 
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try lines_it.next()) |line| {
         // std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
         const instruction = try parseLine(line);

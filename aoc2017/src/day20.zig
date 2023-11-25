@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -35,17 +36,11 @@ const Particle = struct {
 };
 
 fn parseVec3(buf: []const u8) !Vec3 {
-    // std.debug.print("parse vec3: '{s}'\n", .{buf});
-    const part1 = util.splitOne(buf, ",").?;
-    const xStr = std.mem.trim(u8, part1.head, " ");
-    const part2 = util.splitOne(part1.rest, ",").?;
-    const yStr = std.mem.trim(u8, part2.head, " ");
-    const zStr = std.mem.trim(u8, part2.rest, " ");
-    // std.debug.print("x/y/z: '{s}'/'{s}'/'{s}'\n", .{ xStr, yStr, zStr });
-    const x = try std.fmt.parseInt(i64, xStr, 10);
-    const y = try std.fmt.parseInt(i64, yStr, 10);
-    const z = try std.fmt.parseInt(i64, zStr, 10);
-    return Vec3{ .x = x, .y = y, .z = z };
+    var intBuf: [3]i64 = undefined;
+    var ints = try util.extractIntsIntoBuf(i64, buf, &intBuf);
+    assert(ints.len == 3);
+
+    return Vec3{ .x = ints[0], .y = ints[1], .z = ints[2] };
 }
 
 fn parseLine(id: usize, line: []const u8) !Particle {
@@ -102,19 +97,14 @@ fn tick(allocator: std.mem.Allocator, particlesList: *std.ArrayList(Particle)) !
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var file = try std.fs.cwd().openFile(filename, .{});
-    defer file.close();
-
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-
-    var buf: [1024]u8 = undefined;
+    var lines_it = try bufIter.iterLines(filename);
+    defer lines_it.deinit();
 
     var particles = std.ArrayList(Particle).init(allocator);
     defer particles.deinit();
 
     var n: usize = 0;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try lines_it.next()) |line| {
         const particle = try parseLine(n, line);
         try particles.append(particle);
 

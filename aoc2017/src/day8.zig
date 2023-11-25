@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -20,22 +21,20 @@ const Instruction = struct {
 };
 
 // Returned instruction is valid so long as line is.
-fn parseInstruction(allocator: std.mem.Allocator, line: []const u8) !Instruction {
+fn parseInstruction(line: []const u8) !Instruction {
     // aj dec -520 if icd < 9
-    var parts = std.ArrayList([]const u8).init(allocator);
-    defer parts.deinit();
+    var buf: [7][]const u8 = undefined;
+    var parts = util.splitIntoBuf(line, " ", &buf);
+    assert(parts.len == 7);
+    const reg = parts[0];
+    var op = std.meta.stringToEnum(Op, parts[1]) orelse unreachable;
+    const amount = try std.fmt.parseInt(i32, parts[2], 10);
 
-    try util.splitIntoArrayList(line, " ", &parts);
-    assert(parts.items.len == 7);
-    const reg = parts.items[0];
-    var op = std.meta.stringToEnum(Op, parts.items[1]) orelse unreachable;
-    const amount = try std.fmt.parseInt(i32, parts.items[2], 10);
-
-    assert(std.mem.eql(u8, parts.items[3], "if"));
-    const cond_reg = parts.items[4];
+    assert(std.mem.eql(u8, parts[3], "if"));
+    const cond_reg = parts[4];
     // See https://www.reddit.com/r/Zig/comments/13buv9l/extended_switch_semantics_on_stringsarrays/jje4st0/
-    const cond_op = std.meta.stringToEnum(Relation, parts.items[5]) orelse unreachable;
-    const comp_val = try std.fmt.parseInt(i32, parts.items[6], 10);
+    const cond_op = std.meta.stringToEnum(Relation, parts[5]) orelse unreachable;
+    const comp_val = try std.fmt.parseInt(i32, parts[6], 10);
     return Instruction{ .reg = reg, .op = op, .amount = amount, .cond = Condition{
         .reg = cond_reg,
         .op = cond_op,
@@ -93,7 +92,7 @@ pub fn runOnFile(parent_allocator: std.mem.Allocator, filename: [:0]const u8) !v
     defer arena.deinit();
     var allocator = arena.allocator();
 
-    var line_it = try util.iterLines(filename, parent_allocator);
+    var line_it = try bufIter.iterLines(filename);
     defer line_it.deinit();
 
     var reg = std.StringHashMap(i32).init(allocator);
@@ -102,7 +101,7 @@ pub fn runOnFile(parent_allocator: std.mem.Allocator, filename: [:0]const u8) !v
     while (try line_it.next()) |line_in| {
         const line = try allocator.dupe(u8, line_in);
         std.debug.print("line: '{s}'\n", .{line});
-        const instr = try parseInstruction(allocator, line);
+        const instr = try parseInstruction(line);
         const cond = instr.cond;
         const reg_val = reg.get(cond.reg) orelse 0;
         const cond_true = switch (cond.op) {
