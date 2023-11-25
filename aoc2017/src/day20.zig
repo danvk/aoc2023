@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -96,19 +97,14 @@ fn tick(allocator: std.mem.Allocator, particlesList: *std.ArrayList(Particle)) !
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var file = try std.fs.cwd().openFile(filename, .{});
-    defer file.close();
-
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-
-    var buf: [1024]u8 = undefined;
+    var lines_it = try bufIter.iterLines(filename);
+    defer lines_it.deinit();
 
     var particles = std.ArrayList(Particle).init(allocator);
     defer particles.deinit();
 
     var n: usize = 0;
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try lines_it.next()) |line| {
         const particle = try parseLine(n, line);
         try particles.append(particle);
 
