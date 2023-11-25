@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 const U32SliceContext = struct {
     pub fn hash(self: @This(), s: []const u32) u64 {
@@ -54,7 +55,7 @@ fn part1_2(in_nums: []const u32, parent_allocator: std.mem.Allocator) ![2]u32 {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try bufIter.iterLines(filename);
     defer line_it.deinit();
 
     while (try line_it.next()) |line| {

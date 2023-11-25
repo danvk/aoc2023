@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 fn is_valid(line: []const u8, allocator: std.mem.Allocator) !bool {
     var values = std.StringHashMap(void).init(allocator);
@@ -38,7 +39,7 @@ fn is_valid2(line: []const u8, parent_allocator: std.mem.Allocator) !bool {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try bufIter.iterLines(filename);
     defer line_it.deinit();
 
     var sum: u32 = 0;

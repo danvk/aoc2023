@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -93,7 +94,7 @@ pub fn runOnFile(parent_allocator: std.mem.Allocator, filename: [:0]const u8) !v
     defer arena.deinit();
     var allocator = arena.allocator();
 
-    var line_it = try util.iterLines(filename, parent_allocator);
+    var line_it = try bufIter.iterLines(filename);
     defer line_it.deinit();
 
     var reg = std.StringHashMap(i32).init(allocator);

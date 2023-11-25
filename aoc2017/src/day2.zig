@@ -1,5 +1,6 @@
 const std = @import("std");
 const util = @import("./util.zig");
+const bufIter = @import("./buf-iter.zig");
 
 fn part2(nums: []u32) u32 {
     for (nums, 0..) |a, i| {
@@ -25,7 +26,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     // var buf_reader = std.io.bufferedReader(file.reader());
 
     // var line_it = util.readByLine(allocator, &buf_reader);
-    var line_it = try util.iterLines(filename, allocator);
+    var line_it = try bufIter.iterLines(filename);
     defer line_it.deinit();
 
     var sum: u32 = 0;
