@@ -1,6 +1,7 @@
 const std = @import("std");
 const util = @import("./util.zig");
 const Queue = @import("./queue.zig").Queue;
+const bufIter = @import("./buf-iter.zig");
 
 const assert = std.debug.assert;
 
@@ -287,18 +288,18 @@ fn part2(allocator: std.mem.Allocator, instructions: []Instruction) !usize {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var file = try std.fs.cwd().openFile(filename, .{});
-    defer file.close();
+    // var file = try std.fs.cwd().openFile(filename, .{});
+    // defer file.close();
+    // var buf_reader = std.io.bufferedReader(file.reader());
+    // var in_stream = buf_reader.reader();
+    // var buf: [1024]u8 = undefined;
 
-    var buf_reader = std.io.bufferedReader(file.reader());
-    var in_stream = buf_reader.reader();
-
-    var buf: [1024]u8 = undefined;
+    var lines_it = try bufIter.iterLines(filename);
 
     var instructions = std.ArrayList(Instruction).init(allocator);
     defer instructions.deinit();
 
-    while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
+    while (try lines_it.next()) |line| {
         // std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
         const instruction = try parseLine(line);
