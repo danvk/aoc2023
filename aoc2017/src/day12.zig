@@ -11,6 +11,7 @@ const Program = struct {
 
 fn parseProgram(allocator: std.mem.Allocator, line: []const u8) !Program {
     var parts = std.ArrayList([]const u8).init(allocator);
+    defer parts.deinit();
     try util.splitIntoArrayList(line, " <-> ", &parts);
     assert(parts.items.len == 2);
 
@@ -102,7 +103,10 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     while (try line_it.next()) |line| {
         std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
-        const program = try parseProgram(allocator, line);
+        var program = try parseProgram(allocator, line);
+        // const heapProgram = try allocator.create(Program);
+        // heapProgram.* = program;
+
         // std.debug.print("{any}\n", .{program});
         try programs.putNoClobber(program.id, program);
     }
