@@ -31,17 +31,17 @@ const BufReaderReaderType = BufReaderType.Reader;
 
 pub const ReadByLineIterator = struct {
     file: std.fs.File,
-    buf: [4096]u8,
     reader: ReaderType,
     buf_reader: BufReaderType,
     stream: BufReaderReaderType,
+    buf: [4096]u8,
 
-    fn next(self: *@This()) !?[]u8 {
+    pub fn next(self: *@This()) !?[]u8 {
         var slice = try self.stream.readUntilDelimiterOrEof(&self.buf, '\n');
         return slice;
     }
 
-    fn deinit(self: *@This()) void {
+    pub fn deinit(self: *@This()) void {
         self.file.close();
     }
 };
