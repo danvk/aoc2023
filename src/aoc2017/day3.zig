@@ -1,5 +1,5 @@
 const std = @import("std");
-const dir = @import("./dir.zig");
+const dir = @import("../dir.zig");
 const Dir = dir.Dir;
 
 // R1

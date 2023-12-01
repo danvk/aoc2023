@@ -1,8 +1,8 @@
 const std = @import("std");
-const util = @import("./util.zig");
+const util = @import("../util.zig");
 const hashString = @import("./day10.zig").hashString;
-const Dir = @import("./dir.zig").Dir;
-const DIRS = @import("./dir.zig").DIRS;
+const Dir = @import("../dir.zig").Dir;
+const DIRS = @import("../dir.zig").DIRS;
 
 const assert = std.debug.assert;
 

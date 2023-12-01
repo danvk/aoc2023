@@ -1,6 +1,6 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const bufIter = @import("./buf-iter.zig");
+const util = @import("../util.zig");
+const bufIter = @import("../buf-iter.zig");
 
 fn part2(nums: []u32) u32 {
     for (nums, 0..) |a, i| {

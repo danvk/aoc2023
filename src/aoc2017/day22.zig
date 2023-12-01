@@ -1,7 +1,8 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const Dir = @import("./dir.zig").Dir;
-const Coord = @import("./dir.zig").Coord;
+const util = @import("../util.zig");
+const dirMod = @import("../dir.zig");
+const Dir = dirMod.Dir;
+const Coord = dirMod.Coord;
 
 const assert = std.debug.assert;
 

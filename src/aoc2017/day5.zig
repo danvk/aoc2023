@@ -1,6 +1,6 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const bufIter = @import("./buf-iter.zig");
+const util = @import("../util.zig");
+const bufIter = @import("../buf-iter.zig");
 
 fn part1(in_nums: []const i32, allocator: std.mem.Allocator) !u32 {
     var nums = try allocator.dupe(i32, in_nums);

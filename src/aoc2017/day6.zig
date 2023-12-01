@@ -1,6 +1,6 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const bufIter = @import("./buf-iter.zig");
+const util = @import("../util.zig");
+const bufIter = @import("../buf-iter.zig");
 
 const U32SliceContext = struct {
     pub fn hash(self: @This(), s: []const u32) u64 {

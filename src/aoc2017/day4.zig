@@ -1,6 +1,6 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const bufIter = @import("./buf-iter.zig");
+const util = @import("../util.zig");
+const bufIter = @import("../buf-iter.zig");
 
 fn is_valid(line: []const u8, allocator: std.mem.Allocator) !bool {
     var values = std.StringHashMap(void).init(allocator);

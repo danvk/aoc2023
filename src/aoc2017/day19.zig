@@ -1,6 +1,6 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const dir = @import("./dir.zig");
+const util = @import("../util.zig");
+const dir = @import("../dir.zig");
 const Dir = dir.Dir;
 const Coord = dir.Coord;
 

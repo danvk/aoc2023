@@ -1,6 +1,6 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const Queue = @import("./queue.zig").Queue;
+const util = @import("../util.zig");
+const Queue = @import("../queue.zig").Queue;
 
 const assert = std.debug.assert;
 

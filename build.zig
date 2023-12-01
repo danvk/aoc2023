@@ -67,4 +67,12 @@ pub fn build(b: *std.Build) void {
     // running the unit tests.
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_unit_tests.step);
+
+    const exe2017 = b.addExecutable(.{
+        .name = "main-2017",
+        .root_source_file = .{ .path = "src/main-2017.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    b.installArtifact(exe2017);
 }

@@ -1,7 +1,7 @@
 const std = @import("std");
-const util = @import("./util.zig");
-const Queue = @import("./queue.zig").Queue;
-const bufIter = @import("./buf-iter.zig");
+const util = @import("../util.zig");
+const Queue = @import("../queue.zig").Queue;
+const bufIter = @import("../buf-iter.zig");
 
 const assert = std.debug.assert;
 
