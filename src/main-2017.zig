@@ -1,30 +1,29 @@
 const std = @import("std");
-const day1 = @import("./day1.zig").main;
-const day2 = @import("./day2.zig").main;
-const day3 = @import("./day3.zig").main;
-const day4 = @import("./day4.zig").main;
-const day5 = @import("./day5.zig").main;
-const day6 = @import("./day6.zig").main;
-const day7 = @import("./day7.zig").main;
-const day8 = @import("./day8.zig").main;
-const day9 = @import("./day9.zig").main;
-const day10 = @import("./day10.zig").main;
-const day11 = @import("./day11.zig").main;
-const day12 = @import("./day12.zig").main;
-const day13 = @import("./day13.zig").main;
-const day14 = @import("./day14.zig").main;
-const day15 = @import("./day15.zig").main;
-const day16 = @import("./day16.zig").main;
-const day17 = @import("./day17.zig").main;
-const day18 = @import("./day18.zig").main;
-const day19 = @import("./day19.zig").main;
-const day20 = @import("./day20.zig").main;
-const day21 = @import("./day21.zig").main;
-const day22 = @import("./day22.zig").main;
-const day23 = @import("./day23.zig").main;
-const day24 = @import("./day24.zig").main;
-const day25 = @import("./day25.zig").main;
-const day2023_1 = @import("./2023day1.zig").main;
+const day1 = @import("./aoc2017/day1.zig").main;
+const day2 = @import("./aoc2017/day2.zig").main;
+const day3 = @import("./aoc2017/day3.zig").main;
+const day4 = @import("./aoc2017/day4.zig").main;
+const day5 = @import("./aoc2017/day5.zig").main;
+const day6 = @import("./aoc2017/day6.zig").main;
+const day7 = @import("./aoc2017/day7.zig").main;
+const day8 = @import("./aoc2017/day8.zig").main;
+const day9 = @import("./aoc2017/day9.zig").main;
+const day10 = @import("./aoc2017/day10.zig").main;
+const day11 = @import("./aoc2017/day11.zig").main;
+const day12 = @import("./aoc2017/day12.zig").main;
+const day13 = @import("./aoc2017/day13.zig").main;
+const day14 = @import("./aoc2017/day14.zig").main;
+const day15 = @import("./aoc2017/day15.zig").main;
+const day16 = @import("./aoc2017/day16.zig").main;
+const day17 = @import("./aoc2017/day17.zig").main;
+const day18 = @import("./aoc2017/day18.zig").main;
+const day19 = @import("./aoc2017/day19.zig").main;
+const day20 = @import("./aoc2017/day20.zig").main;
+const day21 = @import("./aoc2017/day21.zig").main;
+const day22 = @import("./aoc2017/day22.zig").main;
+const day23 = @import("./aoc2017/day23.zig").main;
+const day24 = @import("./aoc2017/day24.zig").main;
+const day25 = @import("./aoc2017/day25.zig").main;
 
 const Day = struct {
     name: []const u8,
@@ -57,7 +56,6 @@ const DAYS = [_]Day{
     Day{ .name = "day23", .main = day23 },
     Day{ .name = "day24", .main = day24 },
     Day{ .name = "day25", .main = day25 },
-    Day{ .name = "2023day1", .main = day2023_1 },
 };
 
 pub fn main() !void {
