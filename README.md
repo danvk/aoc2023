@@ -4,6 +4,18 @@ This time in Zig?
 
 I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C++) replacement.
 
+## Day by day
+
+### Day 1 (64698 / 40279)
+
+I forgot it was December! I reused my 2017 setup (pretended that today was a 26th day of 2017) to get an answer, then cleaned up after. Part 2 was definitely a curveball. I checked for each of the nine digit strings at each position with `std.mem.eql`.
+
+Actually taking time to read through the prompt, I realized that I hadn't considered the case that there was only one digit in an input line. But my code just happened to do the right thing (that one digit is both first and last).
+
+Also `std.mem.startsWith` is slightly simpler than `std.mem.eql` here.
+
+## Warmup
+
 Following:
 https://ziglang.org/learn/getting-started/
 
@@ -110,3 +122,5 @@ I had a `null` vs. `undefined` bug! You have to initialize optionals to `null` r
 For part 2 I'm implementing `readInts` using an `ArrayList`. Zig found a memory leak (I forgot to deallocate the ArrayList). Pretty cool!
 
 Zig error handling is interesting. If your function returns `!void`, then you can just stick `try` in front of any statement that could error and its error returns will be added to your error returns.
+
+... continues in [2017/README.md](/aoc2017/README.md).

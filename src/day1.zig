@@ -30,8 +30,7 @@ fn calibration2(line: []const u8) u8 {
             digit = c - '0';
         } else {
             for (NUMS, 1..) |numStr, d| {
-                const lineSlice = line[i..@min(i + numStr.len, line.len)];
-                if (std.mem.eql(u8, numStr, lineSlice)) {
+                if (std.mem.startsWith(u8, line[i..], numStr)) {
                     digit = @intCast(d);
                 }
             }
