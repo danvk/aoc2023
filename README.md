@@ -6,11 +6,15 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 2 (49232 / 45787)
+
+My `splitIntoBuf` and `extractIntsIntoBuf` helpers continue to be very efficient at parsing AoC input. I'm intrigued by the suggestion (on r/adventofcode) that the inputs and problem phrasing will be more convoluted this year in an attempt to throw off AI solvers.
+
 ### Day 1 (64698 / 40279)
 
 I forgot it was December! I reused my 2017 setup (pretended that today was a 26th day of 2017) to get an answer, then cleaned up after. Part 2 was definitely a curveball. I checked for each of the nine digit strings at each position with `std.mem.eql`.
 
-Actually taking time to read through the prompt, I realized that I hadn't considered the case that there was only one digit in an input line. But my code just happened to do the right thing (that one digit is both first and last).
+Actually taking time to read through the prompt, I realized that I hadn't considered the case that there was only one digit in an input line. But my code just happened to do the right thing (that one digit is both first and last). Ryan pointed out that he got tripped up by "twone", which wasn't even something I'd considered.
 
 Also `std.mem.startsWith` is slightly simpler than `std.mem.eql` here.
 
