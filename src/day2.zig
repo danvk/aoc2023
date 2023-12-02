@@ -48,7 +48,6 @@ fn isLineValid(line: []const u8) !?u32 {
 
     var games = util.splitIntoBuf(parts[1], "; ", &buf);
     for (games) |gameStr| {
-        std.debug.print("parsing {s}\n", .{gameStr});
         const game = try parseGame(gameStr);
         if (game.r <= MAX_GAME.r and game.g <= MAX_GAME.g and game.b <= MAX_GAME.b) {
             // ok
@@ -59,20 +58,38 @@ fn isLineValid(line: []const u8) !?u32 {
     return id;
 }
 
+fn getGamePower(line: []const u8) !u32 {
+    var buf: [10][]const u8 = undefined;
+    var parts = util.splitIntoBuf(line, ": ", &buf);
+    assert(parts.len == 2);
+
+    var max = Game{ .r = 0, .g = 0, .b = 0 };
+    var games = util.splitIntoBuf(parts[1], "; ", &buf);
+    for (games) |gameStr| {
+        const game = try parseGame(gameStr);
+        max.r = @max(game.r, max.r);
+        max.g = @max(game.g, max.g);
+        max.b = @max(game.b, max.b);
+    }
+    return max.r * max.g * max.b;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     _ = allocator;
     const filename = args[0];
 
     var iter = try bufIter.iterLines(filename);
     var sum1: u32 = 0;
+    var sum2: u32 = 0;
     while (try iter.next()) |line| {
         if (try isLineValid(line)) |id| {
             sum1 += id;
         }
+        sum2 += try getGamePower(line);
     }
 
     std.debug.print("part 1: {d}\n", .{sum1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 2: {d}\n", .{sum2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
