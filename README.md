@@ -12,6 +12,10 @@ These continue to be more involved than I'd expect from the first week. In part 
 
 The lack of closures and the attention you have to pay to allocation and errors definitely rule out certain ways of separating concerns that I'd otherwise reach for. For example fetching all the neighbors for a cell, or mapping over them.
 
+- Start: 9:35 AM
+- ⭐️: 9:59 AM
+- ⭐️⭐️: 10:14 AM
+
 ### Day 2 (49232 / 45787)
 
 My `splitIntoBuf` and `extractIntsIntoBuf` helpers continue to be very efficient at parsing AoC input. I'm intrigued by the suggestion (on r/adventofcode) that the inputs and problem phrasing will be more convoluted this year in an attempt to throw off AI solvers.
