@@ -58,6 +58,71 @@ fn findPartNums(grid: std.AutoHashMap(Coord, u8), extent: Coord) u32 {
     return total;
 }
 
+fn findNumStart(grid: std.AutoHashMap(Coord, u8), pos: Coord) Coord {
+    var x = pos.x;
+    const y = pos.y;
+    while (true) {
+        const c = grid.get(Coord{ .x = x, .y = y }) orelse '.';
+        if (!isDigit(c)) {
+            return Coord{ .x = x + 1, .y = y };
+        }
+        x -= 1;
+    }
+    unreachable;
+}
+
+fn extractNum(grid: std.AutoHashMap(Coord, u8), pos: Coord) u32 {
+    var num: u32 = 0;
+    var x = pos.x;
+    const y = pos.y;
+    while (true) {
+        const c = grid.get(Coord{ .x = x, .y = y }) orelse '.';
+        if (!isDigit(c)) {
+            return num;
+        } else {
+            num *= 10;
+            num += (c - '0');
+        }
+        x += 1;
+    }
+    unreachable;
+}
+
+fn addGearRatios(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, u8)) !u32 {
+    var it = grid.iterator();
+    var sum: u32 = 0;
+    while (it.next()) |entry| {
+        if (entry.value_ptr.* != '*') {
+            continue;
+        }
+        const pos = entry.key_ptr.*;
+        std.debug.print("{any} {c}\n", .{ pos, entry.value_ptr });
+
+        var numStarts = std.AutoHashMap(Coord, void).init(allocator);
+        defer numStarts.deinit();
+        var gearRatio: u32 = 1;
+        var numNeighbors: usize = 0;
+        for (dir.DIR8S) |d| {
+            const n = pos.move8(d);
+            if (grid.get(n)) |nv| {
+                if (isDigit(nv)) {
+                    const numStart = findNumStart(grid, n);
+                    if (!numStarts.contains(numStart)) {
+                        const num = extractNum(grid, numStart);
+                        try numStarts.put(numStart, undefined);
+                        gearRatio *= num;
+                        numNeighbors += 1;
+                    }
+                }
+            }
+        }
+        if (numNeighbors == 2) {
+            sum += gearRatio;
+        }
+    }
+    return sum;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -81,6 +146,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     const extent = Coord{ .x = maxX, .y = maxY };
     std.debug.print("part 1: {d}\n", .{findPartNums(grid, extent)});
+    std.debug.print("part 2: {d}\n", .{try addGearRatios(allocator, grid)});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
