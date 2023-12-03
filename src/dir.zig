@@ -41,4 +41,48 @@ pub const Coord = struct {
             .y = self.y + dir.dy(),
         };
     }
+
+    pub fn move8(self: @This(), dir: Dir8) Coord {
+        return Coord{
+            .x = self.x + dir.dx(),
+            .y = self.y + dir.dy(),
+        };
+    }
 };
+
+pub const Dir8 = enum(u3) {
+    nw,
+    n,
+    ne,
+    w,
+    e,
+    sw,
+    s,
+    se,
+    pub fn dx(this: @This()) i32 {
+        return switch (this) {
+            .nw => -1,
+            .w => -1,
+            .sw => -1,
+            .n => 0,
+            .s => 0,
+            .ne => 1,
+            .e => 1,
+            .se => 1,
+        };
+    }
+    pub fn dy(this: @This()) i32 {
+        return switch (this) {
+            .nw => -1,
+            .n => -1,
+            .ne => -1,
+            .w => 0,
+            .e => 0,
+            .sw => 1,
+            .s => 1,
+            .se => 1,
+        };
+    }
+};
+
+pub const DIR8S = [_]Dir8{ .nw, .n, .ne, .w, .e, .sw, .s, .se };

@@ -1,6 +1,7 @@
 const std = @import("std");
 const day1 = @import("./day1.zig").main;
 const day2 = @import("./day2.zig").main;
+const day3 = @import("./day3.zig").main;
 
 const Day = struct {
     name: []const u8,
@@ -10,6 +11,7 @@ const Day = struct {
 const DAYS = [_]Day{
     Day{ .name = "day1", .main = day1 },
     Day{ .name = "day2", .main = day2 },
+    Day{ .name = "day3", .main = day3 },
 };
 
 pub fn main() !void {
