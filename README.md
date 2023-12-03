@@ -8,7 +8,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ### Day 3 (45310 / 36647)
 
-These continue to be more involved than I'd expect from the first week. In part 2 I looked in each of the eight directions from each `*`. A possible issue I had to avoid was double-counting, i.e. if the same number were both north and northwest of a `*`.
+These continue to be more involved than I'd expect from the first week. In part 2 I looked in each of the eight directions from each `*`. A possible issue I had to avoid was double-counting, i.e. if the same number were both north and northwest of a `*`. I was worried about boundary conditions until I realized I could completely avoid them by padding the input.
 
 The lack of closures and the attention you have to pay to allocation and errors definitely rule out certain ways of separating concerns that I'd otherwise reach for. For example fetching all the neighbors for a cell, or mapping over them.
 
@@ -27,6 +27,13 @@ I forgot it was December! I reused my 2017 setup (pretended that today was a 26t
 Actually taking time to read through the prompt, I realized that I hadn't considered the case that there was only one digit in an input line. But my code just happened to do the right thing (that one digit is both first and last). Ryan pointed out that he got tripped up by "twone", which wasn't even something I'd considered.
 
 Also `std.mem.startsWith` is slightly simpler than `std.mem.eql` here.
+
+## Other Ziggers
+
+- https://github.com/LukeMinnich/advent-of-code-2023
+- https://github.com/ManDeJan/advent-of-code/tree/master/src/2023
+- https://github.com/iskyd/aoc-zig
+- https://github.com/LeperGnome/AoC2023
 
 ## Warmup
 
