@@ -7,10 +7,6 @@ const Coord = dir.Coord;
 
 const assert = std.debug.assert;
 
-fn isDigit(c: u8) bool {
-    return c >= '0' and c <= '9';
-}
-
 fn findPartNums(grid: std.AutoHashMap(Coord, u8), extent: Coord) u32 {
     var total: u32 = 0;
     var inNum = false;
@@ -24,7 +20,7 @@ fn findPartNums(grid: std.AutoHashMap(Coord, u8), extent: Coord) u32 {
             const pos = Coord{ .x = x, .y = y };
             const c = grid.get(pos) orelse '.';
 
-            if (isDigit(c)) {
+            if (std.ascii.isDigit(c)) {
                 if (!inNum) {
                     inNum = true;
                     curNum = 0;
@@ -35,7 +31,7 @@ fn findPartNums(grid: std.AutoHashMap(Coord, u8), extent: Coord) u32 {
                 var hasSymNeighbor = false;
                 for (dir.DIR8S) |d| {
                     if (grid.get(pos.move8(d))) |nv| {
-                        if (!isDigit(nv)) {
+                        if (!std.ascii.isDigit(nv)) {
                             hasSymNeighbor = true;
                             // std.debug.print("{any} {c} is sym\n", .{ pos.move8(d), nv });
                         }
@@ -63,7 +59,7 @@ fn findNumStart(grid: std.AutoHashMap(Coord, u8), pos: Coord) Coord {
     const y = pos.y;
     while (true) {
         const c = grid.get(Coord{ .x = x, .y = y }) orelse '.';
-        if (!isDigit(c)) {
+        if (!std.ascii.isDigit(c)) {
             return Coord{ .x = x + 1, .y = y };
         }
         x -= 1;
@@ -77,7 +73,7 @@ fn extractNum(grid: std.AutoHashMap(Coord, u8), pos: Coord) u32 {
     const y = pos.y;
     while (true) {
         const c = grid.get(Coord{ .x = x, .y = y }) orelse '.';
-        if (!isDigit(c)) {
+        if (!std.ascii.isDigit(c)) {
             return num;
         } else {
             num *= 10;
@@ -105,7 +101,7 @@ fn addGearRatios(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, u8))
         for (dir.DIR8S) |d| {
             const n = pos.move8(d);
             if (grid.get(n)) |nv| {
-                if (isDigit(nv)) {
+                if (std.ascii.isDigit(nv)) {
                     const numStart = findNumStart(grid, n);
                     if (!numStarts.contains(numStart)) {
                         const num = extractNum(grid, numStart);
