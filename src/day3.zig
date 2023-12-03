@@ -37,7 +37,7 @@ fn findPartNums(grid: std.AutoHashMap(Coord, u8), extent: Coord) u32 {
                     if (grid.get(pos.move8(d))) |nv| {
                         if (!isDigit(nv)) {
                             hasSymNeighbor = true;
-                            std.debug.print("{any} {c} is sym\n", .{ pos.move8(d), nv });
+                            // std.debug.print("{any} {c} is sym\n", .{ pos.move8(d), nv });
                         }
                     }
                 }
@@ -46,7 +46,7 @@ fn findPartNums(grid: std.AutoHashMap(Coord, u8), extent: Coord) u32 {
                 if (inNum) {
                     inNum = false;
                     if (isPart) {
-                        std.debug.print("Adding part num: {d}\n", .{curNum});
+                        // std.debug.print("Adding part num: {d}\n", .{curNum});
                         total += curNum;
                     }
                     isPart = false;
@@ -96,7 +96,7 @@ fn addGearRatios(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, u8))
             continue;
         }
         const pos = entry.key_ptr.*;
-        std.debug.print("{any} {c}\n", .{ pos, entry.value_ptr });
+        // std.debug.print("{any} {c}\n", .{ pos, entry.value_ptr });
 
         var numStarts = std.AutoHashMap(Coord, void).init(allocator);
         defer numStarts.deinit();
