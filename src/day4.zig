@@ -42,17 +42,30 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     // const copies = std.AutoHashMap(u32, u32).init(allocator);
     // defer copies.deinit();
 
+    var copiesBuf: [300]u32 = undefined;
+    @memset(copiesBuf[0..], 1);
+    var copies: []u32 = copiesBuf[0..];
+
     var iter = try bufIter.iterLines(filename);
     var part1: u32 = 0;
-    // var part2: u32 = 0;
+    var part2: u32 = 0;
     while (try iter.next()) |line| {
         const matches = try pointsForLine(line);
-        part1 += pointsForMatches(matches);
-        // part2 += try pointsForLine(line, &copies);
+        const points = pointsForMatches(matches);
+        part1 += points;
+        const numTimes = copies[0];
+        std.debug.print("{d} matches -> {d} points, running {d} times\n", .{ matches, points, numTimes });
+        copies = copies[1..];
+        part2 += numTimes;
+
+        var i: u32 = 0;
+        while (i < matches) : (i += 1) {
+            copies[i] += numTimes;
+        }
     }
 
     std.debug.print("part 1: {d}\n", .{part1});
-    // std.debug.print("part 2: {d}\n", .{part2});
+    std.debug.print("part 2: {d}\n", .{part2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
