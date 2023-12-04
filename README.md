@@ -6,6 +6,14 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 4 (48615 / 38383)
+
+No point in using a hash map for such a small number of winning numbers on each card. Part 2 was more interesting, I like the pattern of using a slice view of a fixed-length buffer as a poor man's queue.
+
+- Start: 7:28 AM
+- ⭐️: 7:35 AM
+- ⭐️⭐️: 7:47 AM
+
 ### Day 3 (45310 / 36647)
 
 These continue to be more involved than I'd expect from the first week. In part 2 I looked in each of the eight directions from each `*`. A possible issue I had to avoid was double-counting, i.e. if the same number were both north and northwest of a `*`. I was worried about boundary conditions until I realized I could completely avoid them by padding the input.

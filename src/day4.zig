@@ -4,12 +4,6 @@ const util = @import("./util.zig");
 
 const assert = std.debug.assert;
 
-// alternative with arena allocator:
-// pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
-//     var arena = std.heap.ArenaAllocator.init(in_allocator);
-//     defer arena.deinit();
-//     var allocator = arena.allocator();
-
 fn pointsForMatches(matches: u32) u32 {
     if (matches == 0) {
         return 0;
@@ -17,14 +11,16 @@ fn pointsForMatches(matches: u32) u32 {
     return @as(u32, 1) << @intCast(matches - 1);
 }
 
+// "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53"
 fn pointsForLine(line: []const u8) !u32 {
-    var cardSplit = util.splitOne(line, ": ").?;
-    var parts = util.splitOne(cardSplit.rest, " | ").?;
+    var buf: [3][]const u8 = undefined;
+    var parts = util.splitAnyIntoBuf(line, ":|", &buf);
+    assert(parts.len == 3);
 
     var intBuf: [50]u8 = undefined;
-    var winners = try util.extractIntsIntoBuf(u8, parts.head, &intBuf);
     var intBuf2: [50]u8 = undefined;
-    var nums = try util.extractIntsIntoBuf(u8, parts.rest, &intBuf2);
+    var winners = try util.extractIntsIntoBuf(u8, parts[1], &intBuf);
+    var nums = try util.extractIntsIntoBuf(u8, parts[2], &intBuf2);
 
     var matches: u32 = 0;
     for (nums) |num| {
@@ -54,7 +50,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         const points = pointsForMatches(matches);
         part1 += points;
         const numTimes = copies[0];
-        std.debug.print("{d} matches -> {d} points, running {d} times\n", .{ matches, points, numTimes });
+        // std.debug.print("{d} matches -> {d} points, running {d} times\n", .{ matches, points, numTimes });
         copies = copies[1..];
         part2 += numTimes;
 

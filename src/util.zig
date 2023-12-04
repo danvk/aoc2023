@@ -77,6 +77,19 @@ pub fn splitIntoBuf(str: []const u8, delim: []const u8, buf: [][]const u8) [][]c
     return buf[0..i];
 }
 
+// Split the string on any character in delims, filtering out empty values.
+pub fn splitAnyIntoBuf(str: []const u8, delims: []const u8, buf: [][]const u8) [][]const u8 {
+    var it = std.mem.splitAny(u8, str, delims);
+    var i: usize = 0;
+    while (it.next()) |part| {
+        if (part.len > 0) {
+            buf[i] = part;
+            i += 1;
+        }
+    }
+    return buf[0..i];
+}
+
 pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]const u8 {
     const file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
@@ -113,4 +126,13 @@ test "extractIntsIntoBuf" {
 
     ints = try extractIntsIntoBuf(i32, "not a number", &buf);
     try expect(eql(i32, &[_]i32{}, ints));
+}
+
+test "splitAnyIntoBuf" {
+    var buf: [5][]const u8 = undefined;
+    var parts = splitAnyIntoBuf("Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53", ":|", &buf);
+    try expectEqual(@as(usize, 3), parts.len);
+    try expectEqualDeep(@as([]const u8, "Card 1"), parts[0]);
+    try expectEqualDeep(@as([]const u8, " 41 48 83 86 17 "), parts[1]);
+    try expectEqualDeep(@as([]const u8, " 83 86  6 31 17  9 48 53"), parts[2]);
 }
