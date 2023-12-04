@@ -10,6 +10,13 @@ const assert = std.debug.assert;
 //     defer arena.deinit();
 //     var allocator = arena.allocator();
 
+fn pointsForMatches(matches: u32) u32 {
+    if (matches == 0) {
+        return 0;
+    }
+    return @as(u32, 1) << @intCast(matches - 1);
+}
+
 fn pointsForLine(line: []const u8) !u32 {
     var cardSplit = util.splitOne(line, ": ").?;
     var parts = util.splitOne(cardSplit.rest, " | ").?;
@@ -19,27 +26,33 @@ fn pointsForLine(line: []const u8) !u32 {
     var intBuf2: [50]u8 = undefined;
     var nums = try util.extractIntsIntoBuf(u8, parts.rest, &intBuf2);
 
-    var score: u32 = 0;
+    var matches: u32 = 0;
     for (nums) |num| {
         if (std.mem.indexOfScalar(u8, winners, num) != null) {
-            score = if (score == 0) 1 else 2 * score;
+            matches += 1;
         }
     }
-    return score;
+    return matches;
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     _ = allocator;
     const filename = args[0];
 
+    // const copies = std.AutoHashMap(u32, u32).init(allocator);
+    // defer copies.deinit();
+
     var iter = try bufIter.iterLines(filename);
     var part1: u32 = 0;
+    // var part2: u32 = 0;
     while (try iter.next()) |line| {
-        part1 += try pointsForLine(line);
+        const matches = try pointsForLine(line);
+        part1 += pointsForMatches(matches);
+        // part2 += try pointsForLine(line, &copies);
     }
 
     std.debug.print("part 1: {d}\n", .{part1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    // std.debug.print("part 2: {d}\n", .{part2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
