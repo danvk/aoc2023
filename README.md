@@ -10,6 +10,10 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 1.8B seeds for part 2… maybe that's doable? Yes! Took ~2.5 minutes to run with `-Doptimize=ReleaseFast`. Thanks, Zig!
 
+I reworked my solution to use an Interval class. It's kinda hairy but does at least run really fast: 79ms vs. 2.5 minutes.
+
+In retrospect it might have been easier to split the number line into disjoint intervals. You only have to care about numbers that actually appear somewhere in the input, and there are only at most a thousand or so of those. But hopefully my `Interval` type will be useful on some future day.
+
 - Start: 7:28 AM
 - ⭐️: 7:43 AM
 - ⭐️⭐️: 7:52 AM
