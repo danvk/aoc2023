@@ -110,10 +110,10 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         }
 
         var newRanges = std.ArrayList(Iv64).init(allocator);
-        _ = newRanges;
         for (seeds2) |seedRange| {
-            _ = seedRange;
+            try mapRangeThroughRanges(seedRange, ranges.items, &newRanges);
         }
+        seeds2 = newRanges.items;
         // j = 0;
         // while (j < seeds2.len) : (j += 1) {
         //     seeds2[j] = mapThroughRanges(seeds2[j], ranges.items);
@@ -121,8 +121,13 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         std.debug.print("seeds: {any}\n", .{seeds});
     }
 
+    var min = seeds2[0].low;
+    for (seeds2) |r| {
+        min = @min(min, r.low);
+    }
+
     std.debug.print("part 1: {d}\n", .{std.mem.min(u64, seeds)});
-    // std.debug.print("part 2: {d}\n", .{std.mem.min(u64, seeds2)});
+    std.debug.print("part 2: {d}\n", .{min});
 }
 
 const expectEqualSlices = std.testing.expectEqualSlices;
