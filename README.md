@@ -6,9 +6,13 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-### Day 5
+### Day 5 (33605 / 15495)
 
 1.8B seeds for part 2… maybe that's doable? Yes! Took ~2.5 minutes to run with `-Doptimize=ReleaseFast`. Thanks, Zig!
+
+- Start: 7:28 AM
+- ⭐️: 7:43 AM
+- ⭐️⭐️: 7:52 AM
 
 ### Day 4 (48615 / 38383)
 
