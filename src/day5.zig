@@ -21,6 +21,20 @@ fn mapThroughRanges(num: u64, ranges: []Range) u64 {
     return num;
 }
 
+fn mapRangeThroughRange(r: Iv64, range: Range) struct { mapped: ?Iv64, remaining: ?Iv64 } {
+    const src = range.source;
+    if (!src.intersects(r)) {
+        return .{ .mapped = null, .remaining = src };
+    }
+    if (src.contains(r)) {
+        const mapped = Iv64{
+            .low = range.dest + (r.low - src.low),
+            .high = range.dest + (r.high - src.low),
+        };
+        return .{ .mapped = mapped, .remaining = null };
+    }
+}
+
 fn readRanges(alloc: std.mem.Allocator, iter: *bufIter.ReadByLineIterator) !std.ArrayList(Range) {
     var out = std.ArrayList(Range).init(alloc);
     var intBuf: [3]u64 = undefined;
@@ -55,20 +69,15 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     assert(seeds.len > 2);
     _ = try iter.next();
 
-    // var numSeeds: u64 = 0;
-    // _ = numSeeds;
-    // var i: usize = 0;
-    // var part2Seeds = std.ArrayList(u64).init(allocator);
+    var part2Seeds = std.ArrayList(Iv64).init(allocator);
     // defer part2Seeds.deinit();
-    // while (i < seeds.len) : (i += 2) {
-    //     var start = seeds[i];
-    //     var num = seeds[i + 1];
-    //     for (start..(start + num)) |s| {
-    //         try part2Seeds.append(s);
-    //     }
-    // }
-    // var seeds2 = part2Seeds.items;
-    // std.debug.print("part 2: {d} seeds\n", .{seeds2.len});
+    var i: usize = 0;
+    while (i < seeds.len) : (i += 2) {
+        var start = seeds[i];
+        var num = seeds[i + 1];
+        try part2Seeds.append(Iv64{ .low = start, .high = start + num });
+    }
+    var seeds2 = part2Seeds.items;
 
     while (try iter.next()) |line| {
         assert(std.mem.endsWith(u8, line, "map:"));
@@ -81,6 +90,11 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
             seeds[j] = mapThroughRanges(seeds[j], ranges.items);
         }
 
+        var newRanges = std.ArrayList(Iv64).init(allocator);
+        _ = newRanges;
+        for (seeds2) |seedRange| {
+            _ = seedRange;
+        }
         // j = 0;
         // while (j < seeds2.len) : (j += 1) {
         //     seeds2[j] = mapThroughRanges(seeds2[j], ranges.items);
