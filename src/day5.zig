@@ -125,8 +125,35 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     // std.debug.print("part 2: {d}\n", .{std.mem.min(u64, seeds2)});
 }
 
+const expectEqualSlices = std.testing.expectEqualSlices;
 const expectEqualDeep = std.testing.expectEqualDeep;
 
-test "sample test" {
-    try expectEqualDeep(true, true);
+test "mapRangeThroughRanges" {
+    var out = std.ArrayList(Iv64).init(std.testing.allocator);
+    defer out.deinit();
+
+    // 50 98 2
+    // 52 50 48
+    var ranges = [_]Range{ //
+        .{ .dest = 50, .source = Iv64{ .low = 98, .high = 100 } }, //
+        .{ .dest = 52, .source = Iv64{ .low = 50, .high = 98 } }, //
+    };
+
+    try mapRangeThroughRanges( //
+        Iv64{ .low = 79, .high = 79 + 14 }, //
+        @as([]Range, &ranges), &out);
+    var expected = [_]Iv64{.{ .low = 81, .high = 95 }};
+    try expectEqualDeep(out.items, &expected);
+
+    out.clearAndFree();
+    try mapRangeThroughRanges( //
+        Iv64{ .low = 95, .high = 101 }, //
+        @as([]Range, &ranges), &out);
+    // std.debug.print("out: {any}\n", .{out.items});
+    var expected2 = [_]Iv64{
+        .{ .low = 50, .high = 52 }, // 98-100
+        .{ .low = 97, .high = 100 }, // 95-98
+        .{ .low = 100, .high = 101 }, // 100-101
+    };
+    try expectEqualDeep(out.items, &expected2);
 }
