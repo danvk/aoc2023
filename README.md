@@ -10,6 +10,8 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 No point in using a hash map for such a small number of winning numbers on each card. Part 2 was more interesting, I like the pattern of using a slice view of a fixed-length buffer as a poor man's queue.
 
+I factored out a `splitAnyIntoBuf` helper that can split strings along multiple delimiters. I feel like that's come up a few times already.
+
 - Start: 7:28 AM
 - ⭐️: 7:35 AM
 - ⭐️⭐️: 7:47 AM
@@ -42,6 +44,29 @@ Also `std.mem.startsWith` is slightly simpler than `std.mem.eql` here.
 - https://github.com/ManDeJan/advent-of-code/tree/master/src/2023
 - https://github.com/iskyd/aoc-zig
 - https://github.com/LeperGnome/AoC2023
+
+## Questions I still have about Zig
+
+- Is there anything like upper bounds on `anytype`? Is this C++-style "substitution failure is not an error"?
+- Is `zls` just known to be really bad?
+- You need an `Allocator` to allocate memory. But what's the underlying mechanism here? Is `Allocator` special? How is `GeneralPurposeAllocator` implemented?
+- Zig has lots of numeric types that don't correspond to anything in hardware, e.g. `u5`. How do these work?
+
+## Observations
+
+- An Arena allocator has some similarities to Rust-style lifetime annotations.
+- The pattern of passing allocators (which usually implies `try`) pushes you towards allocator-free patterns, e.g. for parsing.
+- `comptime` makes a lot of sense. Why have a separate language for metaprogramming?
+- Inferred error return types mostly let you not think about errors. But this doesn't really feel that different than exceptions.
+- "Detectable undefined behavior" or whatever seems like a useful concept.
+- Slices are nice. Especially in the context of strings, they feel like a revival of the "Pascal string" as opposed to the null-terminated C string.
+
+## References
+
+- https://avestura.dev/blog/problems-of-c-and-how-zig-addresses-them
+- https://www.huy.rocks/everyday/12-11-2022-zig-using-zig-for-advent-of-code#splitting-a-string
+- https://www.forrestthewoods.com/blog/failing-to-learn-zig-via-advent-of-code/
+- https://cohost.org/strangebroadcasts/post/542139-also-failing-to-lear
 
 ## Warmup
 
