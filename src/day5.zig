@@ -53,21 +53,41 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     assert(seeds.len > 2);
     _ = try iter.next();
 
+    var numSeeds: u64 = 0;
+    _ = numSeeds;
+    var i: usize = 0;
+    var part2Seeds = std.ArrayList(u64).init(allocator);
+    defer part2Seeds.deinit();
+    while (i < seeds.len) : (i += 2) {
+        var start = seeds[i];
+        var num = seeds[i + 1];
+        for (start..(start + num)) |s| {
+            try part2Seeds.append(s);
+        }
+    }
+    var seeds2 = part2Seeds.items;
+    std.debug.print("part 2: {d} seeds\n", .{seeds2.len});
+
     while (try iter.next()) |line| {
         assert(std.mem.endsWith(u8, line, "map:"));
         var ranges = try readRanges(allocator, &iter);
         defer ranges.deinit();
 
         // map all the seeds through.
-        var i: usize = 0;
-        while (i < seeds.len) : (i += 1) {
-            seeds[i] = mapThroughRanges(seeds[i], ranges.items);
+        var j: usize = 0;
+        while (j < seeds.len) : (j += 1) {
+            seeds[j] = mapThroughRanges(seeds[j], ranges.items);
+        }
+
+        j = 0;
+        while (j < seeds2.len) : (j += 1) {
+            seeds2[j] = mapThroughRanges(seeds2[j], ranges.items);
         }
         std.debug.print("seeds: {any}\n", .{seeds});
     }
 
     std.debug.print("part 1: {d}\n", .{std.mem.min(u64, seeds)});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 2: {d}\n", .{std.mem.min(u64, seeds2)});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
