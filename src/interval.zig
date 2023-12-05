@@ -6,21 +6,21 @@ pub fn Interval(comptime IntType: type) type {
         low: IntType,
         high: IntType,
 
-        fn intersects(self: @This(), other: @This()) bool {
+        pub fn intersects(self: @This(), other: @This()) bool {
             return !(self.low >= other.high or self.high <= other.low);
         }
 
-        fn intersection(self: @This(), other: @This()) ?@This() {
+        pub fn intersection(self: @This(), other: @This()) ?@This() {
             var low = @max(self.low, other.low);
             var high = @min(self.high, other.high);
             return if (low < high) @This(){ .low = low, .high = high } else null;
         }
 
-        fn includes(self: @This(), val: IntType) bool {
+        pub fn includes(self: @This(), val: IntType) bool {
             return val >= self.low and val < self.high;
         }
 
-        fn len(self: @This()) IntType {
+        pub fn len(self: @This()) IntType {
             return self.high - self.low;
         }
     };

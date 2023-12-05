@@ -59,6 +59,7 @@ Also `std.mem.startsWith` is slightly simpler than `std.mem.eql` here.
 - Is `zls` just known to be really bad?
 - You need an `Allocator` to allocate memory. But what's the underlying mechanism here? Is `Allocator` special? How is `GeneralPurposeAllocator` implemented?
 - Zig has lots of numeric types that don't correspond to anything in hardware, e.g. `u5`. How do these work?
+- Why are they so opposed to destructuring assignment? It seems like it would really encourage consistent naming, especially with imports.
 
 Nitty gritty questions:
 
