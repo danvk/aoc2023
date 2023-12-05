@@ -60,6 +60,10 @@ Also `std.mem.startsWith` is slightly simpler than `std.mem.eql` here.
 - You need an `Allocator` to allocate memory. But what's the underlying mechanism here? Is `Allocator` special? How is `GeneralPurposeAllocator` implemented?
 - Zig has lots of numeric types that don't correspond to anything in hardware, e.g. `u5`. How do these work?
 
+Nitty gritty questions:
+
+- Why is it `expectEqual(expected, actual)` when the other way around works so much better from a type inference perspective?
+
 ## Observations
 
 - An Arena allocator has some similarities to Rust-style lifetime annotations.
