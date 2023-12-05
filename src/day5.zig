@@ -21,17 +21,36 @@ fn mapThroughRanges(num: u64, ranges: []Range) u64 {
     return num;
 }
 
-fn mapRangeThroughRange(r: Iv64, range: Range) struct { mapped: ?Iv64, remaining: ?Iv64 } {
+fn mapRangeThroughRange(r: Iv64, range: Range) struct { mapped: ?Iv64, pre: ?Iv64, post: ?Iv64 } {
     const src = range.source;
-    if (!src.intersects(r)) {
-        return .{ .mapped = null, .remaining = src };
+    const split = r.split(src);
+
+    return .{
+        .pre = split.pre,
+        .post = split.post,
+        .mapped = if (split.int) |int| Iv64{
+            .low = range.dest + (int.low - src.low),
+            .high = range.dest + (int.high - src.low),
+        } else null,
+    };
+}
+
+fn mapRangeThroughRanges(r: Iv64, ranges: []Range, out: *std.ArrayList(Iv64)) !void {
+    if (ranges.len == 0) {
+        try out.append(r);
+        return;
     }
-    if (src.contains(r)) {
-        const mapped = Iv64{
-            .low = range.dest + (r.low - src.low),
-            .high = range.dest + (r.high - src.low),
-        };
-        return .{ .mapped = mapped, .remaining = null };
+
+    var range = ranges[0];
+    var split = mapRangeThroughRange(r, range);
+    if (split.mapped) |mapped| {
+        try out.append(mapped);
+    }
+    if (split.pre) |pre| {
+        try mapRangeThroughRanges(pre, ranges[1..], out);
+    }
+    if (split.post) |post| {
+        try mapRangeThroughRanges(post, ranges[1..], out);
     }
 }
 
