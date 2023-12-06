@@ -14,6 +14,8 @@ I reworked my solution to use an Interval class. It's kinda hairy but does at le
 
 In retrospect it might have been easier to split the number line into disjoint intervals. You only have to care about numbers that actually appear somewhere in the input, and there are only at most a thousand or so of those. But hopefully my `Interval` type will be useful on some future day.
 
+TODO: look at r/adventofcode, is there a more clever, simple solution?
+
 - Start: 7:28 AM
 - ⭐️: 7:43 AM
 - ⭐️⭐️: 7:52 AM
