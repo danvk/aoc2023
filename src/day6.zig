@@ -10,12 +10,12 @@ const assert = std.debug.assert;
 //     defer arena.deinit();
 //     var allocator = arena.allocator();
 
-fn distForWait(waitMs: u32, time: u32) u32 {
+fn distForWait(waitMs: u64, time: u64) u64 {
     return (time - waitMs) * waitMs;
 }
 
-fn numWinners(time: u32, distance: u32) u32 {
-    var n: u32 = 0;
+fn numWinners(time: u64, distance: u64) u64 {
+    var n: u64 = 0;
     for (0..time) |wait| {
         if (distForWait(@intCast(wait), time) > distance) {
             n += 1;
@@ -32,20 +32,32 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     var lines = util.splitOne(contents, "\n").?;
 
-    var numsBuf1: [20]u32 = undefined;
-    var numsBuf2: [20]u32 = undefined;
-    var times = try util.extractIntsIntoBuf(u32, lines.head, &numsBuf1);
-    var distances = try util.extractIntsIntoBuf(u32, lines.rest, &numsBuf2);
+    var numsBuf1: [20]u64 = undefined;
+    var numsBuf2: [20]u64 = undefined;
+    var times = try util.extractIntsIntoBuf(u64, lines.head, &numsBuf1);
+    var distances = try util.extractIntsIntoBuf(u64, lines.rest, &numsBuf2);
 
-    var prod: u32 = 1;
+    var prod: u64 = 1;
     for (times, distances) |time, distance| {
         const n = numWinners(time, distance);
         std.debug.print("{d} / {d} -> {d}\n", .{ time, distance, n });
         prod *= n;
     }
-
     std.debug.print("part 1: {d}\n", .{prod});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+
+    var buf: [100]u8 = undefined;
+    assert(std.mem.replace(u8, lines.head, " ", "", &buf) > 0);
+    const times2a = try util.extractIntsIntoBuf(u64, &buf, &numsBuf1);
+    assert(times2a.len == 1);
+    const times2 = times2a[0];
+
+    assert(std.mem.replace(u8, lines.rest, " ", "", &buf) > 0);
+    const dist2a = try util.extractIntsIntoBuf(u64, &buf, &numsBuf1);
+    assert(dist2a.len == 1);
+    const dist2 = dist2a[0];
+    std.debug.print("{d} / {d}\n", .{ times2, dist2 });
+
+    std.debug.print("part 2: {d}\n", .{numWinners(times2, dist2)});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
