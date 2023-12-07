@@ -26,8 +26,8 @@ fn cardNum(card: u8) u8 {
     return if (card == 'A') 14 else if (card == 'K') 13 else if (card == 'Q') 12 else if (card == 'J') 11 else if (card == 'T') 10 else if (card >= '1' and card <= '9') card - '0' else unreachable;
 }
 
-fn cardLessThan(a: u8, b: u8) bool {
-    return cardNum(a) < cardNum(b);
+fn cardNum2(card: u8) u8 {
+    return if (card == 'A') 14 else if (card == 'K') 13 else if (card == 'Q') 12 else if (card == 'J') 0 else if (card == 'T') 10 else if (card >= '1' and card <= '9') card - '0' else unreachable;
 }
 
 fn evaluateHand(hand: Hand) HandType {
@@ -48,17 +48,41 @@ fn evaluateHand(hand: Hand) HandType {
     };
 }
 
+fn evaluateHand2(hand: Hand) HandType {
+    var counts: [15]u8 = undefined;
+    @memset(&counts, 0);
+    var numJokers: u8 = 0;
+    for (hand) |card| {
+        if (card == 'J') {
+            numJokers += 1;
+        } else {
+            counts[cardNum(card)] += 1;
+        }
+    }
+    std.mem.sort(u8, &counts, {}, comptime std.sort.desc(u8));
+    counts[0] += numJokers;
+
+    return switch (counts[0]) {
+        5 => .FIVE,
+        4 => .FOUR,
+        3 => if (counts[1] == 2) .FULL else .THREE,
+        2 => if (counts[1] == 2) .TWO_PAIR else .PAIR,
+        1 => .HIGH,
+        else => unreachable,
+    };
+}
+
 fn handLessThan(a: Hand, b: Hand) bool {
-    const typeA = @intFromEnum(evaluateHand(a));
-    const typeB = @intFromEnum(evaluateHand(b));
+    const typeA = @intFromEnum(evaluateHand2(a));
+    const typeB = @intFromEnum(evaluateHand2(b));
     if (typeA < typeB) {
         return true;
     } else if (typeA > typeB) {
         return false;
     }
     for (a, b) |charA, charB| {
-        const cardA = cardNum(charA);
-        const cardB = cardNum(charB);
+        const cardA = cardNum2(charA);
+        const cardB = cardNum2(charB);
         if (cardA < cardB) {
             return true;
         } else if (cardA > cardB) {
@@ -95,14 +119,14 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     std.mem.sort(HandBid, hands.items, {}, handBidLessThan);
-    var part1: u64 = 0;
+    var part2: u64 = 0;
     for (hands.items, 1..) |hand, rank| {
         std.debug.print("{d} {s} {d}\n", .{ rank, hand.hand, hand.bid });
-        part1 += rank * hand.bid;
+        part2 += rank * hand.bid;
     }
 
-    std.debug.print("part 1: {d}\n", .{part1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    // std.debug.print("part 1: {d}\n", .{part1});
+    std.debug.print("part 2: {d}\n", .{part2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
