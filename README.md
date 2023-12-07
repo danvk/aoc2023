@@ -6,6 +6,18 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+- How do I write a literal `[5]u8`?
+
+### Day 6 (61931 / 60637)
+
+Very easy compared to yesterday. I guess if you don't write the closed-form solution for part 1 then part 2 might be slow / intractable. Once again, I had to `s/u32/u64/g` for part 2. Nice that this just works!
+
+We did a birding trip in Miami today starting at 6 AM so I wasn't able to do Advent of Code until after we got back home.
+
+- Start: 5:41 PM
+- ⭐️: 5:51 PM
+- ⭐️⭐️: 5:56 PM
+
 ### Day 5 (33605 / 15495)
 
 1.8B seeds for part 2… maybe that's doable? Yes! Took ~2.5 minutes to run with `-Doptimize=ReleaseFast`. Thanks, Zig!
