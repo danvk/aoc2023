@@ -11,24 +11,37 @@ const Node = struct {
     right: [3]u8,
 };
 
-fn ghostCycle(allocator: std.mem.Allocator, nodes: std.StringHashMap(Node), rlLine: []const u8, node: []const u8) usize {
+fn ghostCycle(allocator: std.mem.Allocator, nodes: std.StringHashMap(Node), rlLine: []const u8, ghost: []u8) !usize {
     var steps: usize = 0;
+    var node = ghost;
+
+    var prev = std.StringHashMap(void).init(allocator);
+    defer prev.deinit();
+
     while (true) {
         var dir = rlLine[steps % rlLine.len];
-        var spot = nodes.get(&node).?;
+        var spot = nodes.get(node).?;
         if (dir == 'L') {
-            node = spot.left;
+            node = &spot.left;
         } else if (dir == 'R') {
-            node = spot.right;
+            node = &spot.right;
         } else {
             unreachable;
         }
         steps += 1;
-        if (std.mem.eql(u8, &node, &end)) {
-            break;
+        std.debug.print("  {s}\n", .{node});
+
+        if (node[2] == 'Z') {
+            std.debug.print("  end state after {d}\n", .{steps});
         }
+        if (prev.contains(node)) {
+            std.debug.print("cycle after {d}\n", .{steps});
+            return steps;
+        }
+        var copy = try allocator.dupe(u8, node);
+        try prev.putNoClobber(copy, undefined);
     }
-    std.debug.print("part 1: {d}\n", .{steps});
+    unreachable;
 }
 
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -68,76 +81,25 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     }
 
     var steps: usize = 0;
-    if (false) {
-        var node = [3]u8{ 'A', 'A', 'A' };
-        const end = [3]u8{ 'Z', 'Z', 'Z' };
-        while (true) {
-            var dir = rlLine[steps % rlLine.len];
-            var spot = nodes.get(&node).?;
-            if (dir == 'L') {
-                node = spot.left;
-            } else if (dir == 'R') {
-                node = spot.right;
-            } else {
-                unreachable;
-            }
-            steps += 1;
-            if (std.mem.eql(u8, &node, &end)) {
-                break;
-            }
-        }
-        std.debug.print("part 1: {d}\n", .{steps});
-    }
 
-    var curNodes = std.StringHashMap(void).init(allocator);
+    var ghosts = std.ArrayList([]u8).init(allocator);
+    defer ghosts.deinit();
     var initIt = nodes.keyIterator();
     while (initIt.next()) |key| {
         if (key.*[2] == 'A') {
-            try curNodes.put(key.*, undefined);
+            var name = try allocator.dupe(u8, key.*);
+            try ghosts.append(name);
             std.debug.print("{s}\n", .{key.*});
         }
     }
-    std.debug.print("starting keys: {d}\n", .{curNodes.count()});
+    std.debug.print("starting keys: {any}\n", .{ghosts.items});
 
-    steps = 0;
-    while (true) {
-        var newNodes = std.StringHashMap(void).init(allocator);
-        var dir = rlLine[steps % rlLine.len];
-        var it = curNodes.keyIterator();
-        var allZ = true;
-        if (steps < 20) {
-            std.debug.print("{c} ", .{dir});
-        }
-        while (it.next()) |key| {
-            var spot = nodes.get(key.*).?;
-            var nextKeyX = if (dir == 'L') spot.left else if (dir == 'R') spot.right else unreachable;
-            var nextKey = try allocator.dupe(u8, &nextKeyX);
-            try newNodes.put(nextKey, undefined);
-            if (nextKey[2] != 'Z') {
-                allZ = false;
-            }
-            if (steps < 20) {
-                std.debug.print("{s} -> {s},", .{ key.*, nextKey });
-            }
-        }
-        if (steps < 20) {
-            std.debug.print("\n", .{});
-        }
-        steps += 1;
-        curNodes.deinit();
-        curNodes = newNodes;
-
-        if (steps % 100_000 == 0) {
-            std.debug.print("{d}...\n", .{steps});
-        }
-
-        if (allZ) {
-            break;
-        }
+    for (ghosts.items) |ghost| {
+        std.debug.print("ghost {s}\n", .{ghost});
+        _ = try ghostCycle(allocator, nodes, rlLine, ghost);
     }
-    std.debug.print("part 2: {d}\n", .{steps});
 
-    curNodes.deinit();
+    std.debug.print("part 2: {d}\n", .{steps});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;

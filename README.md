@@ -15,6 +15,8 @@ In optimized mode, it ended with "killed" after 744,400,000 steps. I don't know 
 
 There are six starting ghosts. There are 790 nodes, so they must wind up in cycles. Maybe I should just try to find the cycles.
 
+Something is wrong. It seems my ghosts enter cycles that never hit an end state (ending with a Z)?
+
 ### Day 7
 
 - How do I write a literal `[5]u8`?
