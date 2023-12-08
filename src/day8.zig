@@ -107,6 +107,10 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         curNodes.deinit();
         curNodes = newNodes;
 
+        if (steps % 100_000 == 0) {
+            std.debug.print("{d}...\n", .{steps});
+        }
+
         if (allZ) {
             break;
         }

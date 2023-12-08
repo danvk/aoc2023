@@ -6,6 +6,14 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 8
+
+Using a hash map was a real mistake for part 2 -- I assumed there would be some fanout of ghosts, but really you'll always have a fixed number of ghosts and using hash maps in Zig complicates absolutely everything.
+
+Killed after 110,440,000 steps.
+
+### Day 7
+
 - How do I write a literal `[5]u8`?
 
 ### Day 6 (61931 / 60637)
