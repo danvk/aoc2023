@@ -91,7 +91,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         while (it.next()) |key| {
             var spot = nodes.get(key.*).?;
             var nextKeyX = if (dir == 'L') spot.left else if (dir == 'R') spot.right else unreachable;
-            var nextKey = try allocator.dupe(u8, nextKeyX);
+            var nextKey = try allocator.dupe(u8, &nextKeyX);
             try newNodes.put(nextKey, undefined);
             if (nextKey[2] != 'Z') {
                 allZ = false;
