@@ -11,6 +11,26 @@ const Node = struct {
     right: [3]u8,
 };
 
+fn ghostCycle(allocator: std.mem.Allocator, nodes: std.StringHashMap(Node), rlLine: []const u8, node: []const u8) usize {
+    var steps: usize = 0;
+    while (true) {
+        var dir = rlLine[steps % rlLine.len];
+        var spot = nodes.get(&node).?;
+        if (dir == 'L') {
+            node = spot.left;
+        } else if (dir == 'R') {
+            node = spot.right;
+        } else {
+            unreachable;
+        }
+        steps += 1;
+        if (std.mem.eql(u8, &node, &end)) {
+            break;
+        }
+    }
+    std.debug.print("part 1: {d}\n", .{steps});
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -115,10 +135,9 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
             break;
         }
     }
+    std.debug.print("part 2: {d}\n", .{steps});
 
     curNodes.deinit();
-
-    std.debug.print("part 2: {d}\n", .{steps});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;

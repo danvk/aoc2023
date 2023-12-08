@@ -11,6 +11,9 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 Using a hash map was a real mistake for part 2 -- I assumed there would be some fanout of ghosts, but really you'll always have a fixed number of ghosts and using hash maps in Zig complicates absolutely everything.
 
 Killed after 110,440,000 steps.
+In optimized mode, it ended with "killed" after 744,400,000 steps. I don't know what that means.
+
+There are six starting ghosts. There are 790 nodes, so they must wind up in cycles. Maybe I should just try to find the cycles.
 
 ### Day 7
 
