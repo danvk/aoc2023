@@ -18,7 +18,8 @@ fn ghostCycle(allocator: std.mem.Allocator, nodes: std.StringHashMap(Node), rlLi
     var prev = std.StringHashMap(void).init(allocator);
     defer prev.deinit();
 
-    while (true) {
+    var numEnds: usize = 0;
+    while (numEnds < 10) {
         var dir = rlLine[steps % rlLine.len];
         var spot = nodes.get(node).?;
         if (dir == 'L') {
@@ -29,19 +30,14 @@ fn ghostCycle(allocator: std.mem.Allocator, nodes: std.StringHashMap(Node), rlLi
             unreachable;
         }
         steps += 1;
-        std.debug.print("  {s}\n", .{node});
+        // std.debug.print("  {s}\n", .{node});
 
         if (node[2] == 'Z') {
-            std.debug.print("  end state after {d}\n", .{steps});
+            std.debug.print(" {d}  end state\n", .{steps});
+            numEnds += 1;
         }
-        if (prev.contains(node)) {
-            std.debug.print("cycle after {d}\n", .{steps});
-            return steps;
-        }
-        var copy = try allocator.dupe(u8, node);
-        try prev.putNoClobber(copy, undefined);
     }
-    unreachable;
+    return numEnds;
 }
 
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
