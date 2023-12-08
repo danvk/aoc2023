@@ -6,7 +6,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-### Day 8
+### Day 8 (35164 / 26872)
 
 Using a hash map was a real mistake for part 2 -- I assumed there would be some fanout of ghosts, but really you'll always have a fixed number of ghosts and using hash maps in Zig complicates absolutely everything.
 
@@ -16,6 +16,12 @@ In optimized mode, it ended with "killed" after 744,400,000 steps. I don't know 
 There are six starting ghosts. There are 790 nodes, so they must wind up in cycles. Maybe I should just try to find the cycles.
 
 Something is wrong. It seems my ghosts enter cycles that never hit an end state (ending with a Z)?
+
+... it's that a "cycle" also requires you to be at the same position in the R/L line.
+
+Printing out the number of steps to each end state for each ghost shows that they're all in perfect cycles. Calculating the LCM for all those cycle lengths gives the answer, which was around 21B. So my program would have had to run for a pretty long time to find it!
+
+This one required more thought than I was expecting for day 8!
 
 ### Day 7
 
