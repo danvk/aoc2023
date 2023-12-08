@@ -47,27 +47,74 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         try nodes.putNoClobber(name, n);
     }
 
-    var node = [3]u8{ 'A', 'A', 'A' };
-    const end = [3]u8{ 'Z', 'Z', 'Z' };
     var steps: usize = 0;
+    if (false) {
+        var node = [3]u8{ 'A', 'A', 'A' };
+        const end = [3]u8{ 'Z', 'Z', 'Z' };
+        while (true) {
+            var dir = rlLine[steps % rlLine.len];
+            var spot = nodes.get(&node).?;
+            if (dir == 'L') {
+                node = spot.left;
+            } else if (dir == 'R') {
+                node = spot.right;
+            } else {
+                unreachable;
+            }
+            steps += 1;
+            if (std.mem.eql(u8, &node, &end)) {
+                break;
+            }
+        }
+        std.debug.print("part 1: {d}\n", .{steps});
+    }
+
+    var curNodes = std.StringHashMap(void).init(allocator);
+    var initIt = nodes.keyIterator();
+    while (initIt.next()) |key| {
+        if (key.*[2] == 'A') {
+            try curNodes.put(key.*, undefined);
+            std.debug.print("{s}\n", .{key.*});
+        }
+    }
+    std.debug.print("starting keys: {d}\n", .{curNodes.count()});
+
+    steps = 0;
     while (true) {
+        var newNodes = std.StringHashMap(void).init(allocator);
         var dir = rlLine[steps % rlLine.len];
-        var spot = nodes.get(&node).?;
-        if (dir == 'L') {
-            node = spot.left;
-        } else if (dir == 'R') {
-            node = spot.right;
-        } else {
-            unreachable;
+        var it = curNodes.keyIterator();
+        var allZ = true;
+        if (steps < 20) {
+            std.debug.print("{c} ", .{dir});
+        }
+        while (it.next()) |key| {
+            var spot = nodes.get(key.*).?;
+            var nextKeyX = if (dir == 'L') spot.left else if (dir == 'R') spot.right else unreachable;
+            var nextKey = try allocator.dupe(u8, nextKeyX);
+            try newNodes.put(nextKey, undefined);
+            if (nextKey[2] != 'Z') {
+                allZ = false;
+            }
+            if (steps < 20) {
+                std.debug.print("{s} -> {s},", .{ key.*, nextKey });
+            }
+        }
+        if (steps < 20) {
+            std.debug.print("\n", .{});
         }
         steps += 1;
-        if (std.mem.eql(u8, &node, &end)) {
+        curNodes.deinit();
+        curNodes = newNodes;
+
+        if (allZ) {
             break;
         }
     }
 
-    std.debug.print("part 1: {d}\n", .{steps});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    curNodes.deinit();
+
+    std.debug.print("part 2: {d}\n", .{steps});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
