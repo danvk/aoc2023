@@ -6,6 +6,14 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 9 (44665 / 43697)
+
+This was wildly easy compared to yesterday. I wonder if Eric is being nice to us on the weekend? My instinct to recursively extrapolate the next number worked great on part 1 and then part 2 just requires reversing the list and using your solution from part 1.
+
+- Start: 4:37 PM
+- ⭐️: 4:45 PM
+- ⭐️⭐️: 4:47 PM
+
 ### Day 8 (35164 / 26872)
 
 Using a hash map was a real mistake for part 2 -- I assumed there would be some fanout of ghosts, but really you'll always have a fixed number of ghosts and using hash maps in Zig complicates absolutely everything.
