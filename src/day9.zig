@@ -35,6 +35,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     var iter = try bufIter.iterLines(filename);
     var part1: i32 = 0;
+    var part2: i32 = 0;
     var nums = std.ArrayList(i32).init(allocator);
     defer nums.deinit();
     while (try iter.next()) |line| {
@@ -43,10 +44,15 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         var next = try extrapolateNext(allocator, nums.items);
         std.debug.print("{s} -> {d}\n", .{ line, next });
         part1 += next;
+
+        std.mem.reverse(i32, nums.items);
+        next = try extrapolateNext(allocator, nums.items);
+        std.debug.print(" -> {d}\n", .{next});
+        part2 += next;
     }
 
     std.debug.print("part 1: {d}\n", .{part1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 2: {d}\n", .{part2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
