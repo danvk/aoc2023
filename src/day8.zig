@@ -95,6 +95,42 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         _ = try ghostCycle(allocator, nodes, rlLine, ghost);
     }
 
+    var timer = try std.time.Timer.start();
+
+    steps = 0;
+    while (true) {
+        var dir = rlLine[steps % rlLine.len];
+        var allZ = true;
+        if (steps < 20) {
+            std.debug.print("{c} ", .{dir});
+        }
+        for (ghosts.items, 0..) |key, i| {
+            var spot = nodes.get(key).?;
+            var nextKey = if (dir == 'L') spot.left else if (dir == 'R') spot.right else unreachable;
+            if (nextKey[2] != 'Z') {
+                allZ = false;
+            }
+            if (steps < 20) {
+                std.debug.print("{s} -> {s},", .{ key, nextKey });
+            }
+            @memcpy(ghosts.items[i], &nextKey);
+        }
+        if (steps < 20) {
+            std.debug.print("\n", .{});
+        }
+        steps += 1;
+
+        if (steps % 1_000_000 == 0) {
+            // timer.read() returns nanoseconds. This converts to ms.
+            const elapsed = timer.read() / 1_000_000;
+            std.debug.print("{d} ms {d}...\n", .{ elapsed, steps });
+        }
+
+        if (allZ) {
+            break;
+        }
+    }
+
     std.debug.print("part 2: {d}\n", .{steps});
 }
 

@@ -23,6 +23,8 @@ Printing out the number of steps to each end state for each ghost shows that the
 
 This one required more thought than I was expecting for day 8!
 
+With a more efficient brute force algorithm for part 2, I can do 687,000,000 steps in 60s, so it would take ~30 minutes for my program to find the answer directly.
+
 ### Day 7
 
 - How do I write a literal `[5]u8`?
