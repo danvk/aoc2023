@@ -36,6 +36,108 @@ fn neighborsForTile(tile: Tile) struct { Dir, Dir } {
     };
 }
 
+fn rhsForMove(tile: Tile) ?struct { Dir, Dir } {
+    return switch (tile) {
+        // if you have moved into this square from the down direction, then
+        // the RHS is right, otherwise it's left.
+        // .@"|" => .{ .up, .down },
+        .@"|" => .{ .left, .right },
+        // .@"-" => .{ .left, .right },
+        .@"-" => .{ .down, .up },
+        .L => null,
+        .J => null,
+        .@"7" => null,
+        .F => null,
+        else => unreachable,
+    };
+}
+
+fn rhsForDiag(tile: Tile, idx: usize) ?struct { Dir, Dir } {
+    return switch (tile) {
+        // if you have moved into this square from the down direction, then
+        // the RHS is right, otherwise it's left.
+        .@"|" => null,
+        .@"-" => null,
+        // .L => .{ .up, .right },
+        .L => if (idx == 0) .{ .left, .down } else null,
+        // .J => .{ .up, .left },
+        .J => if (idx == 0) null else .{ .down, .right },
+        // .@"7" => .{ .left, .down },
+        .@"7" => if (idx == 0) null else .{ .right, .up },
+        // .F => .{ .down, .right },
+        .F => if (idx == 0) null else .{ .up, .left },
+        else => unreachable,
+    };
+}
+
+fn part2(allocator: std.mem.Allocator, start: Coord, step1: Coord, grid: std.AutoHashMap(Coord, Tile), ds: std.AutoHashMap(Coord, usize)) !usize {
+
+    // Find some interior cells. Assume the first direction from start is clockwise.
+    // So the interior is on your right.
+    var fringe = std.AutoHashMap(Coord, void).init(allocator);
+    defer fringe.deinit();
+
+    var lastNode = start;
+    var pos = step1;
+    while (true) {
+        var tile = grid.get(pos).?;
+        if (tile == Tile.S) {
+            break; // completed the loop
+        }
+
+        var moves = neighborsForTile(tile);
+        var a = moves[0];
+        var b = moves[1];
+        var interiorDirs = rhsForMove(tile);
+        var interiorDir: ?Dir = null;
+        var diagIntDirs: ?struct { Dir, Dir } = null;
+        if (std.meta.eql(pos.move(a), lastNode)) {
+            if (interiorDirs) |id| {
+                interiorDir = id[0];
+            } else {
+                diagIntDirs = rhsForDiag(tile, 0);
+            }
+            lastNode = pos;
+            pos = pos.move(b);
+        } else if (std.meta.eql(pos.move(b), lastNode)) {
+            if (interiorDirs) |id| {
+                interiorDir = id[1];
+            } else {
+                diagIntDirs = rhsForDiag(tile, 1);
+            }
+            lastNode = pos;
+            pos = pos.move(a);
+        } else {
+            unreachable;
+        }
+        var candidates = std.ArrayList(Dir).init(allocator);
+        defer candidates.deinit();
+        if (interiorDir) |id| {
+            try candidates.append(id);
+        }
+        if (diagIntDirs) |diags| {
+            try candidates.append(diags[0]);
+            try candidates.append(diags[1]);
+            std.debug.print("{any} diagonal candidates: {any}\n", .{ lastNode, diags });
+        }
+        for (candidates.items) |id| {
+            var p = lastNode.move(id);
+            if (!ds.contains(p)) {
+                try fringe.put(p, undefined);
+                std.debug.print("{any} added to fringe: {any}\n", .{ lastNode, p });
+            }
+        }
+    }
+
+    std.debug.print("fringe:\n", .{});
+    var it = fringe.keyIterator();
+    while (it.next()) |int| {
+        std.debug.print("  {any}\n", .{int});
+    }
+
+    return fringe.count();
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -57,13 +159,13 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
             } else if (tile == Tile.S) {
                 start = coord;
             }
-            std.debug.print("{any} {any}\n", .{ coord, tile });
+            // std.debug.print("{any} {any}\n", .{ coord, tile });
             try grid.putNoClobber(coord, tile);
         }
         y += 1;
     }
     const h: usize = @intCast(y);
-    assert(w == h);
+    _ = h;
 
     var starts = std.ArrayList(Coord).init(allocator);
     defer starts.deinit();
@@ -95,7 +197,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
             numSteps += 1;
             var tile = grid.get(pos).?;
 
-            std.debug.print("{any} {any}\n", .{ pos, tile });
+            // std.debug.print("{any} {any}\n", .{ pos, tile });
             var prev = ds.get(pos) orelse 1_000_000;
             if (numSteps < prev) {
                 try ds.put(pos, numSteps);
@@ -121,7 +223,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     // std.debug.print("part 1: {d}\n", .{sum1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 2: {d}\n", .{try part2(allocator, start, starts.items[0], grid, ds)});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
