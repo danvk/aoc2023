@@ -74,8 +74,8 @@ fn part2(allocator: std.mem.Allocator, start: Coord, step1: Coord, grid: std.Aut
 
     // Find some interior cells. Assume the first direction from start is clockwise.
     // So the interior is on your right.
-    var fringe = std.AutoHashMap(Coord, void).init(allocator);
-    defer fringe.deinit();
+    var fringeSet = std.AutoHashMap(Coord, void).init(allocator);
+    defer fringeSet.deinit();
 
     var lastNode = start;
     var pos = step1;
@@ -123,19 +123,38 @@ fn part2(allocator: std.mem.Allocator, start: Coord, step1: Coord, grid: std.Aut
         for (candidates.items) |id| {
             var p = lastNode.move(id);
             if (!ds.contains(p)) {
-                try fringe.put(p, undefined);
+                try fringeSet.put(p, undefined);
                 std.debug.print("{any} added to fringe: {any}\n", .{ lastNode, p });
             }
         }
     }
 
-    std.debug.print("fringe:\n", .{});
-    var it = fringe.keyIterator();
+    std.debug.print("fringe seeds:\n", .{});
+    var fringe = std.ArrayList(Coord).init(allocator);
+    defer fringe.deinit();
+    var it = fringeSet.keyIterator();
     while (it.next()) |int| {
         std.debug.print("  {any}\n", .{int});
+        try fringe.append(int.*);
     }
 
-    return fringe.count();
+    var seen = std.AutoHashMap(Coord, void).init(allocator);
+    defer seen.deinit();
+
+    while (fringe.popOrNull()) |coord| {
+        if (seen.contains(coord)) {
+            continue;
+        }
+        try seen.put(coord, undefined);
+        for (dirMod.DIRS) |dir| {
+            const n = coord.move(dir);
+            if (!ds.contains(n) and !seen.contains(n)) {
+                try fringe.append(n);
+            }
+        }
+    }
+
+    return seen.count();
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
