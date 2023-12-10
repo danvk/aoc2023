@@ -89,10 +89,10 @@ pub fn runOnFile(parent_allocator: std.mem.Allocator, filename: [:0]const u8) !v
             try reg.put(my_reg, target_val);
         }
         // printHashMap(i32, reg);
-        max_ever = @max(max_ever, hashMaxValue(i32, reg) orelse 0);
+        max_ever = @max(max_ever, util.strHashMaxValue(i32, reg) orelse 0);
     }
 
-    std.debug.print("part 1: {d}\n", .{hashMaxValue(i32, reg) orelse 0});
+    std.debug.print("part 1: {d}\n", .{util.strHashMaxValue(i32, reg) orelse 0});
     std.debug.print("part 2: {d}\n", .{max_ever});
 }
 
