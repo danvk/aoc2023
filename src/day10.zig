@@ -184,7 +184,6 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         y += 1;
     }
     const h: usize = @intCast(y);
-    _ = h;
 
     var starts = std.ArrayList(Coord).init(allocator);
     defer starts.deinit();
@@ -242,7 +241,40 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     // std.debug.print("part 1: {d}\n", .{sum1});
-    std.debug.print("part 2: {d}\n", .{try part2(allocator, start, starts.items[0], grid, ds)});
+    // std.debug.print("part 2: {d}\n", .{try part2(allocator, start, starts.items[0], grid, ds)});
+
+    // XXX replace "|" with whatever the start cell _should_ be to make this work.
+    try grid.put(start, Tile.@"|");
+    var part2alt: usize = 0;
+    for (0..h) |yc| {
+        var numBars: usize = 0;
+        var prevCorner: ?Tile = null;
+        for (0..w) |x| {
+            var c = Coord{ .x = @intCast(x), .y = @intCast(yc) };
+            if (!ds.contains(c)) {
+                if (numBars % 2 == 1) {
+                    part2alt += 1;
+                }
+            } else {
+                var tile = grid.get(c).?;
+                if (tile == Tile.@"|") {
+                    numBars += 1;
+                } else if (tile == Tile.J and prevCorner == Tile.F) {
+                    numBars += 1;
+                } else if (tile == Tile.@"7" and prevCorner == Tile.L) {
+                    numBars += 1;
+                } else if (tile == Tile.S) {
+                    // I think this is only needed if the start tile matches
+                    // one of the previous cases.
+                    // numBars += 1;
+                }
+                if (tile != Tile.@"-") {
+                    prevCorner = tile;
+                }
+            }
+        }
+    }
+    std.debug.print("part 2 alt: {d}\n", .{part2alt});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
