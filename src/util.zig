@@ -98,6 +98,46 @@ pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]cons
     return try file.reader().readAllAlloc(allocator, fileSize);
 }
 
+fn printHashMap(comptime V: type, hash_map: std.StringHashMap(V)) void {
+    var is_first = true;
+    var it = hash_map.iterator();
+    std.debug.print("{{ ", .{});
+    while (it.next()) |entry| {
+        if (!is_first) {
+            std.debug.print(", ", .{});
+        } else {
+            is_first = false;
+        }
+        std.debug.print("{s}: {any}", .{ entry.key_ptr.*, entry.value_ptr.* });
+    }
+    std.debug.print(" }}\n", .{});
+}
+
+pub fn hashMinMaxValue(comptime K: type, comptime V: type, hash_map: std.AutoHashMap(K, V)) ?struct { min: V, max: V } {
+    var min: V = undefined;
+    var max: V = undefined;
+    var it = hash_map.valueIterator();
+    if (it.next()) |val| {
+        min = val.*;
+        max = val.*;
+    } else {
+        return null;
+    }
+    while (it.next()) |val| {
+        min = @min(min, val.*);
+        max = @max(max, val.*);
+    }
+    return .{ .min = min, .max = max };
+}
+
+pub fn hashMaxValue(comptime K: type, comptime V: type, hash_map: std.AutoHashMap(K, V)) ?V {
+    const minMax = hashMinMaxValue(K, V, hash_map);
+    if (minMax) |v| {
+        return v.max;
+    }
+    return null;
+}
+
 const expect = std.testing.expect;
 const expectEqual = std.testing.expectEqual;
 const expectEqualDeep = std.testing.expectEqualDeep;

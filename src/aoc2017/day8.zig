@@ -42,46 +42,6 @@ fn parseInstruction(line: []const u8) !Instruction {
     } };
 }
 
-fn printHashMap(comptime V: type, hash_map: std.StringHashMap(V)) void {
-    var is_first = true;
-    var it = hash_map.iterator();
-    std.debug.print("{{ ", .{});
-    while (it.next()) |entry| {
-        if (!is_first) {
-            std.debug.print(", ", .{});
-        } else {
-            is_first = false;
-        }
-        std.debug.print("{s}: {any}", .{ entry.key_ptr.*, entry.value_ptr.* });
-    }
-    std.debug.print(" }}\n", .{});
-}
-
-pub fn hashMinMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?struct { min: V, max: V } {
-    var min: V = undefined;
-    var max: V = undefined;
-    var it = hash_map.valueIterator();
-    if (it.next()) |val| {
-        min = val.*;
-        max = val.*;
-    } else {
-        return null;
-    }
-    while (it.next()) |val| {
-        min = @min(min, val.*);
-        max = @max(max, val.*);
-    }
-    return .{ .min = min, .max = max };
-}
-
-pub fn hashMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?V {
-    const minMax = hashMinMaxValue(V, hash_map);
-    if (minMax) |v| {
-        return v.max;
-    }
-    return null;
-}
-
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
     return runOnFile(parent_allocator, filename);

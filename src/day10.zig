@@ -81,6 +81,45 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     std.debug.print("start: {any}\n", .{start});
     std.debug.print("starts: {any}\n", .{starts.items});
 
+    var ds = std.AutoHashMap(Coord, usize).init(allocator);
+    defer ds.deinit();
+    try ds.put(start, 0);
+
+    var maxSteps: usize = 0;
+    _ = maxSteps;
+    for (starts.items) |step1| {
+        var numSteps: usize = 0;
+        var lastNode = start;
+        var pos = step1;
+        while (true) {
+            numSteps += 1;
+            var tile = grid.get(pos).?;
+
+            std.debug.print("{any} {any}\n", .{ pos, tile });
+            var prev = ds.get(pos) orelse 1_000_000;
+            if (numSteps < prev) {
+                try ds.put(pos, numSteps);
+            }
+            if (tile == Tile.S) {
+                break; // completed the loop
+            }
+
+            var moves = neighborsForTile(tile);
+            var a = moves[0];
+            var b = moves[1];
+            if (std.meta.eql(pos.move(a), lastNode)) {
+                lastNode = pos;
+                pos = pos.move(b);
+            } else if (std.meta.eql(pos.move(b), lastNode)) {
+                lastNode = pos;
+                pos = pos.move(a);
+            } else {
+                unreachable;
+            }
+        }
+        std.debug.print("part 1: {d}\n", .{util.hashMaxValue(Coord, usize, ds).?});
+    }
+
     // std.debug.print("part 1: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
