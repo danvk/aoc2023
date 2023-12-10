@@ -6,7 +6,17 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-210 is too low.
+### Day 10 (20029 / 10351)
+
+Definitely the most finnicky so far. Part 1 just required some care and careful reading of the instructions. Part 2 was very finnicky. I never came up with a way to tell which direction to move around the loop, I just figured out which neighbor to start with for each sample and my input.
+
+210 is too low. I'd hoped I wouldn't have to do flood fill in addition to finding the fringe, but no dice.
+
+Zig note: you use `std.meta.eql` to compare structs, not `==`.
+
+- Start: 6:19 AM
+- ⭐️: 7:00 AM
+- ⭐️⭐️: 8:00 AM
 
 ### Day 9 (44665 / 43697)
 
