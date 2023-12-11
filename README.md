@@ -6,6 +6,14 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 11 (22119 / 19890)
+
+This was a welcome reprieve after yesterday. The trick is just to shift the coordinates of the galaxies, rather than trying to construct an enormous grid. The distance is just manhattan distance, regardless of how the AoC site chooses to display it. I had an off-by-one error on part 2: you add 999,999 to the coordinates, not 1,000,000.
+
+- Start: 7:05 AM
+- ⭐️: 7:19 AM
+- ⭐️⭐️: 7:22 AM
+
 ### Day 10 (20029 / 10351)
 
 Definitely the most finnicky so far. Part 1 just required some care and careful reading of the instructions. Part 2 was very finnicky. I never came up with a way to tell which direction to move around the loop, I just figured out which neighbor to start with for each sample and my input.
