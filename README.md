@@ -20,6 +20,8 @@ Zig note: you use `std.meta.eql` to compare structs, not `==`.
 
 Looking over the reddit solutions, the clever way to do part 2 is to count parity across a row as you cross pipes. If you cross once, you're in, twice you're out, etc. The tricky bit is that L---7 and F---J should also count as crossings.
 
+I asked about extracting the min/max value from a hash map generically in Zig: https://stackoverflow.com/q/77636941/388951
+
 ### Day 9 (44665 / 43697)
 
 This was wildly easy compared to yesterday. I wonder if Eric is being nice to us on the weekend? My instinct to recursively extrapolate the next number worked great on part 1 and then part 2 just requires reversing the list and using your solution from part 1.
