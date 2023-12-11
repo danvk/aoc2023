@@ -63,24 +63,25 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     std.debug.print("{any}\n", .{freeX.items});
     std.debug.print("{any}\n", .{freeY.items});
 
+    const bumpFactor = 1000000 - 1;
     for (galaxies.items, 0..) |c, i| {
         var bumpX: i32 = 0;
         for (freeX.items) |fx| {
             if (fx < c.x) {
-                bumpX += 1;
+                bumpX += bumpFactor;
             }
         }
 
         var bumpY: i32 = 0;
         for (freeY.items) |fy| {
             if (fy < c.y) {
-                bumpY += 1;
+                bumpY += bumpFactor;
             }
         }
         galaxies.items[i] = Coord{ .x = c.x + bumpX, .y = c.y + bumpY };
     }
 
-    var part1: u32 = 0;
+    var part1: u64 = 0;
     for (galaxies.items, 0..) |g1, i| {
         for (galaxies.items[(i + 1)..], (i + 1)..) |g2, j| {
             var d = std.math.absCast(g1.x - g2.x) + std.math.absCast(g1.y - g2.y);
