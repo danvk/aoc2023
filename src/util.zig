@@ -113,8 +113,7 @@ fn printHashMap(comptime V: type, hash_map: std.StringHashMap(V)) void {
     std.debug.print(" }}\n", .{});
 }
 
-// TODO: can I also make this work with StringHashMap?
-pub fn hashMinMaxValue(comptime K: type, comptime V: type, hash_map: std.AutoHashMap(K, V)) ?struct { min: V, max: V } {
+pub fn hashMinMaxValue(comptime V: type, hash_map: anytype) ?struct { min: V, max: V } {
     var min: V = undefined;
     var max: V = undefined;
     var it = hash_map.valueIterator();
@@ -131,33 +130,8 @@ pub fn hashMinMaxValue(comptime K: type, comptime V: type, hash_map: std.AutoHas
     return .{ .min = min, .max = max };
 }
 
-pub fn hashMaxValue(comptime K: type, comptime V: type, hash_map: std.AutoHashMap(K, V)) ?V {
-    const minMax = hashMinMaxValue(K, V, hash_map);
-    if (minMax) |v| {
-        return v.max;
-    }
-    return null;
-}
-
-pub fn strHashMinMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?struct { min: V, max: V } {
-    var min: V = undefined;
-    var max: V = undefined;
-    var it = hash_map.valueIterator();
-    if (it.next()) |val| {
-        min = val.*;
-        max = val.*;
-    } else {
-        return null;
-    }
-    while (it.next()) |val| {
-        min = @min(min, val.*);
-        max = @max(max, val.*);
-    }
-    return .{ .min = min, .max = max };
-}
-
-pub fn strHashMaxValue(comptime V: type, hash_map: std.StringHashMap(V)) ?V {
-    const minMax = strHashMinMaxValue(V, hash_map);
+pub fn hashMaxValue(comptime V: type, hash_map: anytype) ?V {
+    const minMax = hashMinMaxValue(V, hash_map);
     if (minMax) |v| {
         return v.max;
     }

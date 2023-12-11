@@ -237,7 +237,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
                 unreachable;
             }
         }
-        std.debug.print("part 1: {d}\n", .{util.hashMaxValue(Coord, usize, ds).?});
+        std.debug.print("part 1: {d}\n", .{util.hashMaxValue(usize, ds).?});
     }
 
     // std.debug.print("part 1: {d}\n", .{sum1});
