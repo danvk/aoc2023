@@ -26,7 +26,7 @@ Zig note: you use `std.meta.eql` to compare structs, not `==`.
 - ⭐️: 7:00 AM
 - ⭐️⭐️: 8:00 AM
 
-Looking over the reddit solutions, the clever way to do part 2 is to count parity across a row as you cross pipes. If you cross once, you're in, twice you're out, etc. The tricky bit is that L---7 and F---J should also count as crossings.
+Looking over the reddit solutions, the clever way to do part 2 is to count parity across a row as you cross pipes. If you cross once, you're in, twice you're out, etc. The tricky bit is that L---7 and F---J should also count as crossings. Some people also blew up the grid 2-3x so that the interior was completely connected. I like how part 2 inspired so many different solutions.
 
 I asked about extracting the min/max value from a hash map generically in Zig: https://stackoverflow.com/q/77636941/388951
 

@@ -2,6 +2,7 @@ const std = @import("std");
 const bufIter = @import("./buf-iter.zig");
 const dir = @import("./dir.zig");
 const util = @import("./util.zig");
+const readGrid = @import("./grid.zig").readGrid;
 
 const Coord = dir.Coord;
 
@@ -122,25 +123,11 @@ fn addGearRatios(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, u8))
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var grid = std.AutoHashMap(Coord, u8).init(allocator);
+    var gridResult = try readGrid(allocator, filename, '.');
+    const extent = gridResult.extent;
+    var grid = gridResult.grid;
     defer grid.deinit();
 
-    var iter = try bufIter.iterLines(filename);
-    var y: i32 = 0;
-    var maxY: i32 = 0;
-    var maxX: i32 = 0;
-    while (try iter.next()) |line| {
-        for (line, 0..) |c, x| {
-            if (c != '.') {
-                try grid.putNoClobber(Coord{ .x = @intCast(x), .y = y }, c);
-            }
-            maxX = @intCast(x);
-        }
-        maxY = y;
-        y += 1;
-    }
-
-    const extent = Coord{ .x = maxX, .y = maxY };
     std.debug.print("part 1: {d}\n", .{findPartNums(grid, extent)});
     std.debug.print("part 2: {d}\n", .{try addGearRatios(allocator, grid)});
 }
