@@ -99,6 +99,29 @@ fn numMatchRec(pat: []const u8, nums: []u8) u64 {
         }
         return 1;
     }
+
+    // Check if no matches are possible.
+    var sum: u8 = 0;
+    for (nums) |num| {
+        sum += num;
+    }
+    if (sum + nums.len - 1 > pat.len) {
+        return 0;
+    }
+    var numPound: u8 = 0;
+    var numDot: u8 = 0;
+    for (pat) |p| {
+        if (p == '.' or p == '?') {
+            numDot += 1;
+        }
+        if (p == '#' or p == '?') {
+            numPound += 1;
+        }
+    }
+    if (numPound < sum or numDot < nums.len - 1) {
+        return 0;
+    }
+
     const c = pat[0];
     var count: u64 = 0;
 
