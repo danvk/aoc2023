@@ -65,6 +65,28 @@ fn numMatching(pat: []const u8, nums: []u8) u32 {
     return count;
 }
 
+var memo: std.StringHashMap(u64) = undefined;
+
+fn lookupMemo(pat: []const u8, nums: []u8) ?u64 {
+    var buf: [1000]u8 = undefined;
+    @memcpy(buf[0..], pat);
+    @memcpy(buf[pat.len], nums);
+    var key = buf[0..(pat.len + nums.len)];
+    return memo.get(key);
+}
+
+fn setMemo(pat: []const u8, nums: []u8, count: u64) !void {
+    var buf: [1000]u8 = undefined;
+    @memcpy(buf[0..], pat);
+    @memcpy(buf[pat.len], nums);
+    var key = buf[0..(pat.len + nums.len)];
+    try memo.put(key, count); // <-- this won't work since buf is freed.
+}
+
+fn clearMemo() void {
+    memo.clearAndFree();
+}
+
 fn numMatchRec(pat: []const u8, nums: []u8) u64 {
     // Assumptions:
     // - pat is potentially at the start of a pattern.
@@ -283,12 +305,12 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         var unfoldBuf: [1000]u8 = undefined;
         var unfolded = unfold(pat, &unfoldBuf);
         std.debug.print(" -> {s} {any}\n", .{ unfolded, nums });
-        // var count2 = numMatchRec(unfolded, nums);
-        var count3 = numMatchSplit(unfolded, nums);
-        sum2 += count3;
+        var count2 = numMatchRec(unfolded, nums);
+        // var count3 = numMatchSplit(unfolded, nums);
+        sum2 += count2;
         numLines += 1;
         const elapsed = timer.read() / 1_000_000_000;
-        std.debug.print(" -> {d} {d}s\n", .{ count3, elapsed });
+        std.debug.print(" -> {d} {d}s\n", .{ count2, elapsed });
         // assert(count2 == count3);
     }
 

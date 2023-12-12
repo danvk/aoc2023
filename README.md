@@ -6,6 +6,18 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 12 (17515 / 9282)
+
+Part 1: brute force (try both possibilities for ?). I did this by enumerating all the numbers from 0..2^n and using bit operations, one of my favorite tricks. There were at most 18 `?` chars and 2^18 isn't that many.
+
+Part 2: That clearly wasn't going to work. I tried going recursively character by character but this was too slow (in retrospect it may have worked if I added memoization). Instead I split the list of numbers in half and tried each possibility for the split point in the pattern (by setting those two characters to . and #, as the pattern allowed). I initially just set the middle character to `.` but this results in double-counting. Once you'd picked a split, you can recur and multiply the left and right counts. The beauty of this is that you don't have to enumerate every possible solutions.
+
+Definitely the trickiest so far and my best finish so far. I hopped on the in-flight WiFi to submit my answer for part 2 (we're over the Caribbean on our way to Costa Rica).
+
+It looks like my initial solution to part 2 was just fine, I only needed to memoize it. That's what the #1 solution did (in TypeScript!): https://gist.github.com/Nathan-Fenner/781285b77244f06cf3248a04869e7161
+
+Some notes from debugging follow…
+
 `???????#??.?#????##? { 1, 2, 3, 3, 2 }`
 
 I guess another way to parameterize this is where you put each `.###.` There's more flexibility in each of those, but maybe fewer of them than `?`s? There are at most 6 numbers, which would become 30 after expansion.
@@ -48,9 +60,7 @@ This went for ~4 minutes without finishing in an optimized build.  I'm pretty en
   4:? / { 1 } -> 1
   5:###?? / { 3 } -> 1
 
-So there's some double-counting here. Can I say that the splits must end/start with a `#`? Maybe we can say that the right one must start with a `#`.
-
-5071883216318
+So there's some double-counting here. Can I say that the splits must end/start with a `#`? Maybe we can say that the right one must start with a `#`. YES!
 
 ### Day 11 (22119 / 19890)
 
