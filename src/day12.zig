@@ -65,6 +65,70 @@ fn numMatching(pat: []const u8, nums: []u8) u32 {
     return count;
 }
 
+fn numMatchRec(pat: []const u8, nums: []u8) u64 {
+    // Assumptions:
+    // - pat is potentially at the start of a pattern.
+    //
+    // If nums.len == 0 then:
+    // - scan pat for any #. If there are any, then return 0.
+    // - if it's all `?` and `.` then return 1.
+    // If pat[0] is '.' then shift it off and continue recursively.
+    // If pat[0] is '#' then we have to match nums[0] here.
+    // - if there are too few characters left then return 0.
+    // - if there are exactly nums[0] characters left, return 1 or 0.
+    // - if there are more:
+    //   - the first nums[0] must be `#` or `?`
+    //   - the next after that must be `.` or `?`
+    //   - if not, return 0. Otherwise shift and continue.
+    // If pat[0] is '?' then either pretend it's '.' or '#' and add the results.
+
+    // Other possible filters:
+    // - If at any point sum(nums) + len(nums) - 1 > len(pat), return 0.
+    // - If at any point there are too few `?` and `#` left, return 0.
+
+    // Since I'm adding by at most 1s, I worry this is going to be too slow.
+
+    if (pat.len == 0) {
+        return if (nums.len > 0) 0 else 1;
+    }
+    if (nums.len == 0) {
+        for (pat) |p| {
+            if (p == '#') {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    const c = pat[0];
+    var count: u64 = 0;
+
+    if (c == '.' or c == '?') {
+        count += numMatchRec(pat[1..], nums);
+    }
+    if (c == '#' or c == '?') {
+        // match nums[0] #s here.
+        const n = nums[0];
+        var ok = true;
+        _ = ok;
+        if (pat.len < n) {
+            return count;
+        }
+        for (pat[0..n]) |p| {
+            if (p == '.') {
+                return count;
+            }
+        }
+        if (pat.len == n) {
+            count += numMatchRec(pat[n..], nums[1..]);
+        } else {
+            if (pat[n] == '.' or pat[n] == '?') {
+                count += numMatchRec(pat[(n + 1)..], nums[1..]);
+            }
+        }
+    }
+    return count;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     _ = allocator;
     const filename = args[0];
@@ -72,19 +136,24 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var maxQ: usize = 0;
     var iter = try bufIter.iterLines(filename);
     var intBuf: [30]u8 = undefined;
-    var count: u32 = 0;
+    var sum: u64 = 0;
     while (try iter.next()) |line| {
         var n = std.mem.count(u8, line, "?");
         maxQ = @max(maxQ, n);
 
         var parts = util.splitOne(line, " ").?;
         var nums = try util.extractIntsIntoBuf(u8, parts.rest, &intBuf);
-        std.debug.print("{d} {d}\n", .{ n, nums.len });
         var pat = parts.head;
-        count += numMatching(pat, nums);
+        std.debug.print("{s} {d} {d}\n", .{ pat, n, nums.len });
+        const count = numMatching(pat, nums);
+        sum += count;
+        std.debug.print(" -> {d}\n", .{count});
+        var count2 = numMatchRec(pat, nums);
+        std.debug.print(" -> {d}\n", .{count2});
+        assert(count == count2);
     }
 
-    std.debug.print("part 1: {d}\n", .{count});
+    std.debug.print("part 1: {d}\n", .{sum});
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 

@@ -6,6 +6,17 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+`???????#??.?#????##? { 1, 2, 3, 3, 2 }`
+
+I guess another way to parameterize this is where you put each `.###.` There's more flexibility in each of those, but maybe fewer of them than `?`s? There are at most 6 numbers, which would become 30 after expansion.
+
+This could be done recursively: if you have a contradiction at the start then you're done and you return zero. If you have a `?` then either you make it a `#` or a `.`, and reduce the number by one. Hopefully the number sequence is enough to prune the search space dramatically.
+
+4,1,1,4,1,1,4,1,1,4,1,1,4,1,1
+????.#...#...????.#...#...????.#...#...????.#...#...????.#...#...
+
+OHH! Separate by `?`. Yuck! Even messier.
+
 ### Day 11 (22119 / 19890)
 
 This was a welcome reprieve after yesterday. The trick is just to shift the coordinates of the galaxies, rather than trying to construct an enormous grid. The distance is just manhattan distance, regardless of how the AoC site chooses to display it. I had an off-by-one error on part 2: you add 999,999 to the coordinates, not 1,000,000.
