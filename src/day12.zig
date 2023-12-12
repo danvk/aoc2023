@@ -56,8 +56,9 @@ fn numMatching(pat: []const u8, nums: []u8) u32 {
             }
         }
         assert(y == 0);
-        std.debug.print(" {s}\n", .{buf[0..pat.len]});
+        // std.debug.print(" {s}\n", .{buf[0..pat.len]});
         if (matches(buf[0..pat.len], nums)) {
+            // std.debug.print("  match!\n", .{});
             count += 1;
         }
     }
