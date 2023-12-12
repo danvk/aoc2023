@@ -167,6 +167,13 @@ fn unfold(inBuf: []const u8, outBuf: []u8) []u8 {
     return outBuf[0..i];
 }
 
+fn numMatchSplit(pat: []const u8, nums: []u8) u64 {
+    if (nums.len <= 2) {
+        return numMatchRec(pat, nums);
+    }
+    return 0;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     _ = allocator;
     const filename = args[0];
@@ -176,6 +183,10 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var intBuf: [30]u8 = undefined;
     var sum: u64 = 0;
     var sum2: u64 = 0;
+    var numLines: usize = 0;
+
+    var timer = try std.time.Timer.start();
+
     while (try iter.next()) |line| {
         var n = std.mem.count(u8, line, "?");
         maxQ = @max(maxQ, n);
@@ -183,7 +194,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         var parts = util.splitOne(line, " ").?;
         var nums = try util.extractIntsIntoBuf(u8, parts.rest, &intBuf);
         var pat = parts.head;
-        std.debug.print("{s} {d} {d}\n", .{ pat, n, nums.len });
+        std.debug.print("{d} {s} {d} {d}\n", .{ numLines, pat, n, nums.len });
         // const count = numMatching(pat, nums);
         // sum += count;
         // std.debug.print(" -> {d}\n", .{count});
@@ -206,6 +217,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         std.debug.print(" -> {s} {any}\n", .{ unfolded, nums });
         var count2 = numMatchRec(unfolded, nums);
         sum2 += count2;
+        numLines += 1;
+        const elapsed = timer.read() / 1_000_000_000;
+        std.debug.print(" -> {d} {d}s\n", .{ count2, elapsed });
     }
 
     std.debug.print("part 1: {d}\n", .{sum});
