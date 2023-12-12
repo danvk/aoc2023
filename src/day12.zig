@@ -22,6 +22,7 @@ fn matches(pat: []const u8, expected: []u8) bool {
                     return false;
                 }
                 ns = ns[1..];
+                len = 0;
             }
         }
     }
@@ -87,7 +88,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
+const expect = std.testing.expect;
 
-test "sample test" {
-    try expectEqualDeep(true, true);
+test "match" {
+    var counts = [_]u8{ 1, 1, 3 };
+    try expect(matches("#.#.###", &counts));
 }
