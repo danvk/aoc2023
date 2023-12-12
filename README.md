@@ -154,6 +154,52 @@ Nitty gritty questions:
 - https://www.forrestthewoods.com/blog/failing-to-learn-zig-via-advent-of-code/
 - https://cohost.org/strangebroadcasts/post/542139-also-failing-to-lear
 
+## Zig Docs notes
+
+You can zero-initialize a buffer like this. Also news to me that you can copy a slice this way, though I guess it makes sense.
+
+    var buffer = [_]u8{0}**256;
+    const home_dir = "C:/Users/root";
+    buffer[0..home_dir.len].* = home_dir.*;
+
+In Debug mode, Zig writes 0xaa bytes to undefined memory to help debugging (i.e. by catching use of `undefined`).
+
+If you use `@This()` at file scope, it refers to some sort of file struct.
+
+You can go all the way up to `u65535`!
+
+> Zig supports arbitrary bit-width integers, referenced by using an identifier of i or u followed by digits. For example, the identifier i7 refers to a signed 7-bit integer. The maximum allowed bit-width of an integer type is 65535. For signed integer types, Zig uses a two's complement representation.
+
+You can use `std.math.minInt` and `maxInt` to get the min/max values for a type.
+
+So maybe there isn't a way to use `"hello"` for array literals:
+
+    // array literal
+    const message = [_]u8{ 'h', 'e', 'l', 'l', 'o' };
+
+This is how you modify an array in a loop without going through the index:
+
+    for (slice) |*item| {
+        item.* = whatever;
+    }
+
+Pointers:
+
+- `*T`: pointer to a single item
+- `[*]T`: pointer to many (unknown number) of items
+- `*[N]T`: pointer to N items
+- `[*:x]T`: pointer to a number of items determined by a sentinel
+- `[]T`: slice, has a pointer of type `[*]T` and a `len`.
+
+> In Zig, we generally prefer Slices rather than Sentinel-Terminated Pointers.
+
+Both arrays and slices have a `len`, which is comptime-known in arrays but runtime-known in slices.
+
+This is a trick for "slice by length" and allows more optimizations than `runtime_start + length`:
+
+    const array_ptr_len = array[runtime_start..][0..length];
+
+
 ## Warmup
 
 Following:
