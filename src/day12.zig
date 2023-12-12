@@ -129,6 +129,21 @@ fn numMatchRec(pat: []const u8, nums: []u8) u64 {
     return count;
 }
 
+fn unfold(inBuf: []const u8, outBuf: []u8) []u8 {
+    var i: usize = 0;
+    for (0..5) |n| {
+        if (n > 0) {
+            outBuf[i] = '?';
+            i += 1;
+        }
+        for (inBuf) |c| {
+            outBuf[i] = c;
+            i += 1;
+        }
+    }
+    return outBuf[0..i];
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     _ = allocator;
     const filename = args[0];
@@ -137,6 +152,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var iter = try bufIter.iterLines(filename);
     var intBuf: [30]u8 = undefined;
     var sum: u64 = 0;
+    var sum2: u64 = 0;
     while (try iter.next()) |line| {
         var n = std.mem.count(u8, line, "?");
         maxQ = @max(maxQ, n);
@@ -145,16 +161,32 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         var nums = try util.extractIntsIntoBuf(u8, parts.rest, &intBuf);
         var pat = parts.head;
         std.debug.print("{s} {d} {d}\n", .{ pat, n, nums.len });
-        const count = numMatching(pat, nums);
-        sum += count;
+        // const count = numMatching(pat, nums);
+        // sum += count;
+        // std.debug.print(" -> {d}\n", .{count});
+        var count = numMatchRec(pat, nums);
         std.debug.print(" -> {d}\n", .{count});
-        var count2 = numMatchRec(pat, nums);
-        std.debug.print(" -> {d}\n", .{count2});
-        assert(count == count2);
+        // assert(count == count2);
+        sum += count;
+
+        var numNums = nums.len;
+        for (0..4) |_| {
+            for (nums) |num| {
+                intBuf[numNums] = num;
+                numNums += 1;
+            }
+        }
+        nums = intBuf[0..numNums];
+
+        var unfoldBuf: [1000]u8 = undefined;
+        var unfolded = unfold(pat, &unfoldBuf);
+        std.debug.print(" -> {s} {any}\n", .{ unfolded, nums });
+        var count2 = numMatchRec(unfolded, nums);
+        sum2 += count2;
     }
 
     std.debug.print("part 1: {d}\n", .{sum});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 2: {d}\n", .{sum2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
