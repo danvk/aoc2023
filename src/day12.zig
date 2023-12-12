@@ -167,11 +167,68 @@ fn unfold(inBuf: []const u8, outBuf: []u8) []u8 {
     return outBuf[0..i];
 }
 
+fn minLenForNums(nums: []u8) u8 {
+    var sum: u8 = 0;
+    for (nums) |num| {
+        sum += num;
+    }
+    return @intCast(sum + nums.len - 1);
+}
+
 fn numMatchSplit(pat: []const u8, nums: []u8) u64 {
-    if (nums.len <= 2) {
+    if (nums.len < 2) {
         return numMatchRec(pat, nums);
     }
-    return 0;
+
+    var splitI = nums.len / 2;
+    var nums1 = nums[0..splitI];
+    var nums2 = nums[splitI..];
+    assert(nums1.len > 0);
+    assert(nums2.len > 0);
+    std.debug.print("split {any} -> {any} / {any}\n", .{ nums, nums1, nums2 });
+
+    const minLen1 = minLenForNums(nums1);
+    const minLen2 = minLenForNums(nums2);
+    if (minLen1 + minLen2 + 1 > pat.len) {
+        return 0;
+    }
+
+    // 012345678
+    // #.#.#.#.#
+    // minLen1 = 2
+    // minLen2 = 2
+    // pat.len = 8
+    // 2..6
+    var count: u64 = 0;
+    for (minLen1..(pat.len - minLen2 + 1)) |i| {
+        var c = pat[i];
+        if (c == '#') {
+            // must be a '.' or '?' in between the splits.
+            continue;
+        }
+
+        var splitCount: u64 = 0;
+        const pat1 = pat[0..i];
+        const pat2 = pat[(i + 1)..];
+        const count1 = numMatchSplit(pat1, nums1);
+        std.debug.print("{d}:{s} / {any} -> {d}\n", .{ i, pat1, nums1, count1 });
+        if (count1 > 0) {
+            const count2 = numMatchSplit(pat2, nums2);
+            splitCount = count1 * count2;
+            if (splitCount > 0) {
+                std.debug.print("{d}:{s} / {any} -> {d}\n", .{ i, pat2, nums2, count2 });
+            }
+        }
+        count += splitCount;
+    }
+
+    var checkCount = numMatchRec(pat, nums);
+    if (count != checkCount) {
+        std.debug.print("mismatch: {s} {any} {d} != {d}\n", .{ pat, nums, count, checkCount });
+        assert(false);
+    }
+
+    return count;
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -216,10 +273,12 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         var unfolded = unfold(pat, &unfoldBuf);
         std.debug.print(" -> {s} {any}\n", .{ unfolded, nums });
         var count2 = numMatchRec(unfolded, nums);
+        var count3 = numMatchSplit(unfolded, nums);
         sum2 += count2;
         numLines += 1;
         const elapsed = timer.read() / 1_000_000_000;
-        std.debug.print(" -> {d} {d}s\n", .{ count2, elapsed });
+        std.debug.print(" -> {d} {d} {d}s\n", .{ count2, count3, elapsed });
+        assert(count2 == count3);
     }
 
     std.debug.print("part 1: {d}\n", .{sum});
@@ -227,9 +286,20 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
+const expectEqual = std.testing.expectEqual;
 const expect = std.testing.expect;
 
 test "match" {
     var counts = [_]u8{ 1, 1, 3 };
     try expect(matches("#.#.###", &counts));
+}
+
+test "split" {
+    var pat = "###???";
+    var nums = [_]u8{ 3, 1 };
+    // The two are:
+    // ###.#.
+    // ###..#
+
+    try expectEqual(numMatchSplit(pat[0..], &nums), 2);
 }
