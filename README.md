@@ -50,6 +50,8 @@ This went for ~4 minutes without finishing in an optimized build.  I'm pretty en
 
 So there's some double-counting here. Can I say that the splits must end/start with a `#`? Maybe we can say that the right one must start with a `#`.
 
+5071883216318
+
 ### Day 11 (22119 / 19890)
 
 This was a welcome reprieve after yesterday. The trick is just to shift the coordinates of the galaxies, rather than trying to construct an enormous grid. The distance is just manhattan distance, regardless of how the AoC site chooses to display it. I had an off-by-one error on part 2: you add 999,999 to the coordinates, not 1,000,000.
