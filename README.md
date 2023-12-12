@@ -16,6 +16,10 @@ Definitely the trickiest so far and my best finish so far. I hopped on the in-fl
 
 It looks like my initial solution to part 2 was just fine, I only needed to memoize it. That's what the #1 solution did (in TypeScript!): https://gist.github.com/Nathan-Fenner/781285b77244f06cf3248a04869e7161
 
+- Start: 8:32 AM
+- ⭐️: 9:02 AM
+- ⭐️⭐️: 11:35 AM
+
 Some notes from debugging follow…
 
 `???????#??.?#????##? { 1, 2, 3, 3, 2 }`
