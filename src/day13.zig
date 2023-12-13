@@ -15,8 +15,8 @@ fn findMirrorY(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) ?i32 
     for (0..maxY) |myu| {
         const mirrorY: i32 = @intCast(myu);
         var isMatch = true;
-        for (0..maxY) |y| {
-            for (0..maxX) |x| {
+        for (0..maxY + 1) |y| {
+            for (0..maxX + 1) |x| {
                 var c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }).?;
                 var my: i32 = mirrorY + 1 + (mirrorY - @as(i32, @intCast(y)));
 
@@ -37,8 +37,8 @@ fn findMirrorX(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) ?i32 
     for (0..maxX) |mxu| {
         const mirrorX: i32 = @intCast(mxu);
         var isMatch = true;
-        for (0..maxY) |y| {
-            for (0..maxX) |x| {
+        for (0..maxY + 1) |y| {
+            for (0..maxX + 1) |x| {
                 var c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }).?;
                 var mx: i32 = mirrorX + 1 + (mirrorX - @as(i32, @intCast(x)));
 
@@ -79,11 +79,13 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
             }
             maxY = y;
             y += 1;
+            std.debug.print("{s}\n", .{line});
         }
 
         var mirrorX = findMirrorX(grid, maxX, maxY);
         var mirrorY = findMirrorY(grid, maxX, maxY);
         std.debug.print("mirrorX: {?d} / y: {?d}\n", .{ mirrorX, mirrorY });
+        assert((mirrorX == null) != (mirrorY == null));
         sum += 100 * (mirrorY orelse 0) + (mirrorX orelse 0);
     }
 

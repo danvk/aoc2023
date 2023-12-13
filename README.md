@@ -7,6 +7,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 ## Day by day
 
 44521 is too high
+44507 is too high
 
 ### Day 12 (17515 / 9282)
 
