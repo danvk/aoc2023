@@ -9,6 +9,12 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 44521 is too high
 44507 is too high
 
+I was looping from (0..maxX) instead of (0..maxX+1) so I found mirrors that shouldn't have been there and was confused about what to do when there was both a vertical and horizontal mirror.
+
+Have some kind of problem with part 2 also. Interesting that my `printGrid` from day 22 in 2017 took an allocator. I definitely wouldn't do that now!
+
+Ah, I think I need to specifically exclude the previous mirror?
+
 ### Day 12 (17515 / 9282)
 
 Part 1: brute force (try both possibilities for ?). I did this by enumerating all the numbers from 0..2^n and using bit operations, one of my favorite tricks. There were at most 18 `?` chars and 2^18 isn't that many.
