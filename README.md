@@ -6,6 +6,8 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+44521 is too high
+
 ### Day 12 (17515 / 9282)
 
 Part 1: brute force (try both possibilities for ?). I did this by enumerating all the numbers from 0..2^n and using bit operations, one of my favorite tricks. There were at most 18 `?` chars and 2^18 isn't that many.
@@ -65,6 +67,8 @@ This went for ~4 minutes without finishing in an optimized build.  I'm pretty en
   5:###?? / { 3 } -> 1
 
 So there's some double-counting here. Can I say that the splits must end/start with a `#`? Maybe we can say that the right one must start with a `#`. YES!
+
+Is there a canonical way to memoize a function in Zig?
 
 ### Day 11 (22119 / 19890)
 
@@ -206,6 +210,8 @@ Nitty gritty questions:
 - Inferred error return types mostly let you not think about errors. But this doesn't really feel that different than exceptions.
 - "Detectable undefined behavior" or whatever seems like a useful concept.
 - Slices are nice. Especially in the context of strings, they feel like a revival of the "Pascal string" as opposed to the null-terminated C string.
+- Understanding that everything is passed by value and copied (including structs) was the key insight for understanding Zig. A slice is a struct with a len and a ptr, and these are copied when you assign to a slice. I think I had a similar insight about either Go or Rust in the past.
+- Hash maps are just hard to use in Zig since you have to think about who owns the keys.
 
 ## References
 
@@ -259,6 +265,7 @@ This is a trick for "slice by length" and allows more optimizations than `runtim
 
     const array_ptr_len = array[runtime_start..][0..length];
 
+A `packed struct` guarantees that a `u5` will use exactly 5 bits of memory, and a `bool` will use exactly 1.
 
 ## Warmup
 
