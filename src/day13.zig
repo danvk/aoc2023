@@ -61,7 +61,19 @@ fn findMirrorX(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, exclu
     return null;
 }
 
-// TODO: implement transpose
+fn transpose(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, out: *std.AutoHashMap(Coord, u8)) !void {
+    out.clearAndFree();
+    for (0..maxY + 1) |y| {
+        const yi: i32 = @intCast(y);
+        for (0..maxX + 1) |x| {
+            const xi: i32 = @intCast(x);
+            var mc = grid.get(Coord{ .x = xi, .y = yi });
+            if (mc) |c| {
+                try out.put(Coord{ .x = yi, .y = xi }, c);
+            }
+        }
+    }
+}
 
 fn printGrid(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) void {
     for (0..maxY + 1) |y| {
@@ -80,6 +92,8 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var sum1: i32 = 0;
     var sum2: i32 = 0;
     var isLast = false;
+    var trans = std.AutoHashMap(Coord, u8).init(allocator);
+    defer trans.deinit();
     while (!isLast) {
         var y: usize = 0;
         var grid = std.AutoHashMap(Coord, u8).init(allocator);
@@ -103,6 +117,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
         var rawMirrorX = findMirrorX(grid, maxX, maxY, null);
         var rawMirrorY = findMirrorY(grid, maxX, maxY, null);
+        try transpose(grid, maxX, maxY, &trans);
+        var reMirrorY = findMirrorX(trans, maxY, maxX, null);
+        assert(rawMirrorY == reMirrorY);
         assert((rawMirrorX == null) != (rawMirrorY == null));
         const count1: i32 = 100 * (rawMirrorY orelse 0) + (rawMirrorX orelse 0);
         assert(count1 != 0);

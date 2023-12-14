@@ -43,7 +43,7 @@ fn findPartNums(grid: std.AutoHashMap(Coord, u8), extent: Coord) u32 {
                 if (inNum) {
                     inNum = false;
                     if (isPart) {
-                        // std.debug.print("Adding part num: {d}\n", .{curNum});
+                        std.debug.print("{d}\n", .{curNum});
                         total += curNum;
                     }
                     isPart = false;

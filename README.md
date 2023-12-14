@@ -6,6 +6,10 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 13 (23195 / 23061)
+
+I found today incredibly annoying. Lots of off-by-ones and potential to misunderstand the problem (which I certainly did!). I should probably write a transpose function for grids.
+
 44521 is too high
 44507 is too high
 
