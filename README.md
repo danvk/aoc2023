@@ -31,7 +31,7 @@ Part 2: That clearly wasn't going to work. I tried going recursively character b
 
 Definitely the trickiest so far and my best finish so far. I hopped on the in-flight WiFi to submit my answer for part 2 (we're over the Caribbean on our way to Costa Rica).
 
-It looks like my initial solution to part 2 was just fine, I only needed to memoize it. That's what the #1 solution did (in TypeScript!): https://gist.github.com/Nathan-Fenner/781285b77244f06cf3248a04869e7161
+It looks like my initial solution to part 2 was just fine, I only needed to memoize it. That's what the #1 solution did (in TypeScript!): https://gist.github.com/Nathan-Fenner/781285b77244f06cf3248a04869e7161 I'm pretty proud of coming up with what seems like an unusual but good solution for part 2.
 
 - Start: 8:32 AM
 - ⭐️: 9:02 AM
