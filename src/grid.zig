@@ -70,7 +70,7 @@ pub fn rotCW(grid: *std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) !void 
 
     const midX = 1 + (maxX >> 1);
     const midY = 1 + (maxY >> 1);
-    std.debug.print("midX: {d}, midY: {d}\n", .{ midX, midY });
+    // std.debug.print("midX: {d}, midY: {d}\n", .{ midX, midY });
 
     for (0..(midX)) |xu| {
         const x: i32 = @intCast(xu);

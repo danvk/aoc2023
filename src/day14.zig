@@ -87,7 +87,23 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     // try shiftUp(&grid, maxX, maxY);
     // const sum1 = weight(grid, maxX, maxY);
-    try spin(&grid, maxX);
+    var timer = try std.time.Timer.start();
+    for (0..1000000000) |n| {
+        try spin(&grid, maxX);
+        if (n % 10_000 == 0) {
+            const elapsed = timer.read() / 1_000_000_000;
+            const w = weight(grid, maxX, maxY);
+            std.debug.print("{d}: {d}s, weight={d}\n", .{ n, elapsed, w });
+        }
+        if ((n < 100) or (n > 100_000 and n < 100_999)) {
+            const w = weight(grid, maxX, maxY);
+            std.debug.print("{d} {d}\n", .{ n + 1, w });
+        }
+        if (n == 101_000) {
+            break;
+        }
+    }
+
     const sum2 = weight(grid, maxX, maxY);
 
     printGrid(grid, maxX, maxY, '.');

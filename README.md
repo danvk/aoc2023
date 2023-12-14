@@ -6,6 +6,59 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+Going at ~100,000 spins/sec for the sample. That would translate to 1000 second to get to 1B, not so bad! But there must be a pattern.
+
+0 100982 65
+1 100983 63
+2 100984 68
+3 100985 69
+4 100986 69
+5 100987 65
+6 100988 64
+
+period of length 7
+
+My sample goes at ~1,000 spins/sec. So that would take a long time to get to one billion! Hopefully the cycle is shorter than 1000, which is all I'm printing out.
+
+ 0 100008 84239
+ 1 100009 84206
+ 2 100010 84202
+ 3 100011 84191
+ 4 100012 84210
+ 5 100013 84220
+ 6 100014 84237
+ 7 100015 84244
+ 8 100016 84276
+ 9 100017 84294
+10 100018 84328
+11 100019 84341
+12 100020 84341
+13 100021 84332
+14 100022 84332
+15 100023 84314
+16 100024 84299
+17 100025 84268
+
+100026 84239
+100027 84206
+100028 84202
+100029 84191
+100030 84210
+100031 84220
+100032 84237
+100033 84244
+100034 84276
+100035 84294
+100036 84328
+100037 84341
+100038 84341
+100039 84332
+100040 84332
+100041 84314
+
+cycle length is 18
+
+
 ### Day 13 (23195 / 23061)
 
 I found today incredibly annoying. Lots of off-by-ones and potential to misunderstand the problem (which I certainly did!). I should probably write a transpose function for grids.
