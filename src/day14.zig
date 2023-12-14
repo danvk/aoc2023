@@ -16,7 +16,7 @@ const assert = std.debug.assert;
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var gridResult = try readGrid(allocator, filename, '.');
+    var gridResult = try readGrid(allocator, filename, 'x');
     var grid = gridResult.grid;
     defer grid.deinit();
     const maxX = gridResult.maxX;
@@ -24,6 +24,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     printGrid(grid, maxX, maxY, '.');
     std.debug.print("---\n", .{});
+
+    assert(maxX == maxY);
+    assert(maxX % 2 == 1);
 
     var sum1: i32 = 0;
     for (0..(1 + maxX)) |xu| {
