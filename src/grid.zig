@@ -36,3 +36,13 @@ pub fn readGrid(allocator: std.mem.Allocator, filename: []const u8, blankChar: ?
         .extent = Coord{ .x = @intCast(maxX), .y = @intCast(maxY) },
     };
 }
+
+pub fn printGrid(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, blankChar: ?u8) void {
+    for (0..maxY + 1) |y| {
+        for (0..maxX + 1) |x| {
+            var c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }) orelse blankChar orelse ' ';
+            std.debug.print("{c}", .{c});
+        }
+        std.debug.print("\n", .{});
+    }
+}
