@@ -15,6 +15,10 @@ Have some kind of problem with part 2 also. Interesting that my `printGrid` from
 
 Ah, I think I need to specifically exclude the previous mirror?
 
+That gets me the right answer for the sample, but gives me 23236 for my input which is too low. It looks like I'm not finding a smudge correction for some inputs.
+
+-> I think I need to exclude the original flip at a lower level than I am.
+
 ### Day 12 (17515 / 9282)
 
 Part 1: brute force (try both possibilities for ?). I did this by enumerating all the numbers from 0..2^n and using bit operations, one of my favorite tricks. There were at most 18 `?` chars and 2^18 isn't that many.

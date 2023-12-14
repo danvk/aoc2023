@@ -11,9 +11,12 @@ const assert = std.debug.assert;
 //     defer arena.deinit();
 //     var allocator = arena.allocator();
 
-fn findMirrorY(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) ?i32 {
+fn findMirrorY(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, exclude: ?i32) ?i32 {
     for (0..maxY) |myu| {
         const mirrorY: i32 = @intCast(myu);
+        if (1 + mirrorY == exclude) {
+            continue;
+        }
         var isMatch = true;
         for (0..maxY + 1) |y| {
             for (0..maxX + 1) |x| {
@@ -33,9 +36,12 @@ fn findMirrorY(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) ?i32 
     return null;
 }
 
-fn findMirrorX(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) ?i32 {
+fn findMirrorX(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, exclude: ?i32) ?i32 {
     for (0..maxX) |mxu| {
         const mirrorX: i32 = @intCast(mxu);
+        if (1 + mirrorX == exclude) {
+            continue;
+        }
         var isMatch = true;
         for (0..maxY + 1) |y| {
             for (0..maxX + 1) |x| {
@@ -71,7 +77,8 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
     var iter = try bufIter.iterLines(filename);
-    var sum: i32 = 0;
+    var sum1: i32 = 0;
+    var sum2: i32 = 0;
     var isLast = false;
     while (!isLast) {
         var y: usize = 0;
@@ -94,51 +101,67 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
             // std.debug.print("{s}\n", .{line});
         }
 
-        var rawMirrorX = findMirrorX(grid, maxX, maxY);
-        var rawMirrorY = findMirrorY(grid, maxX, maxY);
-        // printGrid(grid, maxX, maxY);
+        var rawMirrorX = findMirrorX(grid, maxX, maxY, null);
+        var rawMirrorY = findMirrorY(grid, maxX, maxY, null);
+        assert((rawMirrorX == null) != (rawMirrorY == null));
+        const count1: i32 = 100 * (rawMirrorY orelse 0) + (rawMirrorX orelse 0);
+        assert(count1 != 0);
+        sum1 += count1;
+
+        printGrid(grid, maxX, maxY);
+        std.debug.print("raw: {?d}/{?d} -> {d}\n", .{ rawMirrorX, rawMirrorY, count1 });
 
         var thisSum: i32 = 0;
-        outer: for (0..maxX + 1) |xi| {
+        for (0..maxX + 1) |xi| {
             for (0..maxY + 1) |yi| {
                 const k = Coord{ .x = @intCast(xi), .y = @intCast(yi) };
                 const c = grid.get(k).?;
-                // std.debug.print("set {any} was {c}\n", .{ k, c });
                 try grid.put(k, if (c == '#') '.' else '#');
-                var mirrorX = findMirrorX(grid, maxX, maxY);
-                var mirrorY = findMirrorY(grid, maxX, maxY);
+                var mirrorX = findMirrorX(grid, maxX, maxY, rawMirrorX);
+                var mirrorY = findMirrorY(grid, maxX, maxY, rawMirrorY);
+                var count2: i32 = 100 * (mirrorY orelse 0) + (mirrorX orelse 0);
+                std.debug.print("set {any} was {c} -> {?d}/{?d} {d}\n", .{ k, c, mirrorX, mirrorY, count2 });
                 // printGrid(grid, maxX, maxY);
                 try grid.put(k, c);
 
                 if (mirrorX == null and mirrorY == null) {
                     continue;
                 }
-
-                if (mirrorX != rawMirrorX or mirrorY != rawMirrorY) {
+                if (count1 != count2) {
+                    if (mirrorX != null and mirrorY != null) {
+                        count2 -= count1;
+                    }
                     //std.debug.print("{any} mirrorX: {?d} / y: {?d}\n", .{ k, mirrorX, mirrorY });
-                    assert((mirrorX == rawMirrorX) != (mirrorY == rawMirrorY));
-                    var countX = if (mirrorX == null or mirrorX == rawMirrorX) 0 else (mirrorX orelse 0);
-                    var countY = if (mirrorY == null or mirrorY == rawMirrorY) 0 else (mirrorY orelse 0);
-                    if (countX != 0) {
-                        std.debug.print("match! {any} mirrorX: {?d}\n", .{ k, countX });
+                    // assert((mirrorX == rawMirrorX) != (mirrorY == rawMirrorY));
+                    // var countX = if (mirrorX == null or mirrorX == rawMirrorX) 0 else (mirrorX orelse 0);
+                    // var countY = if (mirrorY == null or mirrorY == rawMirrorY) 0 else (mirrorY orelse 0);
+                    // if (countX != 0) {
+                    //     std.debug.print("match! {any} mirrorX: {?d}\n", .{ k, countX });
+                    // }
+                    // if (countY != 0) {
+                    //     std.debug.print("match! {any} mirrorY: {?d}\n", .{ k, countY });
+                    // }
+                    // if (countX == 0 and countY == 0) {
+                    //     std.debug.print("should not happen; x:{?d}/{?d}, y:{?d}/{?d}\n", .{ rawMirrorX, mirrorX, rawMirrorY, mirrorY });
+                    // }
+                    // assert(countX == 0 or countY == 0);
+                    // const newSum: i32 = 100 * (countY) + (countX);
+                    if (thisSum != 0) {
+                        assert(thisSum == count2); // should be unique
                     }
-                    if (countY != 0) {
-                        std.debug.print("match! {any} mirrorY: {?d}\n", .{ k, countY });
-                    }
-                    if (countX == 0 and countY == 0) {
-                        std.debug.print("should not happen; x:{?d}/{?d}, y:{?d}/{?d}\n", .{ rawMirrorX, mirrorX, rawMirrorY, mirrorY });
-                    }
-                    thisSum = 100 * (countY) + (countX);
-                    break :outer;
+                    std.debug.print("{any}: {?d} / {?d} +{d}\n", .{ k, mirrorX, mirrorY, count2 });
+                    thisSum = count2;
+                    // break :outer;
                 }
-                // std.debug.print("---\n\n", .{});
             }
         }
-        sum += thisSum;
+        assert(thisSum != 0);
+        sum2 += thisSum;
+        std.debug.print("---\n", .{});
     }
 
-    std.debug.print("part 1: {d}\n", .{sum});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 1: {d}\n", .{sum1});
+    std.debug.print("part 2: {d}\n", .{sum2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
