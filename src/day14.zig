@@ -3,6 +3,7 @@ const bufIter = @import("./buf-iter.zig");
 const util = @import("./util.zig");
 const readGrid = @import("./grid.zig").readGrid;
 const printGrid = @import("./grid.zig").printGrid;
+const rotCW = @import("./grid.zig").rotCW;
 const Coord = @import("./dir.zig").Coord;
 
 const assert = std.debug.assert;
@@ -58,6 +59,17 @@ pub fn weight(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) i32 {
     return sum;
 }
 
+fn spin(grid: *std.AutoHashMap(Coord, u8), dim: usize) !void {
+    try shiftUp(grid, dim, dim); // shift north
+    try rotCW(grid, dim, dim);
+    try shiftUp(grid, dim, dim); // shift west
+    try rotCW(grid, dim, dim);
+    try shiftUp(grid, dim, dim); // shift south
+    try rotCW(grid, dim, dim);
+    try shiftUp(grid, dim, dim); // shift east
+    try rotCW(grid, dim, dim);
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -73,14 +85,16 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     assert(maxX == maxY);
     assert(maxX % 2 == 1);
 
-    try shiftUp(&grid, maxX, maxY);
-    const sum1 = weight(grid, maxX, maxY);
+    // try shiftUp(&grid, maxX, maxY);
+    // const sum1 = weight(grid, maxX, maxY);
+    try spin(&grid, maxX);
+    const sum2 = weight(grid, maxX, maxY);
 
     printGrid(grid, maxX, maxY, '.');
     std.debug.print("---\n", .{});
 
-    std.debug.print("part 1: {d}\n", .{sum1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    // std.debug.print("part 1: {d}\n", .{sum1});
+    std.debug.print("part 2: {d}\n", .{sum2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
