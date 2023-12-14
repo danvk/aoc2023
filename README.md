@@ -6,6 +6,14 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 14 (28144 / 21743)
+
+Not too bad. You can rotate the grid clockwise to re-use your "shift" implementation from part 1. Then you just have to find a cycle on part 2.
+
+- Start: 4:38 PM
+- ⭐️: 4:51 PM
+- ⭐️⭐️: 5:33 PM
+
 Going at ~100,000 spins/sec for the sample. That would translate to 1000 second to get to 1B, not so bad! But there must be a pattern.
 
 0 100982 65
@@ -39,25 +47,7 @@ My sample goes at ~1,000 spins/sec. So that would take a long time to get to one
 16 100024 84299
 17 100025 84268
 
-100026 84239
-100027 84206
-100028 84202
-100029 84191
-100030 84210
-100031 84220
-100032 84237
-100033 84244
-100034 84276
-100035 84294
-100036 84328
-100037 84341
-100038 84341
-100039 84332
-100040 84332
-100041 84314
-
 cycle length is 18
-
 
 ### Day 13 (23195 / 23061)
 
