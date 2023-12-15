@@ -10,6 +10,8 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 Today was straightforward. Part 2 wasn't hard and didn't require much thought, just care to follow the instructions.
 
+Definitely convenient to read the whole file into memory and then represent strings as slices into that since you don't have to worry about allocating or freeing those strings.
+
 - Start: 2:11 PM
 - ⭐️: 2:18 PM
 - ⭐️⭐️: 2:51 PM
