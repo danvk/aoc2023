@@ -6,6 +6,14 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 15 (29290 / 25436)
+
+Today was straightforward. Part 2 wasn't hard and didn't require much thought, just care to follow the instructions.
+
+- Start: 2:11 PM
+- ⭐️: 2:18 PM
+- ⭐️⭐️: 2:51 PM
+
 ### Day 14 (28144 / 21743)
 
 Not too bad. You can rotate the grid clockwise to re-use your "shift" implementation from part 1. Then you just have to find a cycle on part 2.
