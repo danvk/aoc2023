@@ -87,7 +87,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
 
-    const contents = try util.readInputFile(filename, allocator);
+    const contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
 
     var parts = std.ArrayList([]const u8).init(allocator);

@@ -128,7 +128,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     var allocator = arena.allocator();
     const filename = args[0];
 
-    var contents = try util.readInputFile(filename, allocator);
+    var contents = try util.readInputFile(allocator, filename);
     var lines = std.ArrayList([]const u8).init(allocator);
     try util.splitIntoArrayList(contents, "\n", &lines);
 

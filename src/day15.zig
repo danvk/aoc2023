@@ -36,85 +36,86 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var allocator = arena.allocator();
     const filename = args[0];
 
-    var iter = try bufIter.iterLines(filename);
+    const contents = try util.readInputFile(allocator, filename);
+    defer allocator.free(contents);
+
     var sum: u64 = 0;
     var sum2: u64 = 0;
-    while (try iter.next()) |line| {
-        var parts = std.ArrayList([]const u8).init(allocator);
-        defer parts.deinit();
+    var parts = std.ArrayList([]const u8).init(allocator);
+    defer parts.deinit();
 
-        try util.splitIntoArrayList(line, ",", &parts);
-        assert(parts.items.len > 1);
-        for (parts.items) |part| {
-            const v = hash(part);
-            sum += v;
-        }
+    const line = std.mem.trimRight(u8, contents, "\r\n");
+    try util.splitIntoArrayList(line, ",", &parts);
+    assert(parts.items.len > 1);
+    for (parts.items) |part| {
+        const v = hash(part);
+        sum += v;
+    }
 
-        var boxes: [256]std.ArrayList(Lens) = undefined;
-        for (0..256) |i| {
-            boxes[i] = std.ArrayList(Lens).init(allocator);
-        }
+    var boxes: [256]std.ArrayList(Lens) = undefined;
+    for (0..256) |i| {
+        boxes[i] = std.ArrayList(Lens).init(allocator);
+    }
 
-        for (parts.items) |part| {
-            std.debug.print("After \"{s}\"\n", .{part});
+    for (parts.items) |part| {
+        std.debug.print("After \"{s}\"\n", .{part});
 
-            var partsBuf: [2][]const u8 = undefined;
-            var partParts = util.splitAnyIntoBuf(part, "-=", &partsBuf);
-            var label = partParts[0];
-            const v = hash(label);
-            if (std.mem.endsWith(u8, part, "-")) {
-                var maybeIdx: ?usize = null;
-                var items = boxes[v].items;
-                for (items, 0..) |lens, i| {
-                    if (std.mem.eql(u8, lens.label, label)) {
-                        maybeIdx = i;
-                        break;
-                    }
+        var partsBuf: [2][]const u8 = undefined;
+        var partParts = util.splitAnyIntoBuf(part, "-=", &partsBuf);
+        var label = partParts[0];
+        const v = hash(label);
+        if (std.mem.endsWith(u8, part, "-")) {
+            var maybeIdx: ?usize = null;
+            var items = boxes[v].items;
+            for (items, 0..) |lens, i| {
+                if (std.mem.eql(u8, lens.label, label)) {
+                    maybeIdx = i;
+                    break;
                 }
-                if (maybeIdx) |idx| {
-                    for (idx..items.len - 1) |i| {
-                        items[i] = items[i + 1];
-                    }
-                    _ = boxes[v].pop();
+            }
+            if (maybeIdx) |idx| {
+                for (idx..items.len - 1) |i| {
+                    items[i] = items[i + 1];
                 }
-            } else if (part[part.len - 2] == '=') {
-                // insert
-                var focalLen = try std.fmt.parseInt(u8, part[part.len - 1 ..], 10);
-                var items = boxes[v].items;
-                var maybeIdx: ?usize = null;
-                for (items, 0..) |lens, i| {
-                    if (std.mem.eql(u8, lens.label, label)) {
-                        maybeIdx = i;
-                        break;
-                    }
+                _ = boxes[v].pop();
+            }
+        } else if (part[part.len - 2] == '=') {
+            // insert
+            var focalLen = try std.fmt.parseInt(u8, part[part.len - 1 ..], 10);
+            var items = boxes[v].items;
+            var maybeIdx: ?usize = null;
+            for (items, 0..) |lens, i| {
+                if (std.mem.eql(u8, lens.label, label)) {
+                    maybeIdx = i;
+                    break;
                 }
-                const lens = Lens{ .label = label, .focalLen = focalLen };
-                if (maybeIdx) |idx| {
-                    items[idx] = lens;
-                } else {
-                    try boxes[v].append(lens);
-                }
+            }
+            const lens = Lens{ .label = label, .focalLen = focalLen };
+            if (maybeIdx) |idx| {
+                items[idx] = lens;
             } else {
-                unreachable;
+                try boxes[v].append(lens);
             }
-            for (boxes, 0..) |box, i| {
-                if (box.items.len > 0) {
-                    std.debug.print("Box {d}: ", .{i});
-                    for (box.items) |item| {
-                        printLens(item);
-                    }
-                    std.debug.print("\n", .{});
-                }
-            }
-            std.debug.print("\n", .{});
+        } else {
+            unreachable;
         }
+        // for (boxes, 0..) |box, i| {
+        //     if (box.items.len > 0) {
+        //         std.debug.print("Box {d}: ", .{i});
+        //         for (box.items) |item| {
+        //             printLens(item);
+        //         }
+        //         std.debug.print("\n", .{});
+        //     }
+        // }
+        // std.debug.print("\n", .{});
+    }
 
-        for (boxes, 1..) |box, boxNum| {
-            for (box.items, 1..) |lens, slotNum| {
-                var power = boxNum * slotNum * lens.focalLen;
-                std.debug.print("{s}: {d} * {d} * {d} = {d}\n", .{ lens.label, boxNum, slotNum, lens.focalLen, power });
-                sum2 += power;
-            }
+    for (boxes, 1..) |box, boxNum| {
+        for (box.items, 1..) |lens, slotNum| {
+            var power = boxNum * slotNum * lens.focalLen;
+            std.debug.print("{s}: {d} * {d} * {d} = {d}\n", .{ lens.label, boxNum, slotNum, lens.focalLen, power });
+            sum2 += power;
         }
     }
 

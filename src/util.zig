@@ -90,7 +90,7 @@ pub fn splitAnyIntoBuf(str: []const u8, delims: []const u8, buf: [][]const u8) [
     return buf[0..i];
 }
 
-pub fn readInputFile(filename: []const u8, allocator: std.mem.Allocator) ![]const u8 {
+pub fn readInputFile(allocator: std.mem.Allocator, filename: []const u8) ![]const u8 {
     const file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
     const stat = try file.stat();

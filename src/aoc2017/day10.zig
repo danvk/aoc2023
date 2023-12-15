@@ -102,7 +102,7 @@ fn printDenseHash(els: []const u8) void {
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
-    const contents = try util.readInputFile(filename, allocator);
+    const contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
     var lengths = std.ArrayList(u8).init(allocator);
     defer lengths.deinit();

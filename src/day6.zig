@@ -27,7 +27,7 @@ fn numWinners(time: u64, distance: u64) u64 {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var contents = try util.readInputFile(filename, allocator);
+    var contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
 
     var lines = util.splitOne(contents, "\n").?;

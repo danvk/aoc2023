@@ -60,7 +60,7 @@ fn getGarbage(line: []const u8) u32 {
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
-    const contents = try util.readInputFile(filename, allocator);
+    const contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
     std.debug.print("part1/2: {any}\n", .{scoreStream(contents)});
 }
