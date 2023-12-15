@@ -9,7 +9,7 @@ pub const ReadByLineIterator = struct {
     reader: ReaderType,
     buf_reader: BufReaderType,
     stream: ?BufReaderReaderType,
-    buf: [4096]u8,
+    buf: [32768]u8,
 
     pub fn next(self: *@This()) !?[]u8 {
         if (self.stream == null) {

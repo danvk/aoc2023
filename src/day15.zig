@@ -25,15 +25,23 @@ fn hash(str: []const u8) u8 {
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
-    _ = allocator;
     const filename = args[0];
 
     var iter = try bufIter.iterLines(filename);
+    var sum: u64 = 0;
     while (try iter.next()) |line| {
-        _ = line;
+        var parts = std.ArrayList([]const u8).init(allocator);
+        defer parts.deinit();
+
+        try util.splitIntoArrayList(line, ",", &parts);
+        assert(parts.items.len > 1);
+        for (parts.items) |part| {
+            const v = hash(part);
+            sum += v;
+        }
     }
 
-    // std.debug.print("part 1: {d}\n", .{sum1});
+    std.debug.print("part 1: {d}\n", .{sum});
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 
