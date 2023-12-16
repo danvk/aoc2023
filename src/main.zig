@@ -11,6 +11,7 @@ const day12 = @import("./day12.zig").main;
 const day13 = @import("./day13.zig").main;
 const day14 = @import("./day14.zig").main;
 const day15 = @import("./day15.zig").main;
+const day16 = @import("./day16.zig").main;
 const day1 = @import("./day1.zig").main;
 const day2 = @import("./day2.zig").main;
 const day3 = @import("./day3.zig").main;
@@ -33,6 +34,7 @@ const DAYS = [_]Day{
     Day{ .name = "day13", .main = day13 },
     Day{ .name = "day14", .main = day14 },
     Day{ .name = "day15", .main = day15 },
+    Day{ .name = "day16", .main = day16 },
     Day{ .name = "day1", .main = day1 },
     Day{ .name = "day2", .main = day2 },
     Day{ .name = "day3", .main = day3 },
