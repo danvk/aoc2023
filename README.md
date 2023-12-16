@@ -6,6 +6,11 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+This is pretty confusing. Why am I segfaulting?
+
+    Segmentation fault at address 0x104b7c024
+    Panicked during a panic. Aborting.
+
 ### Day 15 (29290 / 25436)
 
 Today was straightforward. Part 2 wasn't hard and didn't require much thought, just care to follow the instructions.

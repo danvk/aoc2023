@@ -1,6 +1,11 @@
 const std = @import("std");
 const bufIter = @import("./buf-iter.zig");
+const dirMod = @import("./dir.zig");
 const util = @import("./util.zig");
+const gridMod = @import("./grid.zig");
+
+const Coord = dirMod.Coord;
+const Dir = dirMod.Dir;
 
 const assert = std.debug.assert;
 
@@ -10,16 +15,131 @@ const assert = std.debug.assert;
 //     defer arena.deinit();
 //     var allocator = arena.allocator();
 
+const Beam = struct {
+    pos: Coord,
+    dir: Dir,
+};
+
+fn printBeam(beam: Beam) void {
+    std.debug.print(" ({d},{d}){any}", .{ beam.pos.x, beam.pos.y, beam.dir });
+}
+fn printBeams(beams: []Beam) void {
+    std.debug.print("{d}", .{beams.len});
+    for (beams) |beam| {
+        printBeam(beam);
+    }
+    std.debug.print("\n", .{});
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
-    _ = allocator;
     const filename = args[0];
 
-    var iter = try bufIter.iterLines(filename);
-    while (try iter.next()) |line| {
-        _ = line;
+    var gr = try gridMod.readGrid(allocator, filename, 'x');
+    var grid = gr.grid;
+    var maxX = gr.maxX;
+    var maxY = gr.maxY;
+    defer grid.deinit();
+
+    var beams = std.ArrayList(Beam).init(allocator);
+    defer beams.deinit();
+
+    var activated = std.AutoHashMap(Coord, void).init(allocator);
+    defer activated.deinit();
+
+    var prevBeams = std.AutoHashMap(Beam, void).init(allocator);
+    defer prevBeams.deinit();
+
+    try beams.append(Beam{ .pos = Coord{ .x = 0, .y = 0 }, .dir = Dir.right });
+
+    while (beams.items.len > 0) {
+        //std.debug.print("beams: {any}\n", .{beams.items});
+        printBeams(beams.items);
+        // advance the beam
+        var toRemove = std.ArrayList(usize).init(allocator);
+        defer toRemove.deinit();
+        for (0..beams.items.len) |i| {
+            const beam = beams.items[i];
+            std.debug.print("g\n", .{});
+            if (prevBeams.contains(beam)) {
+                try toRemove.append(i);
+                continue;
+            }
+            std.debug.print("h\n", .{});
+            try prevBeams.put(beam, undefined);
+
+            std.debug.print("{d}: {any}\n", .{ i, beam });
+
+            var pos = beam.pos;
+            var dir = beam.dir;
+            try activated.put(pos, undefined);
+
+            pos = pos.move(dir);
+            if (pos.x < 0 or pos.y < 0 or pos.x > maxX or pos.y > maxY) {
+                std.debug.print("removing, continuing\n", .{});
+                try toRemove.append(i);
+                continue;
+            }
+
+            const c = grid.get(pos).?;
+            std.debug.print("{c}\n", .{c});
+            switch (c) {
+                '.' => {
+                    std.debug.print("a\n", .{});
+                    beams.items[i] = Beam{ .pos = pos, .dir = dir };
+                    std.debug.print("b\n", .{});
+                },
+                '\\' => {
+                    dir = switch (dir) {
+                        .left => .up,
+                        .right => .down,
+                        .up => .left,
+                        .down => .right,
+                    };
+                    beams.items[i] = Beam{ .pos = pos, .dir = dir };
+                },
+                '/' => {
+                    dir = switch (dir) {
+                        .left => .down,
+                        .right => .up,
+                        .up => .right,
+                        .down => .left,
+                    };
+                    beams.items[i] = Beam{ .pos = pos, .dir = dir };
+                },
+                '|' => {
+                    if (dir == .down or dir == .up) {
+                        beams.items[i] = Beam{ .pos = pos, .dir = dir };
+                    } else {
+                        beams.items[i] = Beam{ .pos = pos, .dir = .up };
+                        try beams.append(Beam{ .pos = pos, .dir = .down });
+                    }
+                },
+                '-' => {
+                    if (dir == .left or dir == .right) {
+                        beams.items[i] = Beam{ .pos = pos, .dir = dir };
+                    } else {
+                        std.debug.print("c\n", .{});
+                        beams.items[i] = Beam{ .pos = pos, .dir = .left };
+                        std.debug.print("d\n", .{});
+                        try beams.append(Beam{ .pos = pos, .dir = .right });
+                        std.debug.print("e\n", .{});
+                    }
+                },
+                else => unreachable,
+            }
+        }
+        std.debug.print("f\n", .{});
+
+        std.mem.reverse(usize, toRemove.items);
+        for (toRemove.items) |i| {
+            std.debug.print("removing {d} from list of len {d}\n", .{ i, beams.items.len });
+            _ = beams.swapRemove(i);
+        }
     }
 
-    // std.debug.print("part 1: {d}\n", .{sum1});
+    var sum1 = activated.count();
+
+    std.debug.print("part 1: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 
