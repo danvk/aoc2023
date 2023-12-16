@@ -31,7 +31,7 @@ fn printBeams(beams: []Beam) void {
     std.debug.print("\n", .{});
 }
 
-fn numEnergized(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) !usize {
+fn numEnergized(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, initBeam: Beam) !usize {
     var beams = std.ArrayList(Beam).init(allocator);
     defer beams.deinit();
 
@@ -41,7 +41,7 @@ fn numEnergized(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, u8),
     var prevBeams = std.AutoHashMap(Beam, void).init(allocator);
     defer prevBeams.deinit();
 
-    try beams.append(Beam{ .pos = Coord{ .x = 0, .y = 0 }, .dir = Dir.right });
+    try beams.append(initBeam);
 
     while (beams.items.len > 0) {
         //std.debug.print("beams: {any}\n", .{beams.items});
@@ -133,10 +133,31 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var maxY = gr.maxY;
     defer grid.deinit();
 
-    const sum1 = try numEnergized(allocator, &grid, maxX, maxY);
-
+    const sum1 = try numEnergized(allocator, &grid, maxX, maxY, Beam{ .pos = Coord{ .x = 0, .y = 0 }, .dir = Dir.right });
     std.debug.print("part 1: {d}\n", .{sum1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+
+    var nums2 = std.ArrayList(usize).init(allocator);
+    defer nums2.deinit();
+
+    for (0..(1 + maxX)) |x| {
+        const top = Beam{ .pos = Coord{ .x = @intCast(x), .y = 0 }, .dir = Dir.down };
+        const bottom = Beam{ .pos = Coord{ .x = @intCast(x), .y = @intCast(maxY) }, .dir = Dir.up };
+
+        try nums2.append(try numEnergized(allocator, &grid, maxX, maxY, top));
+        try nums2.append(try numEnergized(allocator, &grid, maxX, maxY, bottom));
+    }
+
+    for (0..(1 + maxY)) |y| {
+        const left = Beam{ .pos = Coord{ .x = 0, .y = @intCast(y) }, .dir = Dir.right };
+        const right = Beam{ .pos = Coord{ .x = @intCast(maxX), .y = @intCast(y) }, .dir = Dir.left };
+
+        try nums2.append(try numEnergized(allocator, &grid, maxX, maxY, left));
+        try nums2.append(try numEnergized(allocator, &grid, maxX, maxY, right));
+    }
+
+    const sum2 = std.mem.max(usize, nums2.items);
+
+    std.debug.print("part 2: {d}\n", .{sum2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;

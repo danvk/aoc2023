@@ -15,6 +15,8 @@ I guess mutating an ArrayList as you iterate it is trouble. I suppose that makes
 
 I had to introduce a cache (I think there's an infinite loop). The trick of removing array elements from the end (so that you don't invalidate indices) came in handy.
 
+7264 is too low
+
 ### Day 15 (29290 / 25436)
 
 Today was straightforward. Part 2 wasn't hard and didn't require much thought, just care to follow the instructions.
