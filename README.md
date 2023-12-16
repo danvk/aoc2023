@@ -17,6 +17,8 @@ I had to introduce a cache (I think there's an infinite loop). The trick of remo
 
 7264 is too low
 
+I had a copy/paste bug in part 2 where I was setting the directions wrong for the left/right side. I also had an off-by-one where I was dropping the corners, but that probably didn't matter.
+
 ### Day 15 (29290 / 25436)
 
 Today was straightforward. Part 2 wasn't hard and didn't require much thought, just care to follow the instructions.
