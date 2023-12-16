@@ -31,15 +31,7 @@ fn printBeams(beams: []Beam) void {
     std.debug.print("\n", .{});
 }
 
-pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
-    const filename = args[0];
-
-    var gr = try gridMod.readGrid(allocator, filename, 'x');
-    var grid = gr.grid;
-    var maxX = gr.maxX;
-    var maxY = gr.maxY;
-    defer grid.deinit();
-
+fn numEnergized(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) !usize {
     var beams = std.ArrayList(Beam).init(allocator);
     defer beams.deinit();
 
@@ -53,21 +45,19 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     while (beams.items.len > 0) {
         //std.debug.print("beams: {any}\n", .{beams.items});
-        printBeams(beams.items);
+        // printBeams(beams.items);
         // advance the beam
         var toRemove = std.ArrayList(usize).init(allocator);
         defer toRemove.deinit();
         for (0..beams.items.len) |i| {
             const beam = beams.items[i];
-            std.debug.print("g\n", .{});
             if (prevBeams.contains(beam)) {
                 try toRemove.append(i);
                 continue;
             }
-            std.debug.print("h\n", .{});
             try prevBeams.put(beam, undefined);
 
-            std.debug.print("{d}: {any}\n", .{ i, beam });
+            // std.debug.print("{d}: {any}\n", .{ i, beam });
 
             var pos = beam.pos;
             var dir = beam.dir;
@@ -75,18 +65,16 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
             pos = pos.move(dir);
             if (pos.x < 0 or pos.y < 0 or pos.x > maxX or pos.y > maxY) {
-                std.debug.print("removing, continuing\n", .{});
+                // std.debug.print("removing, continuing\n", .{});
                 try toRemove.append(i);
                 continue;
             }
 
             const c = grid.get(pos).?;
-            std.debug.print("{c}\n", .{c});
+            // std.debug.print("{c}\n", .{c});
             switch (c) {
                 '.' => {
-                    std.debug.print("a\n", .{});
                     beams.items[i] = Beam{ .pos = pos, .dir = dir };
-                    std.debug.print("b\n", .{});
                 },
                 '\\' => {
                     dir = switch (dir) {
@@ -118,26 +106,34 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
                     if (dir == .left or dir == .right) {
                         beams.items[i] = Beam{ .pos = pos, .dir = dir };
                     } else {
-                        std.debug.print("c\n", .{});
                         beams.items[i] = Beam{ .pos = pos, .dir = .left };
-                        std.debug.print("d\n", .{});
                         try beams.append(Beam{ .pos = pos, .dir = .right });
-                        std.debug.print("e\n", .{});
                     }
                 },
                 else => unreachable,
             }
         }
-        std.debug.print("f\n", .{});
 
         std.mem.reverse(usize, toRemove.items);
         for (toRemove.items) |i| {
-            std.debug.print("removing {d} from list of len {d}\n", .{ i, beams.items.len });
+            // std.debug.print("removing {d} from list of len {d}\n", .{ i, beams.items.len });
             _ = beams.swapRemove(i);
         }
     }
 
-    var sum1 = activated.count();
+    return activated.count();
+}
+
+pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
+    const filename = args[0];
+
+    var gr = try gridMod.readGrid(allocator, filename, 'x');
+    var grid = gr.grid;
+    var maxX = gr.maxX;
+    var maxY = gr.maxY;
+    defer grid.deinit();
+
+    const sum1 = try numEnergized(allocator, &grid, maxX, maxY);
 
     std.debug.print("part 1: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});

@@ -11,6 +11,10 @@ This is pretty confusing. Why am I segfaulting?
     Segmentation fault at address 0x104b7c024
     Panicked during a panic. Aborting.
 
+I guess mutating an ArrayList as you iterate it is trouble. I suppose that makes sense -- appending might change what `arraylist.items` points to.
+
+I had to introduce a cache (I think there's an infinite loop). The trick of removing array elements from the end (so that you don't invalidate indices) came in handy.
+
 ### Day 15 (29290 / 25436)
 
 Today was straightforward. Part 2 wasn't hard and didn't require much thought, just care to follow the instructions.
