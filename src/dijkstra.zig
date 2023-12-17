@@ -39,11 +39,6 @@ pub fn dijkstra(
         const idx = std.sort.argMin(StateWithCost, fringe.items, {}, cmp).?;
 
         const stateCost = fringe.orderedRemove(idx); // XXX this is O(N)
-        // printStateLoss(stateLoss);
-
-        // if (stateLoss.loss % 100 == 0) {
-        //     printStateLoss(stateLoss);
-        // }
 
         if (seen.get(stateCost.state)) |cost| {
             if (cost <= stateCost.cost) {

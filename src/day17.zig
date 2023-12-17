@@ -24,7 +24,7 @@ const State = struct {
 
 const StateWithCost = dijkstra.WithCost(State);
 
-fn nextStates(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(StateWithCost)) !void {
+fn nextStates2(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(StateWithCost)) !void {
     out.clearAndFree();
     var grid = gr.grid;
     var maxX = gr.maxX;
@@ -55,6 +55,37 @@ fn nextStates(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(Sta
     }
 }
 
+fn nextStates1(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(StateWithCost)) !void {
+    out.clearAndFree();
+    var grid = gr.grid;
+    var maxX = gr.maxX;
+    var maxY = gr.maxY;
+
+    const state = sc.state;
+    const cost = sc.cost;
+    var pos = state.pos;
+    var dir = state.dir;
+    var n = state.numStraight;
+    // options are:
+    // 1. turn left
+    // 2. turn right
+    // 3. go straight (if permitted)
+
+    if (!state.hasTurned) {
+        // turns are free
+        try out.append(StateWithCost{ .state = State{ .pos = pos, .dir = dir.cw(), .numStraight = 0, .hasTurned = true }, .cost = cost });
+        try out.append(StateWithCost{ .state = State{ .pos = pos, .dir = dir.ccw(), .numStraight = 0, .hasTurned = true }, .cost = cost });
+    }
+    if (n < 3) {
+        pos = pos.move(dir);
+        if (pos.x >= 0 and pos.y >= 0 and pos.x <= maxX and pos.y <= maxY) {
+            const lossChar = grid.get(pos).?;
+            const loss = lossChar - '0';
+            try out.append(StateWithCost{ .state = State{ .pos = pos, .dir = dir, .numStraight = n + 1, .hasTurned = false }, .cost = cost + loss });
+        }
+    }
+}
+
 fn printStateLoss(sl: StateWithCost) void {
     const s = sl.state;
     std.debug.print("{d}:({d},{d}){any}({d},{any})\n", .{
@@ -67,7 +98,13 @@ fn printStateLoss(sl: StateWithCost) void {
     });
 }
 
-fn isDone(gr: gridMod.GridResult, sl: StateWithCost) bool {
+fn isDone1(gr: gridMod.GridResult, sl: StateWithCost) bool {
+    const state = sl.state;
+    const pos = state.pos;
+    return (pos.x == gr.maxX and pos.y == gr.maxY);
+}
+
+fn isDone2(gr: gridMod.GridResult, sl: StateWithCost) bool {
     const state = sl.state;
     const pos = state.pos;
     if (pos.x == gr.maxX and pos.y == gr.maxY and state.numStraight >= 4) {
@@ -85,12 +122,14 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     const seed = State{ .pos = Coord{ .x = 0, .y = 0 }, .dir = .right, .numStraight = 0, .hasTurned = false };
     var seeds = [_]State{seed};
-    const winningState = (try dijkstra.dijkstra(State, allocator, gr, &seeds, nextStates, isDone)).?;
-    // const sum1 = try floodfill(allocator, &gr);
-    const sum1 = winningState.cost;
 
-    std.debug.print("part 1: {d}\n", .{sum1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    const winningState1 = (try dijkstra.dijkstra(State, allocator, gr, &seeds, nextStates1, isDone1)).?;
+    std.debug.print("part 1: {d}\n", .{winningState1.cost});
+
+    const winningState2 = (try dijkstra.dijkstra(State, allocator, gr, &seeds, nextStates2, isDone2)).?;
+    const sum2 = winningState2.cost;
+
+    std.debug.print("part 2: {d}\n", .{sum2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
