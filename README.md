@@ -6,6 +6,12 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 17
+
+I wish I'd implemented a generic flood fill on a previous day. Oh well, now I mostly have it! My part 1 solution worked great for part 2.
+
+### Day 16
+
 This is pretty confusing. Why am I segfaulting?
 
     Segmentation fault at address 0x104b7c024
