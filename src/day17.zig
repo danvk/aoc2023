@@ -2,6 +2,7 @@ const std = @import("std");
 const dirMod = @import("./dir.zig");
 const util = @import("./util.zig");
 const gridMod = @import("./grid.zig");
+const dijkstra = @import("./dijkstra.zig");
 
 const Coord = dirMod.Coord;
 const Dir = dirMod.Dir;
@@ -21,18 +22,16 @@ const State = struct {
     hasTurned: bool,
 };
 
-const StateLoss = struct {
-    state: State,
-    loss: u32,
-};
+const StateWithCost = dijkstra.WithCost(State);
 
-fn nextStates(state: State, gr: *gridMod.GridResult, out: *std.ArrayList(State)) !void {
+fn nextStates(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(StateWithCost)) !void {
     out.clearAndFree();
     var grid = gr.grid;
-    _ = grid;
     var maxX = gr.maxX;
     var maxY = gr.maxY;
 
+    const state = sc.state;
+    const cost = sc.cost;
     var pos = state.pos;
     var dir = state.dir;
     var n = state.numStraight;
@@ -42,25 +41,24 @@ fn nextStates(state: State, gr: *gridMod.GridResult, out: *std.ArrayList(State))
     // 3. go straight (if permitted)
 
     if (!state.hasTurned and n >= 4) {
-        try out.append(State{ .pos = pos, .dir = dir.cw(), .numStraight = 0, .hasTurned = true });
-        try out.append(State{ .pos = pos, .dir = dir.ccw(), .numStraight = 0, .hasTurned = true });
+        // turns are free
+        try out.append(StateWithCost{ .state = State{ .pos = pos, .dir = dir.cw(), .numStraight = 0, .hasTurned = true }, .cost = cost });
+        try out.append(StateWithCost{ .state = State{ .pos = pos, .dir = dir.ccw(), .numStraight = 0, .hasTurned = true }, .cost = cost });
     }
     if (n < 10) {
         pos = pos.move(dir);
         if (pos.x >= 0 and pos.y >= 0 and pos.x <= maxX and pos.y <= maxY) {
-            try out.append(State{ .pos = pos, .dir = dir, .numStraight = n + 1, .hasTurned = false });
+            const lossChar = grid.get(state.pos).?;
+            const loss = lossChar - '0';
+            try out.append(StateWithCost{ .state = State{ .pos = pos, .dir = dir, .numStraight = n + 1, .hasTurned = false }, .cost = cost + loss });
         }
     }
 }
 
-fn stateLossLessThan(_: void, a: StateLoss, b: StateLoss) bool {
-    return a.loss < b.loss;
-}
-
-fn printStateLoss(sl: StateLoss) void {
+fn printStateLoss(sl: StateWithCost) void {
     const s = sl.state;
     std.debug.print("{d}:({d},{d}){any}({d},{any})\n", .{
-        sl.loss,
+        sl.cost,
         s.pos.x,
         s.pos.y,
         s.dir,
@@ -69,50 +67,13 @@ fn printStateLoss(sl: StateLoss) void {
     });
 }
 
-fn floodfill(allocator: std.mem.Allocator, gr: *gridMod.GridResult) !u32 {
-    const grid = gr.grid;
-    var seen = std.AutoHashMap(State, u32).init(allocator);
-    defer seen.deinit();
-
-    var fringe = std.ArrayList(StateLoss).init(allocator);
-    defer fringe.deinit();
-
-    const seed = StateLoss{ .loss = 0, .state = State{ .pos = Coord{ .x = 0, .y = 0 }, .dir = .right, .numStraight = 0, .hasTurned = false } };
-    try fringe.append(seed);
-
-    while (fringe.items.len > 0) {
-        const idx = std.sort.argMin(StateLoss, fringe.items, {}, stateLossLessThan).?;
-
-        const stateLoss = fringe.orderedRemove(idx); // XXX this is O(N)
-        // printStateLoss(stateLoss);
-
-        if (stateLoss.loss % 100 == 0) {
-            printStateLoss(stateLoss);
-        }
-
-        if (seen.get(stateLoss.state)) |loss| {
-            if (loss <= stateLoss.loss) {
-                continue;
-            }
-        }
-
-        const pos = stateLoss.state.pos;
-        if (pos.x == gr.maxX and pos.y == gr.maxY and stateLoss.state.numStraight >= 4) {
-            return stateLoss.loss; // we're done!
-        }
-
-        try seen.put(stateLoss.state, stateLoss.loss);
-        var nexts = std.ArrayList(State).init(allocator);
-        defer nexts.deinit();
-        try nextStates(stateLoss.state, gr, &nexts);
-        for (nexts.items) |state| {
-            const lossChar = grid.get(state.pos).?;
-            const loss = lossChar - '0';
-            const nextLoss = stateLoss.loss + if (state.hasTurned) 0 else loss;
-            try fringe.append(StateLoss{ .state = state, .loss = nextLoss });
-        }
+fn isDone(gr: gridMod.GridResult, sl: StateWithCost) bool {
+    const state = sl.state;
+    const pos = state.pos;
+    if (pos.x == gr.maxX and pos.y == gr.maxY and state.numStraight >= 4) {
+        return true; // we're done!
     }
-    unreachable;
+    return false;
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -122,7 +83,11 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var grid = gr.grid;
     defer grid.deinit();
 
-    const sum1 = try floodfill(allocator, &gr);
+    const seed = State{ .pos = Coord{ .x = 0, .y = 0 }, .dir = .right, .numStraight = 0, .hasTurned = false };
+    var seeds = [_]State{seed};
+    const winningState = (try dijkstra.dijkstra(State, allocator, gr, &seeds, nextStates, isDone)).?;
+    // const sum1 = try floodfill(allocator, &gr);
+    const sum1 = winningState.cost;
 
     std.debug.print("part 1: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});
