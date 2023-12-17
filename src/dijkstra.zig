@@ -13,6 +13,16 @@ fn stateLossLessThan(comptime State: type) fn (void, WithCost(State), WithCost(S
     }.inner;
 }
 
+// std.PriorityQueue(comptime T: type, comptime Context: type, comptime compareFn: fn(context:Context, a:T, b:T)Order)
+
+fn stateLossOrder(comptime State: type) fn (void, WithCost(State), WithCost(State)) std.math.Order {
+    return struct {
+        pub fn inner(_: void, a: WithCost(State), b: WithCost(State)) std.math.Order {
+            return std.math.order(a.cost, b.cost);
+        }
+    }.inner;
+}
+
 pub fn dijkstra(
     comptime State: type, //
     allocator: std.mem.Allocator,
@@ -22,24 +32,20 @@ pub fn dijkstra(
     isDone: fn (@TypeOf(context), WithCost(State)) bool,
 ) !?WithCost(State) {
     const StateWithCost = WithCost(State);
-    const cmp = stateLossLessThan(State);
 
     var seen = std.AutoHashMap(State, u32).init(allocator);
     defer seen.deinit();
 
-    var fringe = std.ArrayList(StateWithCost).init(allocator);
+    var fringe = std.PriorityQueue(StateWithCost, void, stateLossOrder(State)).init(allocator, {});
+    // std.ArrayList(StateWithCost).init(allocator);
     defer fringe.deinit();
 
     for (seeds) |state| {
         const seed = StateWithCost{ .cost = 0, .state = state };
-        try fringe.append(seed);
+        try fringe.add(seed);
     }
 
-    while (fringe.items.len > 0) {
-        const idx = std.sort.argMin(StateWithCost, fringe.items, {}, cmp).?;
-
-        const stateCost = fringe.orderedRemove(idx); // XXX this is O(N)
-
+    while (fringe.removeOrNull()) |stateCost| {
         if (seen.get(stateCost.state)) |cost| {
             if (cost <= stateCost.cost) {
                 continue;
@@ -54,7 +60,7 @@ pub fn dijkstra(
         var nexts = std.ArrayList(StateWithCost).init(allocator);
         defer nexts.deinit();
         try neighbors(context, stateCost, &nexts);
-        try fringe.appendSlice(nexts.items);
+        try fringe.addSlice(nexts.items);
     }
     return null;
 }
