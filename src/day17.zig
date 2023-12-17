@@ -57,6 +57,18 @@ fn stateLossLessThan(_: void, a: StateLoss, b: StateLoss) bool {
     return a.loss < b.loss;
 }
 
+fn printStateLoss(sl: StateLoss) void {
+    const s = sl.state;
+    std.debug.print("{d}:({d},{d}){any}({d},{any})\n", .{
+        sl.loss,
+        s.pos.x,
+        s.pos.y,
+        s.dir,
+        s.numStraight,
+        s.hasTurned,
+    });
+}
+
 fn floodfill(allocator: std.mem.Allocator, gr: *gridMod.GridResult) !u32 {
     const grid = gr.grid;
     var seen = std.AutoHashMap(State, u32).init(allocator);
@@ -72,6 +84,7 @@ fn floodfill(allocator: std.mem.Allocator, gr: *gridMod.GridResult) !u32 {
         const idx = std.sort.argMin(StateLoss, fringe.items, {}, stateLossLessThan).?;
 
         const stateLoss = fringe.orderedRemove(idx); // XXX this is O(N)
+        // printStateLoss(stateLoss);
 
         if (seen.get(stateLoss.state)) |loss| {
             if (loss <= stateLoss.loss) {
@@ -89,8 +102,10 @@ fn floodfill(allocator: std.mem.Allocator, gr: *gridMod.GridResult) !u32 {
         defer nexts.deinit();
         try nextStates(stateLoss.state, gr, &nexts);
         for (nexts.items) |state| {
-            const loss = grid.get(state.pos).?;
-            try fringe.append(StateLoss{ .state = state, .loss = stateLoss.loss + loss });
+            const lossChar = grid.get(state.pos).?;
+            const loss = lossChar - '0';
+            const nextLoss = stateLoss.loss + if (state.hasTurned) 0 else loss;
+            try fringe.append(StateLoss{ .state = state, .loss = nextLoss });
         }
     }
     unreachable;
