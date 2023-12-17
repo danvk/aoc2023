@@ -10,6 +10,10 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 I wish I'd implemented a generic flood fill on a previous day. Oh well, now I mostly have it! My part 1 solution worked great for part 2.
 
+I took this as a cue to write a generic Dijkstra implementation, since that's come in handy for many puzzles in the past. Since Zig doesn't have closures, the key to making this work is putting everything that would have been in your closure into a "context" parameter. I think this is equivalent to a closure, just more boilerplate. Why is Zig so anti-closures?
+
+I used an ArrayList for my initial implementation, but swapping it out for a `std.PriorityQueue` cut the runtime by ~60% (12s->5s for both parts).
+
 ### Day 16
 
 This is pretty confusing. Why am I segfaulting?
