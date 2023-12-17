@@ -4,18 +4,8 @@ pub fn WithCost(comptime State: type) type {
     return struct { state: State, cost: u32 };
 }
 
-fn stateLossLessThan(comptime State: type) fn (void, WithCost(State), WithCost(State)) bool {
-    // XXX this copies a pattern in sort.zig and is kinda weird. Why not allow returning a function?
-    return struct {
-        pub fn inner(_: void, a: WithCost(State), b: WithCost(State)) bool {
-            return a.cost < b.cost;
-        }
-    }.inner;
-}
-
-// std.PriorityQueue(comptime T: type, comptime Context: type, comptime compareFn: fn(context:Context, a:T, b:T)Order)
-
 fn stateLossOrder(comptime State: type) fn (void, WithCost(State), WithCost(State)) std.math.Order {
+    // XXX this copies a pattern in sort.zig and is kinda weird. Why not allow returning a function?
     return struct {
         pub fn inner(_: void, a: WithCost(State), b: WithCost(State)) std.math.Order {
             return std.math.order(a.cost, b.cost);
