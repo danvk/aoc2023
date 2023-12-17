@@ -48,7 +48,7 @@ fn nextStates(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(Sta
     if (n < 10) {
         pos = pos.move(dir);
         if (pos.x >= 0 and pos.y >= 0 and pos.x <= maxX and pos.y <= maxY) {
-            const lossChar = grid.get(state.pos).?;
+            const lossChar = grid.get(pos).?;
             const loss = lossChar - '0';
             try out.append(StateWithCost{ .state = State{ .pos = pos, .dir = dir, .numStraight = n + 1, .hasTurned = false }, .cost = cost + loss });
         }
