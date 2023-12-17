@@ -41,11 +41,11 @@ fn nextStates(state: State, gr: *gridMod.GridResult, out: *std.ArrayList(State))
     // 2. turn right
     // 3. go straight (if permitted)
 
-    if (!state.hasTurned) {
+    if (!state.hasTurned and n >= 4) {
         try out.append(State{ .pos = pos, .dir = dir.cw(), .numStraight = 0, .hasTurned = true });
         try out.append(State{ .pos = pos, .dir = dir.ccw(), .numStraight = 0, .hasTurned = true });
     }
-    if (n < 3) {
+    if (n < 10) {
         pos = pos.move(dir);
         if (pos.x >= 0 and pos.y >= 0 and pos.x <= maxX and pos.y <= maxY) {
             try out.append(State{ .pos = pos, .dir = dir, .numStraight = n + 1, .hasTurned = false });
@@ -86,6 +86,10 @@ fn floodfill(allocator: std.mem.Allocator, gr: *gridMod.GridResult) !u32 {
         const stateLoss = fringe.orderedRemove(idx); // XXX this is O(N)
         // printStateLoss(stateLoss);
 
+        if (stateLoss.loss % 100 == 0) {
+            printStateLoss(stateLoss);
+        }
+
         if (seen.get(stateLoss.state)) |loss| {
             if (loss <= stateLoss.loss) {
                 continue;
@@ -93,7 +97,7 @@ fn floodfill(allocator: std.mem.Allocator, gr: *gridMod.GridResult) !u32 {
         }
 
         const pos = stateLoss.state.pos;
-        if (pos.x == gr.maxX and pos.y == gr.maxY) {
+        if (pos.x == gr.maxX and pos.y == gr.maxY and stateLoss.state.numStraight >= 4) {
             return stateLoss.loss; // we're done!
         }
 
