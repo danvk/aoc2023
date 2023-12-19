@@ -1,6 +1,7 @@
 const std = @import("std");
 const bufIter = @import("./buf-iter.zig");
 const util = @import("./util.zig");
+const interval = @import("./interval.zig");
 
 const assert = std.debug.assert;
 
@@ -108,6 +109,107 @@ fn dropLast(comptime T: type, slice: []T) []T {
     return slice[0 .. slice.len - 1];
 }
 
+fn xmasToRange(c: u8) u2 {
+    return switch (c) {
+        'x' => 0,
+        'm' => 1,
+        'a' => 2,
+        's' => 3,
+        else => unreachable,
+    };
+}
+
+const Range = interval.Interval(u32);
+const XmasRange = [4]Range;
+
+const WorkflowRange = struct {
+    name: []const u8,
+    range: XmasRange,
+};
+
+fn xmasRangeVolume(r: XmasRange) u64 {
+    return @as(u64, r[0].len()) * r[1].len() * r[2].len() * r[3].len();
+}
+
+fn rangeForRule(rule: Rule) struct { pass: Range, fail: Range } {
+    if (rule.rel == .@"<") {
+        return .{
+            .pass = Range{ .low = 1, .high = rule.num },
+            .fail = Range{ .low = rule.num, .high = 4001 },
+        };
+    }
+    return .{
+        .pass = Range{ .low = rule.num + 1, .high = 4001 },
+        .fail = Range{ .low = 1, .high = rule.num + 1 },
+    };
+}
+
+fn isReject(c: []const u8) bool {
+    return c.len == 1 and c[0] == 'R';
+}
+
+fn isAccept(c: []const u8) bool {
+    return c.len == 1 and c[0] == 'A';
+}
+
+const XMAS = [_]u8{ 'x', 'm', 'a', 's' };
+
+fn printWFRange(wfr: WorkflowRange) void {
+    std.debug.print("  {s}:", .{wfr.name});
+    const r = wfr.range;
+    for (XMAS[0..], 0..) |c, i| {
+        std.debug.print(" {c}=[{d},{d})", .{ c, r[i].low, r[i].high });
+    }
+    std.debug.print("\n", .{});
+}
+
+// pass the range through the workflow.
+fn throughWorkflow(range: XmasRange, wf: Workflow, out: *std.ArrayList(WorkflowRange)) !u64 {
+    var remaining = range;
+    var volume: u64 = 0;
+    for (wf.rules) |rule| {
+        // Part matches this rule, part does not.
+        const ruleRs = rangeForRule(rule);
+        var i = xmasToRange(rule.part);
+        var curR = remaining[i];
+        if (ruleRs.pass.intersection(curR)) |matchR| {
+            var matchXR = remaining;
+            matchXR[i] = matchR;
+            if (isAccept(rule.workflow)) {
+                volume += xmasRangeVolume(matchXR);
+            } else if (!isReject(rule.workflow)) {
+                if (xmasRangeVolume(matchXR) > 0) {
+                    try out.append(WorkflowRange{
+                        .name = rule.workflow,
+                        .range = matchXR,
+                    });
+                }
+            }
+        }
+        if (ruleRs.fail.intersection(curR)) |matchR| {
+            remaining[i] = matchR;
+        } else {
+            return volume;
+        }
+
+        if (xmasRangeVolume(remaining) == 0) {
+            return volume;
+        }
+    }
+
+    if (isAccept(wf.fallback)) {
+        volume += xmasRangeVolume(remaining);
+        return volume;
+    } else if (isReject(wf.fallback)) {
+        return volume;
+    }
+    try out.append(WorkflowRange{
+        .name = wf.fallback,
+        .range = remaining,
+    });
+    return volume;
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -180,30 +282,57 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     }
 
     var sum2: u64 = 0;
-    var counts = [_]u32{0} ** 256;
-    var timer = try std.time.Timer.start();
-    for (dropLast(u32, nums[0].items), 0..) |x, xi| {
-        const elapsed = timer.read() / 1_000_000_000;
-        std.debug.print(" -> x={d}, {d}/{d} {d}s\n", .{ x, xi, nums[0].items.len, elapsed });
+    // var counts = [_]u32{0} ** 256;
+    // var timer = try std.time.Timer.start();
+    // for (dropLast(u32, nums[0].items), 0..) |x, xi| {
+    //     const elapsed = timer.read() / 1_000_000_000;
+    //     std.debug.print(" -> x={d}, {d}/{d} {d}s\n", .{ x, xi, nums[0].items.len, elapsed });
+    //
+    //     counts['x'] = x;
+    //     const numX: u64 = nums[0].items[xi + 1] - x;
+    //     for (dropLast(u32, nums[1].items), 0..) |m, mi| {
+    //         counts['m'] = m;
+    //         const numM: u64 = nums[1].items[mi + 1] - m;
+    //         for (dropLast(u32, nums[2].items), 0..) |a, ai| {
+    //             counts['a'] = a;
+    //             const numA: u64 = nums[2].items[ai + 1] - a;
+    //             for (dropLast(u32, nums[3].items), 0..) |s, si| {
+    //                 counts['s'] = s;
+    //                 const numS: u64 = nums[3].items[si + 1] - s;
+    //                 if (accepts(workflows, &counts)) {
+    //                     sum2 += numX * numM * numA * numS;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
-        counts['x'] = x;
-        const numX: u64 = nums[0].items[xi + 1] - x;
-        for (dropLast(u32, nums[1].items), 0..) |m, mi| {
-            counts['m'] = m;
-            const numM: u64 = nums[1].items[mi + 1] - m;
-            for (dropLast(u32, nums[2].items), 0..) |a, ai| {
-                counts['a'] = a;
-                const numA: u64 = nums[2].items[ai + 1] - a;
-                for (dropLast(u32, nums[3].items), 0..) |s, si| {
-                    counts['s'] = s;
-                    const numS: u64 = nums[3].items[si + 1] - s;
-                    if (accepts(workflows, &counts)) {
-                        sum2 += numX * numM * numA * numS;
-                    }
-                }
-            }
+    var fullRange = Range{ .low = 1, .high = 4001 };
+    var initRange = XmasRange{ fullRange, fullRange, fullRange, fullRange };
+    var cubes = std.ArrayList(WorkflowRange).init(allocator);
+    try cubes.append(WorkflowRange{ .name = "in", .range = initRange });
+    std.debug.print("{d} cubes, volume={d}\n", .{ cubes.items.len, xmasRangeVolume(cubes.items[0].range) });
+    while (cubes.items.len > 0) {
+        var nexts = std.ArrayList(WorkflowRange).init(allocator);
+
+        for (cubes.items) |cube| {
+            std.debug.print("cube.name={s}\n", .{cube.name});
+            const wf = workflows.get(cube.name).?;
+            sum2 += try throughWorkflow(cube.range, wf, &nexts);
         }
+
+        var volumeRemaining: u64 = 0;
+        for (nexts.items) |next| {
+            // std.debug.print("  {any}\n", .{next});
+            printWFRange(next);
+            volumeRemaining += xmasRangeVolume(next.range);
+        }
+        std.debug.print("{d} cubes, volume={d}\n", .{ cubes.items.len, volumeRemaining });
+
+        cubes.deinit();
+        cubes = nexts;
     }
+    cubes.deinit();
 
     std.debug.print("part 2: {d}\n", .{sum2});
 }
