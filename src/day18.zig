@@ -205,16 +205,18 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     const tl = Coord{ .x = minX, .y = minY };
+    _ = tl;
     const br = Coord{ .x = maxX, .y = maxY };
+    _ = br;
     // gridMod.printGridFmt(u8, grid, tl, br, fmtChar);
 
     // try fill(&grid, Coord{ .x = 1, .y = 1 });
     const count = grid.count();
     std.debug.print("#ys of note: {d}\n", .{ys.count()});
-    const intArea = try area(grid, tl, br, ys);
+    // const intArea = try area(grid, tl, br, ys);
     std.debug.print("count: {d}\n", .{count});
 
-    std.debug.print("part 1: {d} + {d} = {d}\n", .{ count, intArea, count + intArea });
+    // std.debug.print("part 1: {d} + {d} = {d}\n", .{ count, intArea, count + intArea });
 
     var area2: i32 = 0;
     const xys = coords.items;
