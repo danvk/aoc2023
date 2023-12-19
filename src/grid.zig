@@ -49,6 +49,22 @@ pub fn printGrid(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, bla
     }
 }
 
+pub fn printGridFmt(comptime V: type, grid: std.AutoHashMap(Coord, V), topLeft: Coord, bottomRight: Coord, fmt: fn (?V) u8) void {
+    const minX = topLeft.x;
+    const minY = topLeft.y;
+    const maxX = bottomRight.x;
+    const maxY = bottomRight.y;
+    var y = minY;
+    while (y <= maxY) : (y += 1) {
+        var x = minX;
+        while (x <= maxX) : (x += 1) {
+            var c = fmt(grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }));
+            std.debug.print("{c}", .{c});
+        }
+        std.debug.print("\n", .{});
+    }
+}
+
 // ABCD
 // FGHI
 // KLMN
