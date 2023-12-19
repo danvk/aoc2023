@@ -181,7 +181,11 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     var sum2: u64 = 0;
     var counts = [_]u32{0} ** 256;
+    var timer = try std.time.Timer.start();
     for (dropLast(u32, nums[0].items), 0..) |x, xi| {
+        const elapsed = timer.read() / 1_000_000_000;
+        std.debug.print(" -> x={d}, {d}/{d} {d}s\n", .{ x, xi, nums[0].items.len, elapsed });
+
         counts['x'] = x;
         const numX: u64 = nums[0].items[xi + 1] - x;
         for (dropLast(u32, nums[1].items), 0..) |m, mi| {
