@@ -82,6 +82,42 @@ fn fill(grid: *std.AutoHashMap(Coord, u24), seed: Coord) !void {
 // var area = @divFloor(area2, 2);
 // std.debug.print("area: {d}\n", .{area});
 
+fn area(grid: std.AutoHashMap(Coord, u8), topLeft: Coord, bottomRight: Coord) usize {
+    const minX = topLeft.x;
+    const minY = topLeft.y;
+    const maxX = bottomRight.x;
+    const maxY = bottomRight.y;
+    var part2alt: usize = 0;
+    var y = minY;
+    while (y <= maxY) : (y += 1) {
+        var numBars: usize = 0;
+        var prevCorner: ?u8 = null;
+
+        var x = minX;
+        while (x <= maxX) : (x += 1) {
+            var c = Coord{ .x = x, .y = y };
+            if (!grid.contains(c)) {
+                if (numBars % 2 == 1) {
+                    part2alt += 1;
+                }
+            } else {
+                var tile = grid.get(c).?;
+                if (tile == '|') {
+                    numBars += 1;
+                } else if (tile == 'J' and prevCorner == 'F') {
+                    numBars += 1;
+                } else if (tile == '7' and prevCorner == 'L') {
+                    numBars += 1;
+                }
+                if (tile != '-') {
+                    prevCorner = tile;
+                }
+            }
+        }
+    }
+    return part2alt;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -128,14 +164,17 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     std.debug.print("{d}-{d}, {d}-{d} {any}\n", .{ minX, maxX, minY, maxY, pos });
     std.debug.print("count: {d}\n", .{grid.count()});
 
-    gridMod.printGridFmt(u8, grid, Coord{ .x = minX, .y = minY }, Coord{ .x = maxX, .y = maxY }, fmtChar);
+    const tl = Coord{ .x = minX, .y = minY };
+    const br = Coord{ .x = maxX, .y = maxY };
+    gridMod.printGridFmt(u8, grid, tl, br, fmtChar);
 
     // try fill(&grid, Coord{ .x = 1, .y = 1 });
-    const sum1 = grid.count();
+    const count = grid.count();
+    const intArea = area(grid, tl, br);
 
-    std.debug.print("part 1: {d}\n", .{sum1});
+    std.debug.print("part 1: {d} + {d} = {d}\n", .{ count, intArea, count + intArea });
 
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    // std.debug.print("part 2: {d}\n", .{});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
