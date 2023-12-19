@@ -90,7 +90,7 @@ fn accepts(workflows: std.StringHashMap(Workflow), counts: []u32) bool {
     var name: []const u8 = "in";
 
     while (true) {
-        std.debug.print("  {s}\n", .{name});
+        // std.debug.print("  {s}\n", .{name});
         const wf = workflows.get(name).?;
         const next = applyWorkflow(wf, counts);
         if (std.mem.eql(u8, next, "A")) {
@@ -135,8 +135,26 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
             }
         }
     }
-
     std.debug.print("part 1: {d}\n", .{sum1});
+
+    var seenNums = std.AutoHashMap(u8, std.AutoHashMap(u32, void)).init(allocator);
+    defer seenNums.deinit();
+    var wfit = workflows.valueIterator();
+    while (wfit.next()) |wf| {
+        for (wf.rules) |rule| {
+            if (!seenNums.contains(rule.part)) {
+                try seenNums.put(rule.part, std.AutoHashMap(u32, void).init(allocator));
+            }
+            var h = seenNums.get(rule.part).?;
+            std.debug.print("put {c} {d}\n", .{ rule.part, rule.num });
+            try h.put(rule.num, undefined);
+        }
+    }
+    std.debug.print("{any}\n", .{seenNums});
+    // sample: nums seen: 14
+    // input: nums seen: 891 -> 630B, still too much.
+    std.debug.print("nums seen: {d}, {d}, {d}, {d}\n", .{ seenNums.get('x').?.count(), seenNums.get('m').?.count(), seenNums.get('a').?.count(), seenNums.get('s').?.count() });
+
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 

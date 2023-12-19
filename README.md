@@ -6,6 +6,10 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 19
+
+part 2: only values that appear in a rule are worth checking.
+
 ### Day 18
 
 For part 2, the sample has coordinates that go 0-1186328.
