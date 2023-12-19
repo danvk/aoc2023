@@ -212,6 +212,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const count = grid.count();
     std.debug.print("#ys of note: {d}\n", .{ys.count()});
     const intArea = try area(grid, tl, br, ys);
+    std.debug.print("count: {d}\n", .{count});
 
     std.debug.print("part 1: {d} + {d} = {d}\n", .{ count, intArea, count + intArea });
 

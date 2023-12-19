@@ -28,6 +28,13 @@ A = i + b/2 - 1
 So that works great! I have a ~30 minute process calculating the area that I think will work. I'm reluctant to build a new binary while that's running, but this is a great backup in case that gives me the wrong answer.
 
 part 2: 199993750 + 97873903755970 = 97874103749720
+./zig-out/bin/main day18 day18/input.txt  1979.20s user 7.37s system 99% cpu 33:10.91 total
+
+count: 199993750
+area: 289011596
+i = 289011596 - 199993750 / 2 + 1
+
+So that doesn't work at all!
 
 ### Day 17
 
