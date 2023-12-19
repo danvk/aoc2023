@@ -11,6 +11,11 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 part 2: only values that appear in a rule are worth checking.
 If I treat each of xmas distinctly, I have 3.4B combos to check. Probably OK!
 
+Another way to do this would be to track the ranges of values that would go through each branch of each rule. I wonder if that would blow up more or less? Probably less!
+
+For `<`: the result changes when you hit `num`.
+For `>`: the result changes when you hit `num+1`.
+
 ### Day 18
 
 For part 2, the sample has coordinates that go 0-1186328.
