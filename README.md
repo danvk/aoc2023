@@ -52,6 +52,8 @@ i = 289011596 - 199993750 / 2 + 1
 So that doesn't work at all!
 My area calculation must be wrong, lots of people on reddit used this approach.
 
+… I implemented this again the next day and got the right answer. So what was wrong before? I had to add some `@intCast`s to make it work, errors that I don't remember getting before.
+
 ### Day 17
 
 I wish I'd implemented a generic flood fill on a previous day. Oh well, now I mostly have it! My part 1 solution worked great for part 2.
