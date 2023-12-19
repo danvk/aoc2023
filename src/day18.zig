@@ -163,7 +163,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var maxY: i32 = 0;
     var coords = std.ArrayList(Coord).init(allocator);
     defer coords.deinit();
-    try coords.append(pos);
+    // try coords.append(pos);
     var firstD: ?dirMod.Dir = null;
     var lastD = dirMod.Dir.up;
     while (try iter.next()) |line| {
