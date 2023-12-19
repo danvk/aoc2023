@@ -49,6 +49,10 @@ fn fmtColor(color: ?u24) u8 {
     return if (color == null) '.' else '#';
 }
 
+fn fmtChar(c: ?u8) u8 {
+    return c orelse '.';
+}
+
 fn fill(grid: *std.AutoHashMap(Coord, u24), seed: Coord) !void {
     var fringe = std.ArrayList(Coord).init(grid.allocator);
     defer fringe.deinit();
@@ -69,42 +73,68 @@ fn fill(grid: *std.AutoHashMap(Coord, u24), seed: Coord) !void {
     }
 }
 
+// var area2: i32 = 0;
+// const xys = coords.items;
+// for (xys[0 .. xys.len - 1], xys[1..]) |a, b| {
+//     std.debug.print("{d},{d}\n", .{ a.x, a.y });
+//     area2 += a.x * b.y - b.x * a.y;
+// }
+// var area = @divFloor(area2, 2);
+// std.debug.print("area: {d}\n", .{area});
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var grid = std.AutoHashMap(Coord, u24).init(allocator);
+    var grid = std.AutoHashMap(Coord, u8).init(allocator);
     defer grid.deinit();
     var pos = Coord{ .x = 0, .y = 0 };
 
-    try grid.put(pos, 0);
+    try grid.put(pos, '?');
 
     var iter = try bufIter.iterLines(filename);
     var minX: i32 = 0;
     var minY: i32 = 0;
     var maxX: i32 = 0;
     var maxY: i32 = 0;
+    var coords = std.ArrayList(Coord).init(allocator);
+    defer coords.deinit();
+    try coords.append(pos);
+    var firstD: ?dirMod.Dir = null;
+    var lastD = dirMod.Dir.up;
     while (try iter.next()) |line| {
         const plan = try parsePlan(line);
         std.debug.print("{any}\n", .{plan});
 
-        for (0..plan.len) |_| {
-            pos = pos.move(plan.dir);
-            try grid.put(pos, plan.color);
+        const d = plan.dir;
+        if (firstD == null) {
+            firstD = d;
+        }
+        for (0..plan.len) |i| {
+            if (i == 0) {
+                try grid.put(pos, if (d == .up and lastD == .left) 'L' else if (d == .up and lastD == .right) 'J' else if (d == .down and lastD == .left) 'F' else if (d == .down and lastD == .right) '7' else if (d == .left and lastD == .up) '7' else if (d == .left and lastD == .down) 'J' else if (d == .right and lastD == .up) 'F' else if (d == .right and lastD == .down) 'L' else unreachable);
+            }
+            pos = pos.move(d);
+            try grid.put(pos, if (d == .up or d == .down) '|' else '-');
             maxX = @max(pos.x, maxX);
             maxY = @max(pos.y, maxY);
             minX = @min(pos.x, minX);
             minY = @min(pos.y, minY);
         }
+        lastD = d;
+        try coords.append(pos);
     }
+    const d = firstD.?;
+    try grid.put(pos, if (d == .up and lastD == .left) 'L' else if (d == .up and lastD == .right) 'J' else if (d == .down and lastD == .left) 'F' else if (d == .down and lastD == .right) '7' else if (d == .left and lastD == .up) '7' else if (d == .left and lastD == .down) 'J' else if (d == .right and lastD == .up) 'F' else if (d == .right and lastD == .down) 'L' else unreachable);
     std.debug.print("{d}-{d}, {d}-{d} {any}\n", .{ minX, maxX, minY, maxY, pos });
     std.debug.print("count: {d}\n", .{grid.count()});
 
-    gridMod.printGridFmt(u24, grid, Coord{ .x = minX, .y = minY }, Coord{ .x = maxX, .y = maxY }, fmtColor);
+    gridMod.printGridFmt(u8, grid, Coord{ .x = minX, .y = minY }, Coord{ .x = maxX, .y = maxY }, fmtChar);
 
-    try fill(&grid, Coord{ .x = 1, .y = 1 });
+    // try fill(&grid, Coord{ .x = 1, .y = 1 });
     const sum1 = grid.count();
 
     std.debug.print("part 1: {d}\n", .{sum1});
+
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 
