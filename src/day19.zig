@@ -137,6 +137,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     }
     std.debug.print("part 1: {d}\n", .{sum1});
 
+    // XXX this was surprisingly hard! Discovered hash.getPtr.
     var seenNums = std.AutoHashMap(u8, std.AutoHashMap(u32, void)).init(allocator);
     defer seenNums.deinit();
     var wfit = workflows.valueIterator();
@@ -144,10 +145,13 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         for (wf.rules) |rule| {
             if (!seenNums.contains(rule.part)) {
                 try seenNums.put(rule.part, std.AutoHashMap(u32, void).init(allocator));
+                // std.debug.print("creating {c}\n", .{rule.part});
             }
-            var h = seenNums.get(rule.part).?;
-            std.debug.print("put {c} {d}\n", .{ rule.part, rule.num });
+            var h = seenNums.getPtr(rule.part).?;
+            // std.debug.print("put {c} {d}\n", .{ rule.part, rule.num });
             try h.put(rule.num, undefined);
+            // std.debug.print("  {d}\n", .{h.count()});
+            // std.debug.print("  {d}\n", .{seenNums.get(rule.part).?.count()});
         }
     }
     std.debug.print("{any}\n", .{seenNums});

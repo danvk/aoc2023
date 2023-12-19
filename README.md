@@ -9,6 +9,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 ### Day 19
 
 part 2: only values that appear in a rule are worth checking.
+If I treat each of xmas distinctly, I have 3.4B combos to check. Probably OK!
 
 ### Day 18
 
