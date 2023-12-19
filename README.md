@@ -6,6 +6,29 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 18
+
+For part 2, the sample has coordinates that go 0-1186328.
+Unless there's a corner with the given y-coordinate, it should contribute the same area as the previous row. Something similar holds for x-coordinates, though this might be a little trickier to pull off in practice since you care whether an unspecified square is `-` or `.`.
+
+Area calculation is _very_ slow! ~30 rows/sec.
+
+Pick's theorem for sample:
+
+- Area of polygon = 42
+- Perimeter = 38
+
+A = i + b/2 - 1
+=> i = A - b/2 + 1
+=> i = 42 - 38/2 + 1
+=> i = 42 - 19 + 1
+=> i = 42 - 18
+=> i = 24
+
+So that works great! I have a ~30 minute process calculating the area that I think will work. I'm reluctant to build a new binary while that's running, but this is a great backup in case that gives me the wrong answer.
+
+part 2: 199993750 + 97873903755970 = 97874103749720
+
 ### Day 17
 
 I wish I'd implemented a generic flood fill on a previous day. Oh well, now I mostly have it! My part 1 solution worked great for part 2.

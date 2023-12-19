@@ -45,6 +45,34 @@ fn parsePlan(line: []const u8) !Plan {
     return plan;
 }
 
+// R 6 (#70c710)
+fn parsePlan2(line: []const u8) !Plan {
+    var partsBuf: [3][]const u8 = undefined;
+    var parts = util.splitAnyIntoBuf(line, " ()", &partsBuf);
+    assert(parts.len == 3);
+    // var dir = parts[0];
+    // assert(dir.len == 1);
+    // var len = try std.fmt.parseInt(usize, parts[1], 10);
+    var colorStr = parts[2];
+    assert(colorStr[0] == '#');
+    assert(colorStr.len == 7);
+    var len = try std.fmt.parseInt(u24, colorStr[1..6], 16);
+    const dir = colorStr[6];
+    var plan = Plan{
+        // 0 means R, 1 means D, 2 means L, and 3 means U.
+        .dir = switch (dir) {
+            '2' => .left,
+            '0' => .right,
+            '3' => .up,
+            '1' => .down,
+            else => unreachable,
+        },
+        .len = len,
+        .color = len,
+    };
+    return plan;
+}
+
 fn fmtColor(color: ?u24) u8 {
     return if (color == null) '.' else '#';
 }
@@ -73,35 +101,32 @@ fn fill(grid: *std.AutoHashMap(Coord, u24), seed: Coord) !void {
     }
 }
 
-// var area2: i32 = 0;
-// const xys = coords.items;
-// for (xys[0 .. xys.len - 1], xys[1..]) |a, b| {
-//     std.debug.print("{d},{d}\n", .{ a.x, a.y });
-//     area2 += a.x * b.y - b.x * a.y;
-// }
-// var area = @divFloor(area2, 2);
-// std.debug.print("area: {d}\n", .{area});
-
-fn area(grid: std.AutoHashMap(Coord, u8), topLeft: Coord, bottomRight: Coord) usize {
+fn area(grid: std.AutoHashMap(Coord, u8), topLeft: Coord, bottomRight: Coord, ys: std.AutoHashMap(i32, void)) !usize {
     const minX = topLeft.x;
     const minY = topLeft.y;
     const maxX = bottomRight.x;
     const maxY = bottomRight.y;
     var part2alt: usize = 0;
     var y = minY;
+    var timer = try std.time.Timer.start();
+    var lastRowArea: usize = 0;
+    var ysUsed: usize = 0;
     while (y <= maxY) : (y += 1) {
+        if (!ys.contains(y)) {
+            part2alt += lastRowArea;
+            continue;
+        }
+        ysUsed += 1;
+        const elapsed = timer.read() / 1_000_000_000;
+        std.debug.print(" -> y={d}, {d}/{d} {d}s\n", .{ y, ysUsed, ys.count(), elapsed });
         var numBars: usize = 0;
         var prevCorner: ?u8 = null;
+        lastRowArea = 0;
 
         var x = minX;
         while (x <= maxX) : (x += 1) {
             var c = Coord{ .x = x, .y = y };
-            if (!grid.contains(c)) {
-                if (numBars % 2 == 1) {
-                    part2alt += 1;
-                }
-            } else {
-                var tile = grid.get(c).?;
+            if (grid.get(c)) |tile| {
                 if (tile == '|') {
                     numBars += 1;
                 } else if (tile == 'J' and prevCorner == 'F') {
@@ -112,8 +137,13 @@ fn area(grid: std.AutoHashMap(Coord, u8), topLeft: Coord, bottomRight: Coord) us
                 if (tile != '-') {
                     prevCorner = tile;
                 }
+            } else {
+                if (numBars % 2 == 1) {
+                    lastRowArea += 1;
+                }
             }
         }
+        part2alt += lastRowArea;
     }
     return part2alt;
 }
@@ -124,7 +154,6 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var grid = std.AutoHashMap(Coord, u8).init(allocator);
     defer grid.deinit();
     var pos = Coord{ .x = 0, .y = 0 };
-
     try grid.put(pos, '?');
 
     var iter = try bufIter.iterLines(filename);
@@ -138,7 +167,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var firstD: ?dirMod.Dir = null;
     var lastD = dirMod.Dir.up;
     while (try iter.next()) |line| {
-        const plan = try parsePlan(line);
+        const plan = try parsePlan2(line);
         std.debug.print("{any}\n", .{plan});
 
         const d = plan.dir;
@@ -164,15 +193,36 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     std.debug.print("{d}-{d}, {d}-{d} {any}\n", .{ minX, maxX, minY, maxY, pos });
     std.debug.print("count: {d}\n", .{grid.count()});
 
+    var xs = std.AutoHashMap(i32, void).init(allocator);
+    defer xs.deinit();
+    var ys = std.AutoHashMap(i32, void).init(allocator);
+    defer ys.deinit();
+    for (coords.items) |c| {
+        try xs.put(c.x, undefined);
+        try ys.put(@max(c.y - 1, minY), undefined);
+        try ys.put(c.y, undefined);
+        try ys.put(@min(c.y + 1, maxY), undefined);
+    }
+
     const tl = Coord{ .x = minX, .y = minY };
     const br = Coord{ .x = maxX, .y = maxY };
-    gridMod.printGridFmt(u8, grid, tl, br, fmtChar);
+    // gridMod.printGridFmt(u8, grid, tl, br, fmtChar);
 
     // try fill(&grid, Coord{ .x = 1, .y = 1 });
     const count = grid.count();
-    const intArea = area(grid, tl, br);
+    std.debug.print("#ys of note: {d}\n", .{ys.count()});
+    const intArea = try area(grid, tl, br, ys);
 
     std.debug.print("part 1: {d} + {d} = {d}\n", .{ count, intArea, count + intArea });
+
+    var area2: i32 = 0;
+    const xys = coords.items;
+    for (xys[0 .. xys.len - 1], xys[1..]) |a, b| {
+        std.debug.print("{d},{d}\n", .{ a.x, a.y });
+        area2 += a.x * b.y - b.x * a.y;
+    }
+    var shoelaceArea = @divFloor(area2, 2);
+    std.debug.print("area: {d}\n", .{shoelaceArea});
 
     // std.debug.print("part 2: {d}\n", .{});
 }
