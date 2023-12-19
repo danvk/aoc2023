@@ -52,7 +52,12 @@ i = 289011596 - 199993750 / 2 + 1
 So that doesn't work at all!
 My area calculation must be wrong, lots of people on reddit used this approach.
 
-… I implemented this again the next day and got the right answer. So what was wrong before? I had to add some `@intCast`s to make it work, errors that I don't remember getting before.
+… I implemented this again the next day and got the right answer. So what was wrong before? I had to add some `@intCast`s to make it work, errors that I don't remember getting before. Looking at my diff, I think two things happened:
+
+1. I built the shoelace version in optimized mode, so the integer overflow was not caught at runtime.
+2. Somehow the Zig compiler wasn't able to detect the possible overflow when I inlined my loop, but _was_ able to detect it when I factored out a shoelace function.
+
+The former is my fault but the latter seems like a Zig bug. In any case, the lack of an error probably cost me ~1 hour yesterday ☹️.
 
 ### Day 17
 
