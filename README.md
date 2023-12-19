@@ -16,6 +16,10 @@ Another way to do this would be to track the ranges of values that would go thro
 For `<`: the result changes when you hit `num`.
 For `>`: the result changes when you hit `num+1`.
 
+This ran faster than I expected: ~4 minutes total, and just fast enough that I could submit my answer before my plane took off! The tricky part was the `num` vs. `num+1` thing above.
+
+It seems like most people took the interval approach, which apparently is much faster.
+
 ### Day 18
 
 For part 2, the sample has coordinates that go 0-1186328.

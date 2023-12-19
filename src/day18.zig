@@ -148,6 +148,16 @@ fn area(grid: std.AutoHashMap(Coord, u8), topLeft: Coord, bottomRight: Coord, ys
     return part2alt;
 }
 
+fn shoelaceArea(xys: []Coord) u64 {
+    var area2: i64 = 0;
+    for (xys[0 .. xys.len - 1], xys[1..]) |a, b| {
+        std.debug.print("{d},{d}\n", .{ a.x, a.y });
+        area2 += @as(i64, a.x) * b.y - @as(i64, b.x) * a.y;
+    }
+    assert(area2 > 0);
+    return @divFloor(@as(u64, @intCast(area2)), 2);
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -162,36 +172,40 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var maxX: i32 = 0;
     var maxY: i32 = 0;
     var coords = std.ArrayList(Coord).init(allocator);
+    var countDirect: usize = 0;
     defer coords.deinit();
     // try coords.append(pos);
     var firstD: ?dirMod.Dir = null;
     var lastD = dirMod.Dir.up;
     while (try iter.next()) |line| {
         const plan = try parsePlan2(line);
-        std.debug.print("{any}\n", .{plan});
+        // std.debug.print("{any}\n", .{plan});
 
         const d = plan.dir;
         if (firstD == null) {
             firstD = d;
         }
-        for (0..plan.len) |i| {
-            if (i == 0) {
-                try grid.put(pos, if (d == .up and lastD == .left) 'L' else if (d == .up and lastD == .right) 'J' else if (d == .down and lastD == .left) 'F' else if (d == .down and lastD == .right) '7' else if (d == .left and lastD == .up) '7' else if (d == .left and lastD == .down) 'J' else if (d == .right and lastD == .up) 'F' else if (d == .right and lastD == .down) 'L' else unreachable);
-            }
-            pos = pos.move(d);
-            try grid.put(pos, if (d == .up or d == .down) '|' else '-');
-            maxX = @max(pos.x, maxX);
-            maxY = @max(pos.y, maxY);
-            minX = @min(pos.x, minX);
-            minY = @min(pos.y, minY);
-        }
+        // for (0..plan.len) |i| {
+        //     if (i == 0) {
+        //         try grid.put(pos, if (d == .up and lastD == .left) 'L' else if (d == .up and lastD == .right) 'J' else if (d == .down and lastD == .left) 'F' else if (d == .down and lastD == .right) '7' else if (d == .left and lastD == .up) '7' else if (d == .left and lastD == .down) 'J' else if (d == .right and lastD == .up) 'F' else if (d == .right and lastD == .down) 'L' else unreachable);
+        //     }
+        //     pos = pos.move(d);
+        //     try grid.put(pos, if (d == .up or d == .down) '|' else '-');
+        //     maxX = @max(pos.x, maxX);
+        //     maxY = @max(pos.y, maxY);
+        //     minX = @min(pos.x, minX);
+        //     minY = @min(pos.y, minY);
+        // }
+        const lenI32: i32 = @intCast(plan.len);
+        pos = Coord{ .x = pos.x + lenI32 * d.dx(), .y = pos.y + lenI32 * d.dy() };
         lastD = d;
         try coords.append(pos);
+        countDirect += plan.len;
     }
     const d = firstD.?;
     try grid.put(pos, if (d == .up and lastD == .left) 'L' else if (d == .up and lastD == .right) 'J' else if (d == .down and lastD == .left) 'F' else if (d == .down and lastD == .right) '7' else if (d == .left and lastD == .up) '7' else if (d == .left and lastD == .down) 'J' else if (d == .right and lastD == .up) 'F' else if (d == .right and lastD == .down) 'L' else unreachable);
     std.debug.print("{d}-{d}, {d}-{d} {any}\n", .{ minX, maxX, minY, maxY, pos });
-    std.debug.print("count: {d}\n", .{grid.count()});
+    std.debug.print("count: {d} =? {d}\n", .{ grid.count(), countDirect });
 
     var xs = std.AutoHashMap(i32, void).init(allocator);
     defer xs.deinit();
@@ -218,16 +232,14 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     // std.debug.print("part 1: {d} + {d} = {d}\n", .{ count, intArea, count + intArea });
 
-    var area2: i32 = 0;
-    const xys = coords.items;
-    for (xys[0 .. xys.len - 1], xys[1..]) |a, b| {
-        std.debug.print("{d},{d}\n", .{ a.x, a.y });
-        area2 += a.x * b.y - b.x * a.y;
-    }
-    var shoelaceArea = @divFloor(area2, 2);
-    std.debug.print("area: {d}\n", .{shoelaceArea});
+    var slArea = shoelaceArea(coords.items);
+    std.debug.print("shoelace area: {d}\n", .{slArea});
 
-    // std.debug.print("part 2: {d}\n", .{});
+    // A = i + b/2 - 1
+    // i = A - b/2 + 1
+
+    var totalArea = slArea + (countDirect >> 1) + 1;
+    std.debug.print("part 2: {d}\n", .{totalArea});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
