@@ -23,6 +23,12 @@ const Pulse = struct {
     from: []const u8,
     to: []const u8,
     val: PulseType,
+
+    pub fn format(p: Pulse, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+        _ = fmt;
+        _ = options;
+        try std.fmt.format(writer, "{s} -{s}-> {s}", .{ p.from, if (p.val == .low) "low" else "high", p.to });
+    }
 };
 
 fn parseModule(allocator: std.mem.Allocator, line: []const u8) !Module {
@@ -79,9 +85,9 @@ fn indexOfStr(haystack: [][]const u8, needle: []const u8) ?usize {
     return null;
 }
 
-fn printPulse(pulse: Pulse) void {
-    std.debug.print("{s} -{s}-> {s}", .{ pulse.from, if (pulse.val == .low) "low" else "high", pulse.to });
-}
+// fn printPulse(pulse: Pulse) void {
+//     std.debug.print("{s} -{s}-> {s}", .{ pulse.from, if (pulse.val == .low) "low" else "high", pulse.to });
+// }
 
 fn allHashValuesEql(comptime T: type, map: std.StringHashMap(T), val: T) bool {
     var it = map.valueIterator();
@@ -122,16 +128,16 @@ fn pressButton(n: u64, allocator: std.mem.Allocator, modules: *std.StringHashMap
         const to = pulse.to;
         if (n % 3739 == 0 or n % 3797 == 0 or n % 3919 == 0 or n % 4003 == 0) {
             if (to.len == 2 and ((to[0] == 'k' and to[1] == 'z'))) {
-                std.debug.print("{d} ", .{n});
-                printPulse(pulse);
+                std.debug.print("{d} {any}\n", .{ n, pulse });
+                // printPulse(pulse);
 
-                var anyMoreKz = false;
-                for (pulses.items[i..]) |np| {
-                    if (std.mem.eql(u8, np.to, "kz") and np.val == .low) {
-                        anyMoreKz = true;
-                    }
-                }
-                std.debug.print("{s}\n", .{if (anyMoreKz) " more!" else " clear"});
+                // var anyMoreKz = false;
+                // for (pulses.items[i..]) |np| {
+                //     if (std.mem.eql(u8, np.to, "kz") and np.val == .low) {
+                //         anyMoreKz = true;
+                //     }
+                // }
+                // std.debug.print("{s}\n", .{if (anyMoreKz) " more!" else " clear"});
             }
         }
         // if (to.len == 2 and ((to[0] == 's' and to[1] == 'j') or (to[0] == 'q' and to[1] == 'q') or (to[0] == 'l' and to[1] == 's') or (to[0] == 'b' and to[1] == 'g'))) {
@@ -151,27 +157,27 @@ fn pressButton(n: u64, allocator: std.mem.Allocator, modules: *std.StringHashMap
                     assert(nkz == 3);
                 }
             }
-            if (nkz == 3) {
-                var anyMoreKz = false;
-                for (pulses.items[i..]) |np| {
-                    if (std.mem.eql(u8, np.to, "kz") and np.val == .low) {
-                        anyMoreKz = true;
-                    }
-                }
-                // std.debug.print("{d} {s}\n", .{ n, if (anyMoreKz) " more!" else " clear" });
-                var expected: bool = true;
-                if ((n - 1) % 3739 < (n - 1) % 4003) {
-                    expected = true;
-                } else {
-                    if ((n / 4003) % 2 != n % 2) {
-                        expected = false;
-                    }
-                }
-                if (anyMoreKz != expected) {
-                    std.debug.print("did not match expectations on {d}\n", .{n});
-                }
-                assert(anyMoreKz == expected);
-            }
+            // if (nkz == 3) {
+            //     var anyMoreKz = false;
+            //     for (pulses.items[i..]) |np| {
+            //         if (std.mem.eql(u8, np.to, "kz") and np.val == .low) {
+            //             anyMoreKz = true;
+            //         }
+            //     }
+            //     // std.debug.print("{d} {s}\n", .{ n, if (anyMoreKz) " more!" else " clear" });
+            //     var expected: bool = true;
+            //     if ((n - 1) % 3739 < (n - 1) % 4003) {
+            //         expected = true;
+            //     } else {
+            //         if ((n / 4003) % 2 != n % 2) {
+            //             expected = false;
+            //         }
+            //     }
+            //     if (anyMoreKz != expected) {
+            //         std.debug.print("did not match expectations on {d}\n", .{n});
+            //     }
+            //     assert(anyMoreKz == expected);
+            // }
             nkz += 1;
         }
         // }

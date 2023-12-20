@@ -6,6 +6,22 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 20 (10029 / 7219)
+
+The first part was fine, just took some care. I wanted to set up pointers to "next" nodes, but in retrospect that was a waste of time. I should have just used a hash map, I wound up needing it anyway. I could have used a union type since the two types of modules are so different, but I wound up just mushing the two together in a struct.
+
+Part 2 was extremely frustrating. My part 1 solution got to 30-40M button presses (optimized) before crashing. I realized this was because I was using an arena allocator and a `Queue`, so I was never deallocating anything. Switching to the GPA fixed the crash but made everything 5-10x slower. I changed to using an ArrayList instead and it was similarly slow. Then I gave the ArrayList a capacity of 1000 from the get-go and it was within a factor of 2x of the original. So there's an insight there I guess.
+
+I let my code run through ~300M button presses but it didn't terminate. So I figured I needed to do something smarter. I looked at the input and saw that there was a single node leading into the output `rx` node. It had four inputs. So I printed all pulses leading into these. This quickly led to the realization that they usually got "low" pulses but got "high" signals periodically. I calculated the periods, plugged them into an LCM calculator and got out a number around 222 trillion.
+
+AoC said this was too low, though. I tried adding one and doubling, it was still greater than N+1 but was less than 2N. I thought maybe there was a pattern to whether there were additional signals in the queue that might block the final low pulse. That does sometimes happen. I spent some time tracking down exactly when. It seemed to be something to do with evens and odds. But this would only ever double the number of cycles.
+
+I was at a loss. I started drawing out the graph but it seemed really messy. I still had the LCM calculator open, and I noticed that one of the numbers didn't look right. Sure enough, I had a typo! I plugged the right numbers in and got my answer. So I'd wasted the previous ~hour. Grrr. Lesson learned: always copy/paste, never type!
+
+- Start: 8:50 AM
+- ⭐️: 9:58 AM
+- ⭐️⭐️: 11:51 AM
+
 crashed mysteriously after 30,731,000 iterations
 or after 42,100,000
 
@@ -53,6 +69,13 @@ LCM = 222377836299437
 this is too low!
 
 222377836299438 is also too low
+
+222718819437131
+
+... everything below this turns out to be irrelevant. I typed one of the four numbers incorrectly into the online LCM calculator and then wasted an hour trying to track down other patterns. Sigh.
+
+    - 3739 3797 3913 4003
+    + 3739 3797 3919 4003
 
 I wonder if the "deliver a _single_ pulse" is relevant?
 
@@ -104,6 +127,26 @@ But this suggests that 444755672598874 is the answer, but it's too high.
 It's also not 444755672598873.
 
 I'm stumped. Maybe I need to draw out the network? 58 modules.
+
+I've also been noticing (the past ~week) that zls sometimes gets very slow. Slow enough that I can see it process my typing character-by-character, slower than I type. And sometimes it's slow enough that I hit Cmd-S, go back to the terminal and run `zig build` before the Save command has actually committed. Restarting zls usually fixes this, at least for a bit.
+
+I wish there were more options for the `{any}` formatter in Zig. Even just being able to print `[]const u8` as a string rather than an array of ASCII characters would be helpful.
+
+... maybe you _can_ give types a printer? YES! This works great:
+
+```zig
+const Pulse = struct {
+    from: []const u8,
+    to: []const u8,
+    val: PulseType,
+
+    pub fn format(p: Pulse, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+        _ = fmt;
+        _ = options;
+        try std.fmt.format(writer, "{s} -{s}-> {s}", .{ p.from, if (p.val == .low) "low" else "high", p.to });
+    }
+};
+```
 
 ### Day 19 (14116 / 8346)
 

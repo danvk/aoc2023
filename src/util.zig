@@ -138,6 +138,19 @@ pub fn hashMaxValue(comptime V: type, hash_map: anytype) ?V {
     return null;
 }
 
+const assert = std.debug.assert;
+
+pub fn lcm(comptime V: type, nums: []const V) V {
+    assert(nums.len >= 1);
+    var gcd = nums[0];
+    var prod = nums[0];
+    for (nums[1..]) |num| {
+        gcd = std.math.gcd(gcd, num);
+        prod *= num;
+    }
+    return prod / gcd;
+}
+
 const expect = std.testing.expect;
 const expectEqual = std.testing.expectEqual;
 const expectEqualDeep = std.testing.expectEqualDeep;
@@ -175,4 +188,8 @@ test "splitAnyIntoBuf" {
     try expectEqualDeep(@as([]const u8, "Card 1"), parts[0]);
     try expectEqualDeep(@as([]const u8, " 41 48 83 86 17 "), parts[1]);
     try expectEqualDeep(@as([]const u8, " 83 86  6 31 17  9 48 53"), parts[2]);
+}
+
+test "lcm" {
+    try expectEqual(lcm(u64, &[_]u64{ 3739, 3797, 3919, 4003 }), 222718819437131);
 }
