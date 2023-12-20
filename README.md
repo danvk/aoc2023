@@ -12,7 +12,59 @@ or after 42,100,000
 Using the raw (not arena) allocator is much slower:
 1,000,000 17s
 
-I guess because it's actually allocating and freeing memory?
+I guess because it's actually allocating and freeing memory? Setting an init capacity of 1000 for the ArrayList makes it go much, much faster:
+
+1,000,000 3s
+
+Hopefully this will go faster since it's not leaking memory. My next option is to actually figure out what my sample is computing.
+
+100,000,000 308s
+305,000,000 950s
+
+&kz -> rx
+
+&sj -> kz
+&qq -> kz
+&ls -> kz
+&bg -> kz
+
+sj:
+&hb -> sj, mr, rz, qg, pr
+
+qq:
+&hf -> rg, vl, tq, qq, mv, zz
+
+ls:
+&dl -> hn, pj, ls, mn, jg, sv
+
+bg:
+&lq -> bg, kk, dz, xr, lh, fm
+
+the next level down there are flip-flop modules
+one idea is to track whenever sj, qq, ls and bg send pulses and look for a pattern.
+
+bg gets a low signal every 3739 presses
+ls gets a low signal every 3797 presses
+sj gets a low signal every 3919 presses
+qq gets a low signal every 4003 presses
+LCM = 222,377,836,299,437
+LCM = 222377836299437
+
+this is too low!
+
+222377836299438 is also too low
+
+I wonder if the "deliver a _single_ pulse" is relevant?
+
+kz needs to send a low pulse to rx.
+that happens when all its inputs are high.
+i.e. sj, qq, ls and bg all send high
+
+----
+
+broadcaster -> xr, mr, rg, sv
+
+There are tons of "high" pulses sent to sj, qq, ls and bg on every press.
 
 ### Day 19 (14116 / 8346)
 

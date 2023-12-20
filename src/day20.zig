@@ -93,9 +93,9 @@ fn allHashValuesEql(comptime T: type, map: std.StringHashMap(T), val: T) bool {
     return true;
 }
 
-fn pressButton(allocator: std.mem.Allocator, modules: *std.StringHashMap(Module)) !bool {
+fn pressButton(n: u64, allocator: std.mem.Allocator, modules: *std.StringHashMap(Module)) !bool {
     // var pulses = queue.Queue(Pulse).init(allocator);
-    var pulses = std.ArrayList(Pulse).init(allocator);
+    var pulses = try std.ArrayList(Pulse).initCapacity(allocator, 1000);
     defer pulses.deinit();
     var broadcast = modules.get("broadcaster").?;
     var low: u64 = 1;
@@ -117,6 +117,16 @@ fn pressButton(allocator: std.mem.Allocator, modules: *std.StringHashMap(Module)
         if (std.mem.eql(u8, pulse.to, "rx") and pulse.val == .low) {
             return true;
         }
+
+        // if (n % 3739 == 0 or n % 3797 == 0 or n % 3919 == 0 or n % 4003 == 0) {
+        const to = pulse.to;
+        // if (to.len == 2 and ((to[0] == 's' and to[1] == 'j') or (to[0] == 'q' and to[1] == 'q') or (to[0] == 'l' and to[1] == 's') or (to[0] == 'b' and to[1] == 'g'))) {
+        if (to.len == 2 and ((to[0] == 'k' and to[1] == 'z'))) {
+            std.debug.print("{d} ", .{n});
+            printPulse(pulse);
+        }
+        // }
+
         const maybeModule = modules.getPtr(pulse.to);
         if (maybeModule == null) {
             continue; // untyped module
@@ -179,7 +189,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var numPresses: u64 = 0;
     while (true) {
         numPresses += 1;
-        var sent = try pressButton(in_allocator, &modules);
+        var sent = try pressButton(numPresses, in_allocator, &modules);
         if (sent) {
             break;
         }
