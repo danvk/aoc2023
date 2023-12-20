@@ -14,7 +14,7 @@ const Module = struct {
     name: []const u8,
     typ: ModuleType,
     nextStrs: [][]const u8,
-    nexts: []*Module,
+    nexts: []?*Module,
     values: std.StringHashMap(PulseType),
     flipFlopOn: bool,
 };
@@ -47,9 +47,8 @@ fn parseModule(allocator: std.mem.Allocator, line: []const u8) !Module {
     try util.splitIntoArrayList(sides.rest, ", ", &nextStrs);
     mod.nextStrs = nextStrs.items;
     mod.values = std.StringHashMap(PulseType).init(allocator);
-    // mod.values = try allocator.alloc(PulseType, mod.inputs.len);
-    // @memset(mod.values, PulseType.low);
-    mod.nexts = try allocator.alloc(*Module, mod.nextStrs.len);
+    mod.nexts = try allocator.alloc(?*Module, mod.nextStrs.len);
+    @memset(mod.nexts, null);
     return mod;
 }
 
@@ -57,12 +56,16 @@ fn setNexts(modules: *std.StringHashMap(Module)) !void {
     var it = modules.valueIterator();
     while (it.next()) |module| {
         for (module.nextStrs, 0..) |nextStr, i| {
-            var next = modules.getPtr(nextStr).?;
-            module.nexts[i] = next;
-            assert(module.nexts[i] == next);
-            try next.values.put(module.name, .low);
-            assert(next.values.contains(module.name));
-            assert(next.values.get(module.name).? == .low);
+            if (modules.getPtr(nextStr)) |next| {
+                module.nexts[i] = next;
+                assert(module.nexts[i] == next);
+                try next.values.put(module.name, .low);
+                assert(next.values.contains(module.name));
+                assert(next.values.get(module.name).? == .low);
+            } else {
+                std.debug.print("untyped module: {s}\n", .{nextStr});
+                module.nexts[i] = null;
+            }
         }
     }
 }
@@ -95,8 +98,8 @@ fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u6
     var broadcast = modules.get("broadcaster").?;
     var low: u64 = 1;
     var high: u64 = 0;
-    for (broadcast.nexts) |next| {
-        try pulses.enqueue(Pulse{ .from = "broadcaster", .to = next.name, .val = PulseType.low });
+    for (broadcast.nextStrs) |nextStr| {
+        try pulses.enqueue(Pulse{ .from = "broadcaster", .to = nextStr, .val = PulseType.low });
     }
 
     while (pulses.dequeue()) |pulse| {
@@ -106,7 +109,11 @@ fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u6
             low += 1;
         }
         printPulse(pulse);
-        const module = modules.getPtr(pulse.to).?;
+        const maybeModule = modules.getPtr(pulse.to);
+        if (maybeModule == null) {
+            continue; // untyped module
+        }
+        const module = maybeModule.?;
 
         switch (module.typ) {
             .flipFlop => {
@@ -116,8 +123,8 @@ fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u6
                 if (pulse.val == .low) {
                     module.flipFlopOn = !module.flipFlopOn;
                     const sendType = if (module.flipFlopOn) PulseType.high else PulseType.low;
-                    for (module.nexts) |next| {
-                        try pulses.enqueue(Pulse{ .from = module.name, .to = next.name, .val = sendType });
+                    for (module.nextStrs) |nextStr| {
+                        try pulses.enqueue(Pulse{ .from = module.name, .to = nextStr, .val = sendType });
                     }
                 }
             },
@@ -131,8 +138,8 @@ fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u6
                 try module.values.put(pulse.from, pulse.val);
                 const allHigh = allHashValuesEql(PulseType, module.values, .high);
                 const sendType = if (allHigh) PulseType.low else PulseType.high;
-                for (module.nexts) |next| {
-                    try pulses.enqueue(Pulse{ .from = module.name, .to = next.name, .val = sendType });
+                for (module.nextStrs) |nextStr| {
+                    try pulses.enqueue(Pulse{ .from = module.name, .to = nextStr, .val = sendType });
                 }
             },
             else => unreachable,
@@ -160,8 +167,14 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     try setNexts(&modules);
 
-    var sum1 = try pressButton(&modules);
-    std.debug.print("part 1: {any}\n", .{sum1});
+    var sumLow: u64 = 0;
+    var sumHigh: u64 = 0;
+    for (0..1000) |_| {
+        var sum = try pressButton(&modules);
+        sumLow += sum.low;
+        sumHigh += sum.high;
+    }
+    std.debug.print("part 1: {d} = {d} * {d}\n", .{ sumLow * sumHigh, sumLow, sumHigh });
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 
