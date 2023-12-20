@@ -1,19 +1,28 @@
 const std = @import("std");
 const bufIter = @import("./buf-iter.zig");
 const util = @import("./util.zig");
+const queue = @import("./queue.zig");
 
 const assert = std.debug.assert;
 
 // alternative with arena allocator:
 
+const PulseType = enum { low, high };
 const ModuleType = enum { broadcast, flipFlop, conjunction };
 
 const Module = struct {
     name: []const u8,
     typ: ModuleType,
-    inputs: [][]const u8,
-    values: []u32,
+    nextStrs: [][]const u8,
     nexts: []*Module,
+    values: std.StringHashMap(PulseType),
+    flipFlopOn: bool,
+};
+
+const Pulse = struct {
+    from: []const u8,
+    to: []const u8,
+    val: PulseType,
 };
 
 fn parseModule(allocator: std.mem.Allocator, line: []const u8) !Module {
@@ -24,6 +33,7 @@ fn parseModule(allocator: std.mem.Allocator, line: []const u8) !Module {
         // flip-flop
         mod.name = nameType[1..];
         mod.typ = .flipFlop;
+        mod.flipFlopOn = false;
     } else if (nameType[0] == '&') {
         mod.name = nameType[1..];
         mod.typ = .conjunction;
@@ -33,10 +43,102 @@ fn parseModule(allocator: std.mem.Allocator, line: []const u8) !Module {
     } else {
         unreachable;
     }
-    var inputs = std.ArrayList([]const u8).init(allocator);
-    try util.splitIntoArrayList(sides.rest, ", ", &inputs);
-    mod.inputs = inputs.items;
+    var nextStrs = std.ArrayList([]const u8).init(allocator);
+    try util.splitIntoArrayList(sides.rest, ", ", &nextStrs);
+    mod.nextStrs = nextStrs.items;
+    mod.values = std.StringHashMap(PulseType).init(allocator);
+    // mod.values = try allocator.alloc(PulseType, mod.inputs.len);
+    // @memset(mod.values, PulseType.low);
+    mod.nexts = try allocator.alloc(*Module, mod.nextStrs.len);
     return mod;
+}
+
+fn setNexts(modules: *std.StringHashMap(Module)) !void {
+    var it = modules.valueIterator();
+    while (it.next()) |module| {
+        for (module.nextStrs, 0..) |nextStr, i| {
+            var next = modules.getPtr(nextStr).?;
+            module.nexts[i] = next;
+            assert(module.nexts[i] == next);
+            try next.values.put(module.name, .low);
+            assert(next.values.contains(module.name));
+            assert(next.values.get(module.name).? == .low);
+        }
+    }
+}
+
+fn indexOfStr(haystack: [][]const u8, needle: []const u8) ?usize {
+    for (haystack, 0..) |str, i| {
+        if (std.mem.eql(u8, str, needle)) {
+            return i;
+        }
+    }
+    return null;
+}
+
+fn printPulse(pulse: Pulse) void {
+    std.debug.print("{s} -{s}-> {s}\n", .{ pulse.from, if (pulse.val == .low) "low" else "high", pulse.to });
+}
+
+fn allHashValuesEql(comptime T: type, map: std.StringHashMap(T), val: T) bool {
+    var it = map.valueIterator();
+    while (it.next()) |v| {
+        if (v.* != val) {
+            return false;
+        }
+    }
+    return true;
+}
+
+fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u64 } {
+    var pulses = queue.Queue(Pulse).init(modules.allocator);
+    var broadcast = modules.get("broadcaster").?;
+    var low: u64 = 1;
+    var high: u64 = 0;
+    for (broadcast.nexts) |next| {
+        try pulses.enqueue(Pulse{ .from = "broadcaster", .to = next.name, .val = PulseType.low });
+    }
+
+    while (pulses.dequeue()) |pulse| {
+        if (pulse.val == .high) {
+            high += 1;
+        } else {
+            low += 1;
+        }
+        printPulse(pulse);
+        const module = modules.getPtr(pulse.to).?;
+
+        switch (module.typ) {
+            .flipFlop => {
+                // if a flip-flop module receives a low pulse, it flips between
+                // on and off. If it was off, it turns on and sends a high pulse.
+                // If it was on, it turns off and sends a low pulse.
+                if (pulse.val == .low) {
+                    module.flipFlopOn = !module.flipFlopOn;
+                    const sendType = if (module.flipFlopOn) PulseType.high else PulseType.low;
+                    for (module.nexts) |next| {
+                        try pulses.enqueue(Pulse{ .from = module.name, .to = next.name, .val = sendType });
+                    }
+                }
+            },
+            .conjunction => {
+                // Conjunction modules (prefix &) remember the type of the most recent pulse
+                // received from each of their connected input modules; they initially default
+                // to remembering a low pulse for each input. When a pulse is received, the
+                // conjunction module first updates its memory for that input. Then, if it
+                // remembers high pulses for all inputs, it sends a low pulse; otherwise, it
+                // sends a high pulse.
+                try module.values.put(pulse.from, pulse.val);
+                const allHigh = allHashValuesEql(PulseType, module.values, .high);
+                const sendType = if (allHigh) PulseType.low else PulseType.high;
+                for (module.nexts) |next| {
+                    try pulses.enqueue(Pulse{ .from = module.name, .to = next.name, .val = sendType });
+                }
+            },
+            else => unreachable,
+        }
+    }
+    return .{ .low = low, .high = high };
 }
 
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -56,7 +158,10 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         try modules.put(module.name, module);
     }
 
-    // std.debug.print("part 1: {d}\n", .{sum1});
+    try setNexts(&modules);
+
+    var sum1 = try pressButton(&modules);
+    std.debug.print("part 1: {any}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 
