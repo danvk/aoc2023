@@ -6,6 +6,8 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+crashed mysteriously after 30,731,000 iterations
+
 ### Day 19 (14116 / 8346)
 
 part 2: only values that appear in a rule are worth checking.

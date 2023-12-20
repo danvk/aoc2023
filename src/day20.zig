@@ -93,7 +93,7 @@ fn allHashValuesEql(comptime T: type, map: std.StringHashMap(T), val: T) bool {
     return true;
 }
 
-fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u64 } {
+fn pressButton(modules: *std.StringHashMap(Module)) !bool {
     var pulses = queue.Queue(Pulse).init(modules.allocator);
     var broadcast = modules.get("broadcaster").?;
     var low: u64 = 1;
@@ -108,7 +108,10 @@ fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u6
         } else {
             low += 1;
         }
-        printPulse(pulse);
+        // printPulse(pulse);
+        if (std.mem.eql(u8, pulse.to, "rx") and pulse.val == .low) {
+            return true;
+        }
         const maybeModule = modules.getPtr(pulse.to);
         if (maybeModule == null) {
             continue; // untyped module
@@ -145,7 +148,7 @@ fn pressButton(modules: *std.StringHashMap(Module)) !struct { low: u64, high: u6
             else => unreachable,
         }
     }
-    return .{ .low = low, .high = high };
+    return false;
 }
 
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -167,15 +170,30 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     try setNexts(&modules);
 
-    var sumLow: u64 = 0;
-    var sumHigh: u64 = 0;
-    for (0..1000) |_| {
-        var sum = try pressButton(&modules);
-        sumLow += sum.low;
-        sumHigh += sum.high;
+    var timer = try std.time.Timer.start();
+    var numPresses: u64 = 0;
+    while (true) {
+        numPresses += 1;
+        var sent = try pressButton(&modules);
+        if (sent) {
+            break;
+        }
+        if (numPresses % 100_000 == 0) {
+            const elapsed = timer.read() / 1_000_000_000;
+            std.debug.print("{d} {d}s\n", .{ numPresses, elapsed });
+        }
     }
-    std.debug.print("part 1: {d} = {d} * {d}\n", .{ sumLow * sumHigh, sumLow, sumHigh });
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 2: {d}\n", .{numPresses});
+
+    // var sumLow: u64 = 0;
+    // var sumHigh: u64 = 0;
+    // for (0..1000) |_| {
+    //     var sum = try pressButton(&modules);
+    //     sumLow += sum.low;
+    //     sumHigh += sum.high;
+    // }
+    // std.debug.print("part 1: {d} = {d} * {d}\n", .{ sumLow * sumHigh, sumLow, sumHigh });
+
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
