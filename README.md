@@ -7,6 +7,12 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 ## Day by day
 
 crashed mysteriously after 30,731,000 iterations
+or after 42,100,000
+
+Using the raw (not arena) allocator is much slower:
+1,000,000 17s
+
+I guess because it's actually allocating and freeing memory?
 
 ### Day 19 (14116 / 8346)
 

@@ -93,16 +93,21 @@ fn allHashValuesEql(comptime T: type, map: std.StringHashMap(T), val: T) bool {
     return true;
 }
 
-fn pressButton(modules: *std.StringHashMap(Module)) !bool {
-    var pulses = queue.Queue(Pulse).init(modules.allocator);
+fn pressButton(allocator: std.mem.Allocator, modules: *std.StringHashMap(Module)) !bool {
+    // var pulses = queue.Queue(Pulse).init(allocator);
+    var pulses = std.ArrayList(Pulse).init(allocator);
+    defer pulses.deinit();
     var broadcast = modules.get("broadcaster").?;
     var low: u64 = 1;
     var high: u64 = 0;
+    var i: usize = 0;
     for (broadcast.nextStrs) |nextStr| {
-        try pulses.enqueue(Pulse{ .from = "broadcaster", .to = nextStr, .val = PulseType.low });
+        try pulses.append(Pulse{ .from = "broadcaster", .to = nextStr, .val = PulseType.low });
     }
 
-    while (pulses.dequeue()) |pulse| {
+    while (i < pulses.items.len) {
+        const pulse = pulses.items[i];
+        i += 1;
         if (pulse.val == .high) {
             high += 1;
         } else {
@@ -127,7 +132,7 @@ fn pressButton(modules: *std.StringHashMap(Module)) !bool {
                     module.flipFlopOn = !module.flipFlopOn;
                     const sendType = if (module.flipFlopOn) PulseType.high else PulseType.low;
                     for (module.nextStrs) |nextStr| {
-                        try pulses.enqueue(Pulse{ .from = module.name, .to = nextStr, .val = sendType });
+                        try pulses.append(Pulse{ .from = module.name, .to = nextStr, .val = sendType });
                     }
                 }
             },
@@ -142,7 +147,7 @@ fn pressButton(modules: *std.StringHashMap(Module)) !bool {
                 const allHigh = allHashValuesEql(PulseType, module.values, .high);
                 const sendType = if (allHigh) PulseType.low else PulseType.high;
                 for (module.nextStrs) |nextStr| {
-                    try pulses.enqueue(Pulse{ .from = module.name, .to = nextStr, .val = sendType });
+                    try pulses.append(Pulse{ .from = module.name, .to = nextStr, .val = sendType });
                 }
             },
             else => unreachable,
@@ -174,11 +179,11 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var numPresses: u64 = 0;
     while (true) {
         numPresses += 1;
-        var sent = try pressButton(&modules);
+        var sent = try pressButton(in_allocator, &modules);
         if (sent) {
             break;
         }
-        if (numPresses % 100_000 == 0) {
+        if (numPresses % 1_000_000 == 0) {
             const elapsed = timer.read() / 1_000_000_000;
             std.debug.print("{d} {d}s\n", .{ numPresses, elapsed });
         }
