@@ -80,7 +80,7 @@ fn indexOfStr(haystack: [][]const u8, needle: []const u8) ?usize {
 }
 
 fn printPulse(pulse: Pulse) void {
-    std.debug.print("{s} -{s}-> {s}\n", .{ pulse.from, if (pulse.val == .low) "low" else "high", pulse.to });
+    std.debug.print("{s} -{s}-> {s}", .{ pulse.from, if (pulse.val == .low) "low" else "high", pulse.to });
 }
 
 fn allHashValuesEql(comptime T: type, map: std.StringHashMap(T), val: T) bool {
@@ -101,6 +101,7 @@ fn pressButton(n: u64, allocator: std.mem.Allocator, modules: *std.StringHashMap
     var low: u64 = 1;
     var high: u64 = 0;
     var i: usize = 0;
+    var nkz: usize = 0;
     for (broadcast.nextStrs) |nextStr| {
         try pulses.append(Pulse{ .from = "broadcaster", .to = nextStr, .val = PulseType.low });
     }
@@ -118,12 +119,60 @@ fn pressButton(n: u64, allocator: std.mem.Allocator, modules: *std.StringHashMap
             return true;
         }
 
-        // if (n % 3739 == 0 or n % 3797 == 0 or n % 3919 == 0 or n % 4003 == 0) {
         const to = pulse.to;
+        if (n % 3739 == 0 or n % 3797 == 0 or n % 3919 == 0 or n % 4003 == 0) {
+            if (to.len == 2 and ((to[0] == 'k' and to[1] == 'z'))) {
+                std.debug.print("{d} ", .{n});
+                printPulse(pulse);
+
+                var anyMoreKz = false;
+                for (pulses.items[i..]) |np| {
+                    if (std.mem.eql(u8, np.to, "kz") and np.val == .low) {
+                        anyMoreKz = true;
+                    }
+                }
+                std.debug.print("{s}\n", .{if (anyMoreKz) " more!" else " clear"});
+            }
+        }
         // if (to.len == 2 and ((to[0] == 's' and to[1] == 'j') or (to[0] == 'q' and to[1] == 'q') or (to[0] == 'l' and to[1] == 's') or (to[0] == 'b' and to[1] == 'g'))) {
         if (to.len == 2 and ((to[0] == 'k' and to[1] == 'z'))) {
-            std.debug.print("{d} ", .{n});
-            printPulse(pulse);
+            if (pulse.val == .high) {
+                if (std.mem.eql(u8, pulse.from, "bg")) {
+                    assert(n % 3739 == 0);
+                    assert(nkz == 0);
+                } else if (std.mem.eql(u8, pulse.from, "sj")) {
+                    assert(n % 3919 == 0);
+                    assert(nkz == 1);
+                } else if (std.mem.eql(u8, pulse.from, "qq")) {
+                    assert(n % 4003 == 0);
+                    assert(nkz == 2);
+                } else if (std.mem.eql(u8, pulse.from, "ls")) {
+                    assert(n % 3797 == 0);
+                    assert(nkz == 3);
+                }
+            }
+            if (nkz == 3) {
+                var anyMoreKz = false;
+                for (pulses.items[i..]) |np| {
+                    if (std.mem.eql(u8, np.to, "kz") and np.val == .low) {
+                        anyMoreKz = true;
+                    }
+                }
+                // std.debug.print("{d} {s}\n", .{ n, if (anyMoreKz) " more!" else " clear" });
+                var expected: bool = true;
+                if ((n - 1) % 3739 < (n - 1) % 4003) {
+                    expected = true;
+                } else {
+                    if ((n / 4003) % 2 != n % 2) {
+                        expected = false;
+                    }
+                }
+                if (anyMoreKz != expected) {
+                    std.debug.print("did not match expectations on {d}\n", .{n});
+                }
+                assert(anyMoreKz == expected);
+            }
+            nkz += 1;
         }
         // }
 
@@ -184,6 +233,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     }
 
     try setNexts(&modules);
+
+    std.debug.print("modules: {d}\n", .{modules.count()});
 
     var timer = try std.time.Timer.start();
     var numPresses: u64 = 0;

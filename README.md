@@ -60,11 +60,50 @@ kz needs to send a low pulse to rx.
 that happens when all its inputs are high.
 i.e. sj, qq, ls and bg all send high
 
+kz receives multiple pulses from each of those four inputs after each button press.
+Maybe there's more structure here? Maybe each index of press has a period?
+
+3739 12 0: bg high
+3797 13 3: ls high
+3919 14 1: sj high
+4003 16 3: qq high
+
+7478 12 0: bg high
+7594 13 4: ls high
+7838 16 1: sj high
+8006 19 2: qq high
+
+14196983: bg high, sj low, qq low, ls high
+
+The order is always bg, sj, qq, ls, then some others
+
 ----
 
 broadcaster -> xr, mr, rg, sv
 
-There are tons of "high" pulses sent to sj, qq, ls and bg on every press.
+There are tons of low pulses sent to sj, qq, ls and bg on every press.
+
+I'm very confused. I can predict how many presses it will take to get any combination of bg, ls, sj and qq to activate. They're all set to high one after the other.
+
+Maybe there's also a period to the number of pulses sent? If the fifth signal to kz arrives too early, it may not have a chance to process the signal itself before it gets reset to low.
+
+444755672598874 (my guess times 2) is too high.
+
+The previous paragraph seems correct, there's an interesting structure to whether there's more signals in the queue. So far as I can tell it sometimes flip/flops between "clear" and "more" with even/odd and sometimes it's just "more".
+
+- It starts with odd=clear, even=more
+- After the first high (3739 presses) there are always more
+- This persists until after 4003, after which it resets to even=clear, odd=more
+- After going through 7478 (3739*2) presses there are always more
+- After 8006 (4003 * 2) it resets to odd=clear, even=more
+
+So if (n-1) % 3739 < (n-1) % 4003 then it will be "more".
+Otherwise if floor(n/4003) % 2 != n % 2 then it's "clear"
+
+But this suggests that 444755672598874 is the answer, but it's too high.
+It's also not 444755672598873.
+
+I'm stumped. Maybe I need to draw out the network? 58 modules.
 
 ### Day 19 (14116 / 8346)
 
