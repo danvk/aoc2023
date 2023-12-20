@@ -6,7 +6,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-### Day 19
+### Day 19 (14116 / 8346)
 
 part 2: only values that appear in a rule are worth checking.
 If I treat each of xmas distinctly, I have 3.4B combos to check. Probably OK!
@@ -18,9 +18,13 @@ For `>`: the result changes when you hit `num+1`.
 
 This ran faster than I expected: ~4 minutes total, and just fast enough that I could submit my answer before my plane took off! The tricky part was the `num` vs. `num+1` thing above.
 
-It seems like most people took the interval approach, which apparently is much faster.
+It seems like most people took the interval approach, which apparently is much faster. OK, I implemented that and yes, it is a cleaner and faster solution! You never wind up with more than a few hundred cubes to keep track of.
 
-### Day 18
+- Start: 7:30 AM?
+- ⭐️: 7:55 AM
+- ⭐️⭐️: 8:58 AM
+
+### Day 18 (20160 / 15394)
 
 For part 2, the sample has coordinates that go 0-1186328.
 Unless there's a corner with the given y-coordinate, it should contribute the same area as the previous row. Something similar holds for x-coordinates, though this might be a little trickier to pull off in practice since you care whether an unspecified square is `-` or `.`.
@@ -58,6 +62,10 @@ My area calculation must be wrong, lots of people on reddit used this approach.
 2. Somehow the Zig compiler wasn't able to detect the possible overflow when I inlined my loop, but _was_ able to detect it when I factored out a shoelace function.
 
 The former is my fault but the latter seems like a Zig bug. In any case, the lack of an error probably cost me ~1 hour yesterday ☹️.
+
+- Start: 7:00 PM
+- ⭐️: 7:40 PM
+- ⭐️⭐️: 9:07 PM
 
 ### Day 17
 
