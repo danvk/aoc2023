@@ -177,8 +177,33 @@ fn tileHash(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), tile: C
     return TileHash{ .count = count, .hash = hasher.final() };
 }
 
+const deltadeltadeltas = [_]i64{ 0, -2, 4, -2, -7, 2, 3, 2, -2, 4, -2 };
+
+fn extrapolateSample() bool {
+    var total: i64 = 85566;
+    var delta: i64 = 514;
+    var i: usize = 1;
+    var deltadeltas = [_]i64{ 2, -61, 131, -66, -211, 67, 94, 64, -65, 134, -73 };
+
+    for (359..5001) |n| {
+        deltadeltas[i] += deltadeltadeltas[i];
+        delta += deltadeltas[i];
+        total += delta;
+
+        std.debug.print("{d}: {d} (∆={d}, ∆∆={d})\n", .{ n, total, delta, deltadeltas[i] });
+
+        i += 1;
+        i = i % deltadeltas.len;
+    }
+    return true;
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
+
+    if (extrapolateSample()) {
+        return;
+    }
 
     var gr = try gridMod.readGrid(allocator, filename, null);
     var grid = gr.grid;
