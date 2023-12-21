@@ -99,7 +99,7 @@ fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: *std.AutoHashMap(
         }
 
         if (allFrozen) {
-            std.debug.print("deep freeze tile {any} after {d} steps\n", .{ t, numSteps });
+            // std.debug.print("deep freeze tile {any} after {d} steps\n", .{ t, numSteps });
             try frozen.put(t, if (entry.value_ptr.*) numSteps - 1 else numSteps);
             // remove all the spots from this tile to avoid double-counting
             clearTile(gr, spots, t);
@@ -228,7 +228,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     spots.clearAndFree();
     try spots.put(start, undefined);
     var timer = try std.time.Timer.start();
-    for (1..51) |i| {
+    for (1..5001) |i| {
         var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
         try step2(&gr, spots, frozen, &nextSpots);
         spots.deinit();
