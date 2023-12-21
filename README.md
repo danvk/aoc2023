@@ -34,6 +34,8 @@ input:
 128: day21.TileHash{ .hash = 3360108315240557322, .count = 7577 }
 129: day21.TileHash{ .hash = 7951923478988671822, .count = 7596 }
 
+This may _still_ be too slow. I also can't entirely remove frozen tiles from the calculation since they can still affect non-frozen tiles around them.
+
 ### Day 20 (10029 / 7219)
 
 The first part was fine, just took some care. I wanted to set up pointers to "next" nodes, but in retrospect that was a waste of time. I should have just used a hash map, I wound up needing it anyway. I could have used a union type since the two types of modules are so different, but I wound up just mushing the two together in a struct.

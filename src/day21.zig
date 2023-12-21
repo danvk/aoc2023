@@ -59,11 +59,12 @@ fn step2(gr: *gridMod.GridResult, spots: std.AutoHashMap(Coord, void), frozen: s
     }
 }
 
-fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), freezeHash: u64, frozen: *std.AutoHashMap(Coord, usize)) !void {
+fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), freezeHashes: [2]u64, frozen: *std.AutoHashMap(Coord, usize)) !void {
     const maxX: i32 = @intCast(gr.maxX + 1);
     const maxY: i32 = @intCast(gr.maxY + 1);
 
     var tiles = std.AutoHashMap(Coord, void).init(spots.allocator);
+    defer tiles.deinit();
 
     var it = spots.keyIterator();
     while (it.next()) |p| {
@@ -71,12 +72,35 @@ fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: std.AutoHashMap(C
         try tiles.put(t, undefined);
     }
 
+    var newFrozen = std.AutoHashMap(Coord, bool).init(spots.allocator);
+    defer newFrozen.deinit();
+
     var tit = tiles.keyIterator();
     while (tit.next()) |t| {
-        var th = tileHash(gr, spots, t);
-        if (th.hash == freezeHash and !frozen.contains(t)) {
-            std.debug.print("freeze tile {any} after {d} steps\n", .{ t, numSteps });
-            try frozen.put(t, numSteps);
+        const tile = t.*;
+        var th = tileHash(gr, spots, tile);
+        if ((th.hash == freezeHashes[0] or th.hash == freezeHashes[1]) and !frozen.contains(tile)) {
+            // std.debug.print("newly frozen tile {any} after {d} steps\n", .{ tile, numSteps });
+            try newFrozen.put(tile, th.hash == freezeHashes[1]);
+        }
+    }
+
+    // Only add newly-frozen tiles to the frozen set if all their neighbors are also frozen.
+    var nfit = newFrozen.iterator();
+    while (nfit.next()) |entry| {
+        const t = entry.key_ptr.*;
+        var allFrozen = true;
+        for (dirMod.DIRS) |d| {
+            const n = t.move(d);
+            if (!frozen.contains(n) and !newFrozen.contains(n)) {
+                allFrozen = false;
+                break;
+            }
+        }
+
+        if (allFrozen) {
+            std.debug.print("deep freeze tile {any} after {d} steps\n", .{ t, numSteps });
+            try frozen.put(t, if (entry.value_ptr.*) numSteps - 1 else numSteps); // XXX might be numSteps-1
         }
     }
 }
@@ -181,15 +205,28 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var frozen = std.AutoHashMap(Coord, usize).init(allocator);
     defer frozen.deinit();
 
+    var finalCounts = [_]u64{
+        hashToCount.get(finalHashes[0]).?,
+        hashToCount.get(finalHashes[1]).?,
+    };
+
     spots.clearAndFree();
     try spots.put(start, undefined);
     var timer = try std.time.Timer.start();
-    for (1..5001) |i| {
+    for (1..51) |i| {
         var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
         try step2(&gr, spots, frozen, &nextSpots);
-        try addToFrozen(i, gr, spots, finalHashes[0], &frozen);
+        try addToFrozen(i, gr, spots, finalHashes, &frozen);
+
+        var fullCount: u64 = nextSpots.count();
+        var it = frozen.valueIterator();
+        while (it.next()) |freezeI| {
+            const parity = (i - freezeI.*) % 2;
+            fullCount += finalCounts[parity];
+        }
+
         const elapsed = timer.read() / 1_000_000_000;
-        std.debug.print("{d}: {d} ({d} s)\n", .{ i, nextSpots.count(), elapsed });
+        std.debug.print("{d}: {d} -> {d} {d} frozen ({d} s)\n", .{ i, nextSpots.count(), fullCount, frozen.count(), elapsed });
         // printKeys(nextSpots);
         // printGarden(gr, nextSpots);
         spots.deinit();
