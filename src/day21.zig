@@ -179,6 +179,7 @@ fn tileHash(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), tile: C
 
 // const deltadeltadeltas = [_]i64{ 0, -2, 4, -2, -7, 2, 3, 2, -2, 4, -2 };
 
+// These numbers will vary depending on your input.
 const deltadeltadeltas = [_]i64{ 0, 3, -15, 36, -49, 63, -59, 44, -36, 28, -34, 37, -32, 32, -31, 27, -26, 28, -24, 21, -23, 17, -4, 10, -11, -2, -11, 27, -23, 27, -10, 2, -9, 6, -4, 3, -15, 19, -25, 34, -39, 37, -39, 30, -27, 42, -34, 42, -39, 20, -16, 10, -19, 19, -17, 25, -23, 24, -40, 74, -29, 44, -55, 48, -48, 48, -84, 39, -29, 34, -28, 22, -25, 15, -8, 21, -24, 26, -18, 14, -19, 19, -31, 28, -32, 49, -38, 20, -15, 15, -6, 8, -14, 11, -3, 11, -21, 19, -15, -1, 1, 2, 0, 4, -9, 18, -21, 18, -21, 29, -42, 38, -32, 35, -30, 29, -31, 27, -27, 45, -56, 58, -57, 30, -12, 8, -7, 13, -5, 2, -6 };
 
 fn extrapolateSample() bool {
@@ -195,7 +196,7 @@ fn extrapolateSample() bool {
         i += 1;
         i = i % deltadeltas.len;
     }
-    std.debug.print("{d} (∆={d}, ∆∆={d})\n", .{ total, delta, deltadeltas[i] });
+    std.debug.print("part 2: {d} (∆={d}, ∆∆={d})\n", .{ total, delta, deltadeltas[i] });
 
     return true;
 }
@@ -203,9 +204,7 @@ fn extrapolateSample() bool {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    if (extrapolateSample()) {
-        return;
-    }
+    extrapolateSample();
 
     var gr = try gridMod.readGrid(allocator, filename, null);
     var grid = gr.grid;
@@ -241,7 +240,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         finalHashes[0] = finalHashes[1];
         finalHashes[1] = th.hash;
     }
-    std.debug.print("part 1: {d}\n", .{spots.count()});
+    // std.debug.print("part 1: {d}\n", .{spots.count()});
     std.debug.print("final hashes: {any}\n", .{finalHashes});
 
     var frozen = std.AutoHashMap(Coord, usize).init(allocator);

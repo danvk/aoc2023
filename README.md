@@ -6,10 +6,23 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-### Day 21
+### Day 21 (12914 / 4624)
 
-Part 1 is straightforward.
-Part 2 is slow as molasses. I don't think speeding up the direct implementation is worthwhile.
+Part 1 was straightforward. The direct implementation for part 2 is slow as molasses. I don't think speeding up the direct implementation is worthwhile.
+
+I noticed that the boundary of the tile was devoid of rocks. This made me think that there might be a pattern to how each tile behaves. I printed out the central tile for part 2 and noticed that both the sample (quickly) and my input (more slowly) eventually bounced back and forth between two states. Half the boundary squares are visited in each and it flips back and forth between which half.
+
+I wrote some code to hash the state of a tile and used this to detect the periodicity (using part 1). After a tile _and its neighbors_ (this was tricky to realize) are in one of the terminal states, you can remove it from consideration. This turns a quadratic expansion of tiles from step to step into a linear one. This let me run the sample all the way to n=5000 and my input out to n=2000 in ~4 minutes.
+
+But I needed n=26501365, so this clearly wasn't good enough. I copy/pasted the counts for each step from the sample into a spreadsheet and started looking at derivatives. Something stood out about the second derivative: every 11th step it was exactly 2. The other values in between varied, but only by small amounts. And these amounts were fixed. So the pattern is that the second derivative comprises 11 distinct linear sequences.
+
+I pasted the counts for my input into the sheet and looked for a similar pattern. The number 4 appeared in the second derivative every 131 steps. So that was my sequence. It took a little fiddling to get the counts exactly right, but that gave me my answer. Woo!
+
+Best finish so far this year, and at 11 AM. This must be a pretty tough one in the grand scheme of AoC puzzles. I wonder if my "frozen" optimization was really necessary. In retrospect the pattern establishes itself immediately. You could detect it by only going out to ~300 or 400 steps.
+
+- Start: 8:25 AM
+- ⭐️: 8:44 AM
+- ⭐️⭐️: 11:01 AM
 
 Ideas:
 
@@ -36,7 +49,7 @@ input:
 
 This may _still_ be too slow. I also can't entirely remove frozen tiles from the calculation since they can still affect non-frozen tiles around them.
 
-There _is_ a clear pattern in the second derivative. So maybe I can extrapolate from this?
+There _is_ a clear pattern in the second derivative. So maybe I can extrapolate from this? Yep! That worked. The period for the sample is 11 whereas the period for my input is 131, but the structure is the same.
 
 ### Day 20 (10029 / 7219)
 
