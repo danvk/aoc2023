@@ -124,6 +124,11 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     std.debug.print("start: {any}\n", .{start});
 
+    var hashToCount = std.AutoHashMap(u64, usize).init(allocator);
+    defer hashToCount.deinit();
+
+    var finalHashes: [2]u64 = .{ 0, 0 };
+
     var spots = std.AutoHashMap(Coord, void).init(allocator);
     try spots.put(start, undefined);
     for (0..1000) |i| {
@@ -131,11 +136,21 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         try step(&gr, spots, &nextSpots);
         // std.debug.print("{d}: {d}\n", .{ i, nextSpots.count() });
         // printKeys(nextSpots);
-        std.debug.print("{d}: {any}\n", .{ i, tileHash(gr, nextSpots, Coord{ .x = 0, .y = 0 }) });
+        const th = tileHash(gr, nextSpots, Coord{ .x = 0, .y = 0 });
+        std.debug.print("{d}: {any}\n", .{ i, th });
         spots.deinit();
         spots = nextSpots;
+
+        if (hashToCount.contains(th.hash)) {
+            std.debug.print("Repeat {any} after {d} steps\n", .{ th, i });
+            break;
+        }
+        try hashToCount.put(th.hash, th.count);
+        finalHashes[0] = finalHashes[1];
+        finalHashes[1] = th.hash;
     }
     std.debug.print("part 1: {d}\n", .{spots.count()});
+    std.debug.print("final hashes: {any}\n", .{finalHashes});
 
     // spots.clearAndFree();
     // try spots.put(start, undefined);

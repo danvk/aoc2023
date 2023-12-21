@@ -24,6 +24,16 @@ My input does the same thing, though it takes longer. What happens for other til
 
 So maybe I should detect when a tile is "full" and freeze it. That way I'm only considering the fringe, which should be lower-dimensional.
 
+sample:
+
+13: day21.TileHash{ .hash = 17606044957879186035, .count = 42 }
+14: day21.TileHash{ .hash = 18010981749530968007, .count = 39 }
+
+input:
+
+128: day21.TileHash{ .hash = 3360108315240557322, .count = 7577 }
+129: day21.TileHash{ .hash = 7951923478988671822, .count = 7596 }
+
 ### Day 20 (10029 / 7219)
 
 The first part was fine, just took some care. I wanted to set up pointers to "next" nodes, but in retrospect that was a waste of time. I should have just used a hash map, I wound up needing it anyway. I could have used a union type since the two types of modules are so different, but I wound up just mushing the two together in a struct.
