@@ -38,6 +38,23 @@ fn step(gr: *gridMod.GridResult, spots: std.AutoHashMap(Coord, void), nexts: *st
     }
 }
 
+fn step2(gr: *gridMod.GridResult, spots: std.AutoHashMap(Coord, void), nexts: *std.AutoHashMap(Coord, void)) !void {
+    const maxX: i32 = @intCast(gr.maxX + 1);
+    const maxY: i32 = @intCast(gr.maxY + 1);
+    nexts.clearAndFree();
+    var it = spots.keyIterator();
+    var grid = gr.grid;
+    while (it.next()) |pos| {
+        for (dirMod.DIRS) |d| {
+            const p = pos.move(d);
+            const m = Coord{ .x = @mod(p.x, maxX), .y = @mod(p.y, maxY) };
+            if ((grid.get(m) orelse '.') == '.') {
+                try nexts.put(p, undefined);
+            }
+        }
+    }
+}
+
 fn printKeys(grid: std.AutoHashMap(Coord, void)) void {
     var it = grid.keyIterator();
     while (it.next()) |pos| {
@@ -59,12 +76,29 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     std.debug.print("start: {any}\n", .{start});
 
     var spots = std.AutoHashMap(Coord, void).init(allocator);
+    // try spots.put(start, undefined);
+    // for (0..64) |i| {
+    //     var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
+    //
+    //     try step(&gr, spots, &nextSpots);
+    //     std.debug.print("{d}: {d}\n", .{ i, nextSpots.count() });
+    //     // printKeys(nextSpots);
+    //
+    //     spots.deinit();
+    //     spots = nextSpots;
+    // }
+    // std.debug.print("part 1: {d}\n", .{spots.count()});
+
+    spots.clearAndFree();
     try spots.put(start, undefined);
-    for (0..64) |i| {
+
+    var timer = try std.time.Timer.start();
+    for (1..5001) |i| {
         var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
 
-        try step(&gr, spots, &nextSpots);
-        std.debug.print("{d}: {d}\n", .{ i, nextSpots.count() });
+        try step2(&gr, spots, &nextSpots);
+        const elapsed = timer.read() / 1_000_000_000;
+        std.debug.print("{d}: {d} ({d} s)\n", .{ i, nextSpots.count(), elapsed });
         // printKeys(nextSpots);
 
         spots.deinit();
@@ -73,7 +107,6 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     spots.deinit();
 
-    // std.debug.print("part 1: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 

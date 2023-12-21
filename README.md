@@ -6,6 +6,16 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+### Day 21
+
+Part 1 is straightforward.
+Part 2 is slow as molasses. I don't think speeding up the direct implementation is worthwhile.
+
+Ideas:
+
+- Look for a pattern in the deltas between steps
+- Do the interior tiles eventually settle into a pattern?
+
 ### Day 20 (10029 / 7219)
 
 The first part was fine, just took some care. I wanted to set up pointers to "next" nodes, but in retrospect that was a waste of time. I should have just used a hash map, I wound up needing it anyway. I could have used a union type since the two types of modules are so different, but I wound up just mushing the two together in a struct.
