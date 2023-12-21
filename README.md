@@ -148,6 +148,9 @@ const Pulse = struct {
 };
 ```
 
+This is the _only_ mention I have ever seen of this:
+https://github.com/ziglang/zig/blob/e7ac05e882fa4290af4a41e9cae63105bcacb283/lib/std/fmt.zig#L65
+
 ### Day 19 (14116 / 8346)
 
 part 2: only values that appear in a rule are worth checking.
