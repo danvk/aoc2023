@@ -1,3 +1,5 @@
+const std = @import("std");
+
 pub const Dir = enum(u2) {
     right,
     up,
@@ -47,6 +49,12 @@ pub const Coord = struct {
             .x = self.x + dir.dx(),
             .y = self.y + dir.dy(),
         };
+    }
+
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+        _ = fmt;
+        _ = options;
+        try std.fmt.format(writer, "({d}, {d})", .{ self.x, self.y });
     }
 };
 
