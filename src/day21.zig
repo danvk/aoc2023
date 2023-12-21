@@ -59,7 +59,7 @@ fn step2(gr: *gridMod.GridResult, spots: std.AutoHashMap(Coord, void), frozen: s
     }
 }
 
-fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), freezeHashes: [2]u64, frozen: *std.AutoHashMap(Coord, usize)) !void {
+fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: *std.AutoHashMap(Coord, void), freezeHashes: [2]u64, frozen: *std.AutoHashMap(Coord, usize)) !void {
     const maxX: i32 = @intCast(gr.maxX + 1);
     const maxY: i32 = @intCast(gr.maxY + 1);
 
@@ -78,7 +78,7 @@ fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: std.AutoHashMap(C
     var tit = tiles.keyIterator();
     while (tit.next()) |t| {
         const tile = t.*;
-        var th = tileHash(gr, spots, tile);
+        var th = tileHash(gr, spots.*, tile);
         if ((th.hash == freezeHashes[0] or th.hash == freezeHashes[1]) and !frozen.contains(tile)) {
             // std.debug.print("newly frozen tile {any} after {d} steps\n", .{ tile, numSteps });
             try newFrozen.put(tile, th.hash == freezeHashes[1]);
@@ -100,7 +100,22 @@ fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: std.AutoHashMap(C
 
         if (allFrozen) {
             std.debug.print("deep freeze tile {any} after {d} steps\n", .{ t, numSteps });
-            try frozen.put(t, if (entry.value_ptr.*) numSteps - 1 else numSteps); // XXX might be numSteps-1
+            try frozen.put(t, if (entry.value_ptr.*) numSteps - 1 else numSteps);
+            // remove all the spots from this tile to avoid double-counting
+            clearTile(gr, spots, t);
+        }
+    }
+}
+
+fn clearTile(gr: gridMod.GridResult, spots: *std.AutoHashMap(Coord, void), tile: Coord) void {
+    const maxX: i32 = @intCast(gr.maxX + 1);
+    const maxY: i32 = @intCast(gr.maxY + 1);
+    for (0..@intCast(maxY)) |yu| {
+        const y: i32 = @intCast(yu);
+        for (0..@intCast(maxX)) |xu| {
+            const x: i32 = @intCast(xu);
+            const p = Coord{ .x = x + tile.x * maxX, .y = y + tile.y * maxY };
+            _ = spots.remove(p);
         }
     }
 }
@@ -216,9 +231,11 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     for (1..51) |i| {
         var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
         try step2(&gr, spots, frozen, &nextSpots);
-        try addToFrozen(i, gr, spots, finalHashes, &frozen);
+        spots.deinit();
+        spots = nextSpots;
+        try addToFrozen(i, gr, &spots, finalHashes, &frozen);
 
-        var fullCount: u64 = nextSpots.count();
+        var fullCount: u64 = spots.count();
         var it = frozen.valueIterator();
         while (it.next()) |freezeI| {
             const parity = (i - freezeI.*) % 2;
@@ -229,8 +246,6 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         std.debug.print("{d}: {d} -> {d} {d} frozen ({d} s)\n", .{ i, nextSpots.count(), fullCount, frozen.count(), elapsed });
         // printKeys(nextSpots);
         // printGarden(gr, nextSpots);
-        spots.deinit();
-        spots = nextSpots;
     }
     spots.deinit();
 
