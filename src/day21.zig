@@ -83,12 +83,18 @@ fn printGarden(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void)) void
     }
 }
 
-fn tileHash(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), tile: Coord) struct { count: usize, hash: u64 } {
+const TileHash = struct {
+    hash: u64,
+    count: usize,
+};
+
+fn tileHash(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), tile: Coord) TileHash {
     var count: usize = 0;
     const maxX: i32 = @intCast(gr.maxX + 1);
     const maxY: i32 = @intCast(gr.maxY + 1);
-    const grid = gr.grid;
     var buf = [2]u32{ 0, 0 };
+    var bufAddr: [*]u8 = @ptrCast(&buf);
+    var bufSlice = bufAddr[0..8];
     var hasher = std.hash.Wyhash.init(42);
     for (0..@intCast(maxY)) |yu| {
         const y: i32 = @intCast(yu);
@@ -99,12 +105,11 @@ fn tileHash(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), tile: C
                 count += 1;
                 buf[0] = @intCast(xu);
                 buf[1] = @intCast(yu);
-                hasher.update(&buf);
+                hasher.update(bufSlice);
             }
         }
-        std.debug.print("\n", .{});
     }
-    return struct { .count = count, .hash = hash };
+    return TileHash{ .count = count, .hash = hasher.final() };
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -120,18 +125,17 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     std.debug.print("start: {any}\n", .{start});
 
     var spots = std.AutoHashMap(Coord, void).init(allocator);
-    // try spots.put(start, undefined);
-    // for (0..64) |i| {
-    //     var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
-    //
-    //     try step(&gr, spots, &nextSpots);
-    //     std.debug.print("{d}: {d}\n", .{ i, nextSpots.count() });
-    //     // printKeys(nextSpots);
-    //
-    //     spots.deinit();
-    //     spots = nextSpots;
-    // }
-    // std.debug.print("part 1: {d}\n", .{spots.count()});
+    try spots.put(start, undefined);
+    for (0..64) |i| {
+        var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
+        try step(&gr, spots, &nextSpots);
+        // std.debug.print("{d}: {d}\n", .{ i, nextSpots.count() });
+        // printKeys(nextSpots);
+        std.debug.print("{d}: {any}\n", .{ i, tileHash(gr, nextSpots, Coord{ .x = 0, .y = 0 }) });
+        spots.deinit();
+        spots = nextSpots;
+    }
+    std.debug.print("part 1: {d}\n", .{spots.count()});
 
     // spots.clearAndFree();
     // try spots.put(start, undefined);
