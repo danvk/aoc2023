@@ -83,6 +83,30 @@ fn printGarden(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void)) void
     }
 }
 
+fn tileHash(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), tile: Coord) struct { count: usize, hash: u64 } {
+    var count: usize = 0;
+    const maxX: i32 = @intCast(gr.maxX + 1);
+    const maxY: i32 = @intCast(gr.maxY + 1);
+    const grid = gr.grid;
+    var buf = [2]u32{ 0, 0 };
+    var hasher = std.hash.Wyhash.init(42);
+    for (0..@intCast(maxY)) |yu| {
+        const y: i32 = @intCast(yu);
+        for (0..@intCast(maxX)) |xu| {
+            const x: i32 = @intCast(xu);
+            const p = Coord{ .x = x + tile.x * maxX, .y = y + tile.y * maxY };
+            if (spots.contains(p)) {
+                count += 1;
+                buf[0] = @intCast(xu);
+                buf[1] = @intCast(yu);
+                hasher.update(&buf);
+            }
+        }
+        std.debug.print("\n", .{});
+    }
+    return struct { .count = count, .hash = hash };
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -109,23 +133,22 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     // }
     // std.debug.print("part 1: {d}\n", .{spots.count()});
 
-    spots.clearAndFree();
-    try spots.put(start, undefined);
-
-    var timer = try std.time.Timer.start();
-    for (1..5001) |i| {
-        var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
-
-        try step2(&gr, spots, &nextSpots);
-        const elapsed = timer.read() / 1_000_000_000;
-        std.debug.print("{d}: {d} ({d} s)\n", .{ i, nextSpots.count(), elapsed });
-        // printKeys(nextSpots);
-        printGarden(gr, nextSpots);
-
-        spots.deinit();
-        spots = nextSpots;
-    }
-
+    // spots.clearAndFree();
+    // try spots.put(start, undefined);
+    //
+    // var timer = try std.time.Timer.start();
+    // for (1..5001) |i| {
+    //     var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
+    //
+    //     try step2(&gr, spots, &nextSpots);
+    //     const elapsed = timer.read() / 1_000_000_000;
+    //     std.debug.print("{d}: {d} ({d} s)\n", .{ i, nextSpots.count(), elapsed });
+    //     // printKeys(nextSpots);
+    //     printGarden(gr, nextSpots);
+    //
+    //     spots.deinit();
+    //     spots = nextSpots;
+    // }
     spots.deinit();
 
     // std.debug.print("part 2: {d}\n", .{sum2});
