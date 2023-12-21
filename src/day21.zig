@@ -126,7 +126,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     var spots = std.AutoHashMap(Coord, void).init(allocator);
     try spots.put(start, undefined);
-    for (0..64) |i| {
+    for (0..1000) |i| {
         var nextSpots = std.AutoHashMap(Coord, void).init(allocator);
         try step(&gr, spots, &nextSpots);
         // std.debug.print("{d}: {d}\n", .{ i, nextSpots.count() });
