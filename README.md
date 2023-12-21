@@ -16,6 +16,14 @@ Ideas:
 - Look for a pattern in the deltas between steps
 - Do the interior tiles eventually settle into a pattern?
 
+There are no rocks on the edges, either in the sample input or in my input. I wonder if that's helpful? It can't be a coincidence. It means that eventually you'll get into a state where the edges are flip-flopping.
+
+The central tile in the sample quickly (less than 20 steps) settles into a flip-flop pattern where half the border tiles are set on each step.
+
+My input does the same thing, though it takes longer. What happens for other tiles? They start in a different state, but eventually they get to the same flip-flop pattern.
+
+So maybe I should detect when a tile is "full" and freeze it. That way I'm only considering the fringe, which should be lower-dimensional.
+
 ### Day 20 (10029 / 7219)
 
 The first part was fine, just took some care. I wanted to set up pointers to "next" nodes, but in retrospect that was a waste of time. I should have just used a hash map, I wound up needing it anyway. I could have used a union type since the two types of modules are so different, but I wound up just mushing the two together in a struct.

@@ -63,6 +63,26 @@ fn printKeys(grid: std.AutoHashMap(Coord, void)) void {
     std.debug.print("\n", .{});
 }
 
+fn printGarden(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void)) void {
+    const maxX: i32 = @intCast(gr.maxX + 1);
+    const maxY: i32 = @intCast(gr.maxY + 1);
+    const grid = gr.grid;
+    for (0..@intCast(maxY)) |yu| {
+        const y: i32 = @intCast(yu);
+        for (0..@intCast(maxX)) |xu| {
+            const x: i32 = @intCast(xu);
+            const m = Coord{ .x = x, .y = y };
+            const p = Coord{ .x = x, .y = y + maxY };
+            if (spots.contains(p)) {
+                std.debug.print("O", .{});
+            } else {
+                std.debug.print("{c}", .{grid.get(m) orelse '.'});
+            }
+        }
+        std.debug.print("\n", .{});
+    }
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -100,6 +120,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         const elapsed = timer.read() / 1_000_000_000;
         std.debug.print("{d}: {d} ({d} s)\n", .{ i, nextSpots.count(), elapsed });
         // printKeys(nextSpots);
+        printGarden(gr, nextSpots);
 
         spots.deinit();
         spots = nextSpots;
