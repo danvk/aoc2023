@@ -23,6 +23,10 @@ const Coord3 = struct {
     }
 };
 
+fn closedIntervalIntersects(a1: i32, a2: i32, b1: i32, b2: i32) bool {
+    return !(a1 > b2 or a2 < b1);
+}
+
 const Brick = struct {
     name: u8,
     a: Coord3,
@@ -39,6 +43,13 @@ const Brick = struct {
     }
 
     pub fn intersects(self: @This(), other: Brick) bool {
+        // Interestingly this winds up being exactly the same speed as the code below.
+        // return (
+        //     closedIntervalIntersects(self.a.x, self.b.x, other.a.x, other.b.x) and
+        //     closedIntervalIntersects(self.a.y, self.b.y, other.a.y, other.b.y) and
+        //     closedIntervalIntersects(self.a.z, self.b.z, other.a.z, other.b.z)
+        // );
+
         var me = IvI32{ .low = self.a.x, .high = self.b.x + 1 };
         var them = IvI32{ .low = other.a.x, .high = other.b.x + 1 };
         if (!me.intersects(them)) {
