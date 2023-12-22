@@ -6,6 +6,10 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+## Day 22
+
+Why is a void context `{}` and not `.{}`?
+
 ### Day 21 (12914 / 4624)
 
 Part 1 was straightforward. The direct implementation for part 2 is slow as molasses. I don't think speeding up the direct implementation is worthwhile.
