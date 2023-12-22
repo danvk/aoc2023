@@ -175,7 +175,7 @@ fn fall1(bricks: *std.ArrayList(Brick)) bool {
     for (bricks.items, 0..) |*brick, i| {
         var z = brick.bottom();
         if (z == 1) {
-            std.debug.print("Brick {c} is on the ground\n", .{brick.name});
+            // std.debug.print("Brick {c} is on the ground\n", .{brick.name});
             continue; // already resting on the ground
         }
         // Check if another brick is supporting us.
@@ -184,7 +184,7 @@ fn fall1(bricks: *std.ArrayList(Brick)) bool {
         var isSupported = false;
         for (bricks.items[0..i]) |other| {
             if (drop1.intersects(other)) {
-                std.debug.print("Brick {c} is supported by {c}\n", .{ brick.name, other.name });
+                // std.debug.print("Brick {c} is supported by {c}\n", .{ brick.name, other.name });
                 isSupported = true;
                 break;
             }
@@ -193,7 +193,7 @@ fn fall1(bricks: *std.ArrayList(Brick)) bool {
             continue;
         }
         // no support: drop it!
-        std.debug.print("Dropping {any}\n", .{brick.*});
+        // std.debug.print("Dropping {any}\n", .{brick.*});
         brick.* = drop1;
         assert(brick.bottom() == z - 1);
         anyMoved = true;
@@ -208,7 +208,7 @@ fn fall(bricks: *std.ArrayList(Brick)) void {
 }
 
 fn parseBrick(line: []const u8, i: usize) !Brick {
-    var name: u8 = 'A' + @as(u8, @intCast(i));
+    var name: u8 = if (i >= 26) 'Z' else 'A' + @as(u8, @intCast(i));
     var intBuf: [6]i32 = undefined;
     var ints = try util.extractIntsIntoBuf(i32, line, &intBuf);
     var a = Coord3{ .x = ints[0], .y = ints[1], .z = ints[2] };
