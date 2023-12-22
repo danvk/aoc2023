@@ -1,6 +1,9 @@
 const std = @import("std");
 const bufIter = @import("./buf-iter.zig");
 const util = @import("./util.zig");
+const interval = @import("./interval.zig");
+
+const IvI32 = interval.Interval(i32);
 
 const assert = std.debug.assert;
 
@@ -33,26 +36,6 @@ const Brick = struct {
         try std.fmt.format(writer, "{c}: {any}~{any}", .{ self.name, self.a, self.b });
     }
 
-    pub fn contains(self: @This(), pt: Coord3) bool {
-        var dx: i32 = if (self.lenX() != 0) 1 else 0;
-        var dy: i32 = if (self.lenY() != 0) 1 else 0;
-        var dz: i32 = if (self.lenZ() != 0) 1 else 0;
-        var x = self.a.x;
-        var y = self.a.y;
-        var z = self.a.z;
-        var n = self.len();
-        var i: i32 = 0;
-        while (i <= n) : (i += 1) {
-            if (x == pt.x and y == pt.y and z == pt.z) {
-                return true;
-            }
-            x += dx;
-            y += dy;
-            z += dz;
-        }
-        return false;
-    }
-
     pub fn lenX(self: @This()) i32 {
         return self.b.x - self.a.x;
     }
@@ -77,25 +60,21 @@ const Brick = struct {
         return .Z;
     }
     pub fn intersects(self: @This(), other: Brick) bool {
-        // TODO: optimize
-        var dx: i32 = if (self.lenX() != 0) 1 else 0;
-        var dy: i32 = if (self.lenY() != 0) 1 else 0;
-        var dz: i32 = if (self.lenZ() != 0) 1 else 0;
-        var x = self.a.x;
-        var y = self.a.y;
-        var z = self.a.z;
-        var n = self.len();
-        var i: i32 = 0;
-        while (i <= n) : (i += 1) {
-            const pt = Coord3{ .x = x, .y = y, .z = z };
-            if (other.contains(pt)) {
-                return true;
-            }
-            x += dx;
-            y += dy;
-            z += dz;
+        var me = IvI32{ .low = self.a.x, .high = self.b.x + 1 };
+        var them = IvI32{ .low = other.a.x, .high = other.b.x + 1 };
+        if (!me.intersects(them)) {
+            return false;
         }
-        return false;
+
+        me = IvI32{ .low = self.a.y, .high = self.b.y + 1 };
+        them = IvI32{ .low = other.a.y, .high = other.b.y + 1 };
+        if (!me.intersects(them)) {
+            return false;
+        }
+
+        me = IvI32{ .low = self.a.z, .high = self.b.z + 1 };
+        them = IvI32{ .low = other.a.z, .high = other.b.z + 1 };
+        return me.intersects(them);
     }
 };
 
