@@ -23,8 +23,6 @@ const Coord3 = struct {
     }
 };
 
-const Orientation = enum { X, Y, Z };
-
 const Brick = struct {
     name: u8,
     a: Coord3,
@@ -36,29 +34,10 @@ const Brick = struct {
         try std.fmt.format(writer, "{c}: {any}~{any}", .{ self.name, self.a, self.b });
     }
 
-    pub fn lenX(self: @This()) i32 {
-        return self.b.x - self.a.x;
-    }
-    pub fn lenY(self: @This()) i32 {
-        return self.b.y - self.a.y;
-    }
-    pub fn lenZ(self: @This()) i32 {
-        return self.b.z - self.a.z;
-    }
-    pub fn len(self: @This()) i32 {
-        return self.lenX() + self.lenY() + self.lenZ();
-    }
     pub fn bottom(self: @This()) i32 {
         return self.a.z;
     }
-    pub fn getOrientation(self: @This()) Orientation {
-        if (self.lenX() > 1) {
-            return .X;
-        } else if (self.lenY() > 1) {
-            return .Y;
-        }
-        return .Z;
-    }
+
     pub fn intersects(self: @This(), other: Brick) bool {
         var me = IvI32{ .low = self.a.x, .high = self.b.x + 1 };
         var them = IvI32{ .low = other.a.x, .high = other.b.x + 1 };

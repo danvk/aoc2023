@@ -568,6 +568,7 @@ Nitty gritty questions:
 - Slices are nice. Especially in the context of strings, they feel like a revival of the "Pascal string" as opposed to the null-terminated C string.
 - Understanding that everything is passed by value and copied (including structs) was the key insight for understanding Zig. A slice is a struct with a len and a ptr, and these are copied when you assign to a slice. I think I had a similar insight about either Go or Rust in the past.
 - Hash maps are just hard to use in Zig since you have to think about who owns the keys.
+- It's interesting that structs can have private functions but not private fields. I guess this makes some sense since you have to be able to copy the bytes of a struct to use it.
 
 ## References
 
