@@ -265,7 +265,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     std.debug.print("---\n", .{});
     var sum1 = try findSupports(bricks);
 
-    std.debug.print("part 1: {d}\n", .{sum1});
+    std.debug.print("part 2: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
 
