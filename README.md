@@ -18,7 +18,9 @@ But I needed n=26501365, so this clearly wasn't good enough. I copy/pasted the c
 
 I pasted the counts for my input into the sheet and looked for a similar pattern. The number 4 appeared in the second derivative every 131 steps. So that was my sequence. It took a little fiddling to get the counts exactly right, but that gave me my answer. Woo!
 
-Best finish so far this year, and at 11 AM. This must be a pretty tough one in the grand scheme of AoC puzzles. I wonder if my "frozen" optimization was really necessary. In retrospect the pattern establishes itself immediately. You could detect it by only going out to ~300 or 400 steps.
+Best finish so far this year, and at 11 AM. This must be a pretty tough one in the grand scheme of AoC puzzles.
+
+In retrospect, my "frozen" optimization was totally unnecessary. I'm able to run >1000 steps on my input before it bogs down, and you only need a few hundred steps to see the pattern as I described it here.
 
 - Start: 8:25 AM
 - ⭐️: 8:44 AM

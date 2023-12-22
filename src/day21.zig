@@ -212,7 +212,7 @@ fn extrapolateSample() bool {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    extrapolateSample();
+    _ = extrapolateSample();
 
     var gr = try gridMod.readGrid(allocator, filename, null);
     var grid = gr.grid;
