@@ -166,13 +166,33 @@ fn findSupports(bricks: std.ArrayList(Brick)) !usize {
             num += 1;
         }
     }
-    return num;
+    std.debug.print("part 1: {d}\n", .{num});
+
+    var num2: usize = 0;
+    for (bricks.items, 0..) |brick, i| {
+        const n = try chainReaction(allocator, bricks.items, i);
+        std.debug.print("{any} drops {d}\n", .{ brick, n });
+        num2 += n;
+    }
+    return num2;
 }
 
-fn fall1(bricks: *std.ArrayList(Brick)) bool {
-    var anyMoved = false;
-    std.mem.sort(Brick, bricks.items, {}, sortByBottom);
-    for (bricks.items, 0..) |*brick, i| {
+// How many other bricks would disintegrating i drop?
+fn chainReaction(allocator: std.mem.Allocator, bricks: []Brick, i: usize) !usize {
+    var copyBuf = try allocator.dupe(Brick, bricks);
+    defer allocator.free(copyBuf);
+
+    for (i..(bricks.len - 1)) |j| {
+        copyBuf[j] = copyBuf[j + 1];
+    }
+    var copy = copyBuf[0..(bricks.len - 1)];
+    return fall1(copy);
+}
+
+fn fall1(bricks: []Brick) usize {
+    var numMoved: usize = 0;
+    std.mem.sort(Brick, bricks, {}, sortByBottom);
+    for (bricks, 0..) |*brick, i| {
         var z = brick.bottom();
         if (z == 1) {
             // std.debug.print("Brick {c} is on the ground\n", .{brick.name});
@@ -182,7 +202,7 @@ fn fall1(bricks: *std.ArrayList(Brick)) bool {
         // Since we've already moved all the bricks under us, it won't budge.
         const drop1 = Brick{ .a = brick.a.down1(), .b = brick.b.down1(), .name = brick.name };
         var isSupported = false;
-        for (bricks.items[0..i]) |other| {
+        for (bricks[0..i]) |other| {
             if (drop1.intersects(other)) {
                 // std.debug.print("Brick {c} is supported by {c}\n", .{ brick.name, other.name });
                 isSupported = true;
@@ -196,14 +216,16 @@ fn fall1(bricks: *std.ArrayList(Brick)) bool {
         // std.debug.print("Dropping {any}\n", .{brick.*});
         brick.* = drop1;
         assert(brick.bottom() == z - 1);
-        anyMoved = true;
+        numMoved += 1;
     }
-    return anyMoved;
+    return numMoved;
 }
 
 fn fall(bricks: *std.ArrayList(Brick)) void {
-    while (fall1(bricks)) {
-        std.debug.print("---\n", .{});
+    var n: usize = 0;
+    while (fall1(bricks.items) > 0) {
+        std.debug.print("{d} ---\n", .{n});
+        n += 1;
     }
 }
 
