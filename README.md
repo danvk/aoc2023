@@ -20,6 +20,8 @@ One idea is that, from looking at the input, there aren't many squares where you
 sample: n=211, forced: 204, choice: 6, junction: 1
 input: n=9404, forced: 9370, choice: 18, junction: 16
 
+For the sample there are only 9 interesting nodes. For the input there are 36. This should be feasible.
+
 ## Day 22 (7437 / 6407)
 
 Pretty straightforward today! The one trick was to sort by bottom z before dropping. I had an off-by-one on my "brick intersection" code that slowed me down, and it took some head scratching to figure out exactly what they wanted me to compute at the end of part 1. I was about to implement the "chain reaction" code for part 2 before realizing it was just part 1! I looped over the bricks, disintegrating each one in turn and calling my `fall1` function to see how many would drop. A bit slow but definitely correct.

@@ -136,6 +136,57 @@ fn countChoices(gr: gridMod.GridResult) !std.ArrayList(Coord) {
     return nodes;
 }
 
+const Connection = struct {
+    from: Coord,
+    to: Coord,
+    len: usize,
+};
+
+fn isNode(pos: Coord, coords: []Coord) bool {
+    for (coords) |c| {
+        if (c.x == pos.x and c.y == pos.y) {
+            return true;
+        }
+    }
+    return false;
+}
+
+fn findConnections(gr: gridMod.GridResult, nodes: []Coord) !std.ArrayList(Connection) {
+    const grid = gr.grid;
+    const allocator = grid.allocator;
+    var conns = std.ArrayList(Connection).init(allocator);
+
+    for (nodes) |node| {
+        // For each node, do flood fill in each direction until we hit another node.
+        var initState = State{ .pos = node, .prev = null };
+
+        var fringe = queue.Queue(*State).init(allocator);
+        try fringe.enqueue(&initState);
+
+        var nextsBuf: [4]*State = undefined;
+
+        while (fringe.dequeue()) |statePtr| {
+            var nexts = try nextStates(gr, statePtr, &nextsBuf);
+            if (nexts.len > 1 and statePtr != &initState) {
+                unreachable;
+            }
+            for (nexts) |next| {
+                if (isNode(next.pos, nodes)) {
+                    const len = pathLen(next);
+                    std.debug.print("Unique walk from {any} -> {any} in {d} steps.\n", .{ node, next.pos, len });
+                    try conns.append(Connection{ .from = node, .to = next.pos, .len = len });
+                } else {
+                    try fringe.enqueue(next);
+                }
+            }
+        }
+    }
+
+    std.debug.print("found {d} connections\n", .{conns.items.len});
+
+    return conns;
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -162,6 +213,9 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     defer nodes.deinit();
 
     std.debug.print("# nodes: {d}\n", .{nodes.items.len});
+
+    const conns = try findConnections(gr, nodes.items);
+    defer conns.deinit();
 
     // try find(allocator, start, end, gr);
 
