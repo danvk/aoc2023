@@ -6,7 +6,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-## Day 23 (7437 / 6407)
+## Day 23 (8738 / 5426)
 
 Part 1: straightforward
 Part 2: The search is bogging down, there seem to be many different ways to reach the end state in the same number of steps.
@@ -24,6 +24,10 @@ For the sample there are only 9 interesting nodes. For the input there are 36. T
 
 Sample: found 24 connections
 Input: found 120 connections
+
+- Start: 9:01 AM
+- ⭐️: 9:39 AM
+- ⭐️⭐️: 10:27 AM
 
 ## Day 22 (7437 / 6407)
 
