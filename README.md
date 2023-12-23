@@ -6,6 +6,8 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+I feel like with the last VS Code update everything got slow.
+
 ## Day 22 (7437 / 6407)
 
 Pretty straightforward today! The one trick was to sort by bottom z before dropping. I had an off-by-one on my "brick intersection" code that slowed me down, and it took some head scratching to figure out exactly what they wanted me to compute at the end of part 1. I was about to implement the "chain reaction" code for part 2 before realizing it was just part 1! I looped over the bricks, disintegrating each one in turn and calling my `fall1` function to see how many would drop. A bit slow but definitely correct.
