@@ -30,7 +30,7 @@ fn hasVisited(state: *State, pos: Coord) bool {
     return false;
 }
 
-fn nextStates(gr: gridMod.GridResult, state: *State, nextBuf: []*State) ![]*State {
+fn nextStates(gr: gridMod.GridResult, state: *State, nextBuf: []*State, isPart2: bool) ![]*State {
     const pos = state.pos;
     const grid = gr.grid;
     const cur = grid.get(pos);
@@ -43,12 +43,14 @@ fn nextStates(gr: gridMod.GridResult, state: *State, nextBuf: []*State) ![]*Stat
         if (next == '#') {
             continue; // blocked
         }
-        if ((cur == '>' and d != .right) or
-            (cur == '<' and d != .left) or
-            (cur == '^' and d != .up) or
-            (cur == 'v' and d != .down))
-        {
-            continue;
+        if (!isPart2) {
+            if ((cur == '>' and d != .right) or
+                (cur == '<' and d != .left) or
+                (cur == '^' and d != .up) or
+                (cur == 'v' and d != .down))
+            {
+                continue;
+            }
         }
         if (hasVisited(state, np)) {
             continue;
@@ -82,7 +84,7 @@ fn find(allocator: std.mem.Allocator, start: Coord, end: Coord, gr: gridMod.Grid
     var nextsBuf: [4]*State = undefined;
 
     while (fringe.dequeue()) |statePtr| {
-        var nexts = try nextStates(gr, statePtr, &nextsBuf);
+        var nexts = try nextStates(gr, statePtr, &nextsBuf, false);
         for (nexts) |next| {
             if (next.pos.x == end.x and next.pos.y == end.y) {
                 const len = pathLen(next);
@@ -171,7 +173,7 @@ fn findConnections(gr: gridMod.GridResult, nodes: []Coord) !std.ArrayList(Connec
         var nextsBuf: [4]*State = undefined;
 
         while (fringe.dequeue()) |statePtr| {
-            var nexts = try nextStates(gr, statePtr, &nextsBuf);
+            var nexts = try nextStates(gr, statePtr, &nextsBuf, true);
             if (nexts.len > 1 and statePtr != &initState) {
                 unreachable;
             }
