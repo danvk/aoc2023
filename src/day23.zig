@@ -137,18 +137,18 @@ fn countChoices(gr: gridMod.GridResult) !std.ArrayList(Coord) {
 }
 
 const Connection = struct {
-    from: Coord,
-    to: Coord,
+    from: usize,
+    to: usize,
     len: usize,
 };
 
-fn isNode(pos: Coord, coords: []Coord) bool {
-    for (coords) |c| {
+fn isNode(pos: Coord, coords: []Coord) ?usize {
+    for (coords, 0..) |c, i| {
         if (c.x == pos.x and c.y == pos.y) {
-            return true;
+            return i;
         }
     }
-    return false;
+    return null;
 }
 
 fn findConnections(gr: gridMod.GridResult, nodes: []Coord) !std.ArrayList(Connection) {
@@ -156,7 +156,7 @@ fn findConnections(gr: gridMod.GridResult, nodes: []Coord) !std.ArrayList(Connec
     const allocator = grid.allocator;
     var conns = std.ArrayList(Connection).init(allocator);
 
-    for (nodes) |node| {
+    for (nodes, 0..) |node, i| {
         // For each node, do flood fill in each direction until we hit another node.
         var initState = State{ .pos = node, .prev = null };
 
@@ -171,10 +171,10 @@ fn findConnections(gr: gridMod.GridResult, nodes: []Coord) !std.ArrayList(Connec
                 unreachable;
             }
             for (nexts) |next| {
-                if (isNode(next.pos, nodes)) {
+                if (isNode(next.pos, nodes)) |j| {
                     const len = pathLen(next);
                     std.debug.print("Unique walk from {any} -> {any} in {d} steps.\n", .{ node, next.pos, len });
-                    try conns.append(Connection{ .from = node, .to = next.pos, .len = len });
+                    try conns.append(Connection{ .from = i, .to = j, .len = len });
                 } else {
                     try fringe.enqueue(next);
                 }
@@ -185,6 +185,70 @@ fn findConnections(gr: gridMod.GridResult, nodes: []Coord) !std.ArrayList(Connec
     std.debug.print("found {d} connections\n", .{conns.items.len});
 
     return conns;
+}
+
+const State2 = struct {
+    idx: usize,
+    prev: ?*State2,
+    len: usize,
+};
+
+fn hasVisited2(state: *State2, idx: usize) bool {
+    if (state.idx == idx) {
+        return true;
+    }
+    if (state.prev) |prev| {
+        return hasVisited2(prev, idx);
+    }
+    return false;
+}
+
+fn nextStates2(allocator: std.mem.Allocator, state: *State2, connections: []Connection, nextBuf: []*State2) ![]*State2 {
+    var idx = state.idx;
+    var i: usize = 0;
+    for (connections) |conn| {
+        if (conn.from != idx) {
+            continue;
+        }
+        if (hasVisited2(state, conn.to)) {
+            continue;
+        }
+        var statePtr = try allocator.create(State2);
+        statePtr.* = State2{
+            .idx = conn.to,
+            .prev = state,
+            .len = conn.len,
+        };
+        nextBuf[i] = statePtr;
+        i += 1;
+    }
+    return nextBuf[0..i];
+}
+
+fn pathLen2(state: *State2) usize {
+    if (state.prev) |prev| {
+        return state.len + pathLen2(prev);
+    }
+    return state.len;
+}
+
+fn part2(allocator: std.mem.Allocator, start: usize, end: usize, connections: []Connection) !void {
+    var fringe = queue.Queue(*State2).init(allocator);
+    var initState = State2{ .idx = start, .prev = null, .len = 0 };
+    try fringe.enqueue(&initState);
+
+    var nextsBuf: [4]*State2 = undefined;
+
+    while (fringe.dequeue()) |statePtr| {
+        var nexts = try nextStates2(allocator, statePtr, connections, &nextsBuf);
+        for (nexts) |next| {
+            if (next.idx == end) {
+                std.debug.print("Reached finish in {d} steps.\n", .{pathLen2(next)});
+            } else {
+                try fringe.enqueue(next);
+            }
+        }
+    }
 }
 
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -216,6 +280,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     const conns = try findConnections(gr, nodes.items);
     defer conns.deinit();
+
+    try part2(allocator, nodes.items.len - 2, nodes.items.len - 1, conns.items);
 
     // try find(allocator, start, end, gr);
 
