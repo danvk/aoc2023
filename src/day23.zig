@@ -34,22 +34,23 @@ fn nextStates(gr: gridMod.GridResult, state: *State, nextBuf: []*State) ![]*Stat
     const pos = state.pos;
     const grid = gr.grid;
     const cur = grid.get(pos);
+    _ = cur;
     const allocator = grid.allocator;
     var i: usize = 0;
 
     for (dirMod.DIRS) |d| {
-        const np = state.pos.move(d);
+        const np = pos.move(d);
         const next = grid.get(np) orelse '#';
         if (next == '#') {
             continue; // blocked
         }
-        if ((cur == '>' and d != .right) or
-            (cur == '<' and d != .left) or
-            (cur == '^' and d != .up) or
-            (cur == 'v' and d != .down))
-        {
-            continue;
-        }
+        // if ((cur == '>' and d != .right) or
+        //     (cur == '<' and d != .left) or
+        //     (cur == '^' and d != .up) or
+        //     (cur == 'v' and d != .down))
+        // {
+        //     continue;
+        // }
         if (hasVisited(state, np)) {
             continue;
         }
@@ -90,6 +91,51 @@ fn find(allocator: std.mem.Allocator, start: Coord, end: Coord, gr: gridMod.Grid
     }
 }
 
+fn countChoices(gr: gridMod.GridResult) !std.ArrayList(Coord) {
+    const grid = gr.grid;
+    var num: usize = 0;
+    var numChoices: usize = 0;
+    var numForced: usize = 0;
+    var numJunctions: usize = 0;
+    var nodes = std.ArrayList(Coord).init(grid.allocator);
+    for (1..gr.maxX) |x| {
+        for (1..gr.maxY) |y| {
+            var numNexts: usize = 0;
+            const p = Coord{ .x = @intCast(x), .y = @intCast(y) };
+            if (grid.get(p) == '#') {
+                continue;
+            }
+            num += 1;
+            for (dirMod.DIRS) |d| {
+                const np = p.move(d);
+                if (grid.get(np) != '#') {
+                    numNexts += 1;
+                }
+            }
+            if (numNexts == 0) {
+                std.debug.print("isolated! {any}\n", .{p});
+            } else if (numNexts == 1) {
+                std.debug.print("dead end! {any}\n", .{p});
+            } else if (numNexts == 2) {
+                // std.debug.print("forced: {any}", .{p});
+                numForced += 1;
+            } else if (numNexts == 3) {
+                numChoices += 1;
+            } else {
+                numJunctions += 1;
+            }
+            if (numNexts >= 3) {
+                try nodes.append(p);
+            }
+        }
+    }
+
+    std.debug.print("num squares: {d}\n", .{num});
+    std.debug.print("forced: {d}, choice: {d}, junction: {d}\n", .{ numForced, numChoices, numJunctions });
+
+    return nodes;
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -110,7 +156,14 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     assert(grid.get(start) == '.');
     assert(grid.get(end) == '.');
 
-    try find(allocator, start, end, gr);
+    var nodes = try countChoices(gr);
+    try nodes.append(start);
+    try nodes.append(end);
+    defer nodes.deinit();
+
+    std.debug.print("# nodes: {d}\n", .{nodes.items.len});
+
+    // try find(allocator, start, end, gr);
 
     // std.debug.print("part 1: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});

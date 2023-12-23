@@ -6,7 +6,19 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-I feel like with the last VS Code update everything got slow.
+## Day 23 (7437 / 6407)
+
+Part 1: straightforward
+Part 2: The search is bogging down, there seem to be many different ways to reach the end state in the same number of steps.
+
+I'm at 2250 steps after ~5 minutes, and there are 9406 non-rock squares. But this seems to be getting slower (like a quadratic) so I'm not optimistic about it terminating.
+
+5000 is too low.
+
+One idea is that, from looking at the input, there aren't many squares where you have a choice. If I could fast-forward through the (unique) path between these, it might be a big speedup.
+
+sample: n=211, forced: 204, choice: 6, junction: 1
+input: n=9404, forced: 9370, choice: 18, junction: 16
 
 ## Day 22 (7437 / 6407)
 
