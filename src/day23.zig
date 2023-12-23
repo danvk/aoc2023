@@ -34,7 +34,6 @@ fn nextStates(gr: gridMod.GridResult, state: *State, nextBuf: []*State) ![]*Stat
     const pos = state.pos;
     const grid = gr.grid;
     const cur = grid.get(pos);
-    _ = cur;
     const allocator = grid.allocator;
     var i: usize = 0;
 
@@ -44,13 +43,13 @@ fn nextStates(gr: gridMod.GridResult, state: *State, nextBuf: []*State) ![]*Stat
         if (next == '#') {
             continue; // blocked
         }
-        // if ((cur == '>' and d != .right) or
-        //     (cur == '<' and d != .left) or
-        //     (cur == '^' and d != .up) or
-        //     (cur == 'v' and d != .down))
-        // {
-        //     continue;
-        // }
+        if ((cur == '>' and d != .right) or
+            (cur == '<' and d != .left) or
+            (cur == '^' and d != .up) or
+            (cur == 'v' and d != .down))
+        {
+            continue;
+        }
         if (hasVisited(state, np)) {
             continue;
         }
@@ -72,10 +71,13 @@ fn pathLen(state: *State) usize {
     return 0;
 }
 
-fn find(allocator: std.mem.Allocator, start: Coord, end: Coord, gr: gridMod.GridResult) !void {
+fn find(allocator: std.mem.Allocator, start: Coord, end: Coord, gr: gridMod.GridResult) !usize {
     var fringe = queue.Queue(*State).init(allocator);
     var initState = State{ .pos = start, .prev = null };
     try fringe.enqueue(&initState);
+
+    var lens = std.ArrayList(usize).init(allocator);
+    defer lens.deinit();
 
     var nextsBuf: [4]*State = undefined;
 
@@ -83,12 +85,15 @@ fn find(allocator: std.mem.Allocator, start: Coord, end: Coord, gr: gridMod.Grid
         var nexts = try nextStates(gr, statePtr, &nextsBuf);
         for (nexts) |next| {
             if (next.pos.x == end.x and next.pos.y == end.y) {
-                std.debug.print("Reached finish in {d} steps.\n", .{pathLen(next)});
+                const len = pathLen(next);
+                std.debug.print("Reached finish in {d} steps.\n", .{len});
+                try lens.append(len);
             } else {
                 try fringe.enqueue(next);
             }
         }
     }
+    return std.mem.max(usize, lens.items);
 }
 
 fn countChoices(gr: gridMod.GridResult) !std.ArrayList(Coord) {
@@ -232,10 +237,13 @@ fn pathLen2(state: *State2) usize {
     return state.len;
 }
 
-fn part2(allocator: std.mem.Allocator, start: usize, end: usize, connections: []Connection) !void {
+fn part2(allocator: std.mem.Allocator, start: usize, end: usize, connections: []Connection) !usize {
     var fringe = queue.Queue(*State2).init(allocator);
     var initState = State2{ .idx = start, .prev = null, .len = 0 };
     try fringe.enqueue(&initState);
+
+    var lens = std.ArrayList(usize).init(allocator);
+    defer lens.deinit();
 
     var nextsBuf: [4]*State2 = undefined;
 
@@ -243,12 +251,16 @@ fn part2(allocator: std.mem.Allocator, start: usize, end: usize, connections: []
         var nexts = try nextStates2(allocator, statePtr, connections, &nextsBuf);
         for (nexts) |next| {
             if (next.idx == end) {
-                std.debug.print("Reached finish in {d} steps.\n", .{pathLen2(next)});
+                const len = pathLen2(next);
+                std.debug.print("Reached finish in {d} steps.\n", .{len});
+                try lens.append(len);
             } else {
                 try fringe.enqueue(next);
             }
         }
     }
+
+    return std.mem.max(usize, lens.items);
 }
 
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -271,6 +283,9 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     assert(grid.get(start) == '.');
     assert(grid.get(end) == '.');
 
+    const answer1 = try find(allocator, start, end, gr);
+    std.debug.print("part 1: {d}\n", .{answer1});
+
     var nodes = try countChoices(gr);
     try nodes.append(start);
     try nodes.append(end);
@@ -281,12 +296,10 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     const conns = try findConnections(gr, nodes.items);
     defer conns.deinit();
 
-    try part2(allocator, nodes.items.len - 2, nodes.items.len - 1, conns.items);
+    const answer2 = try part2(allocator, nodes.items.len - 2, nodes.items.len - 1, conns.items);
 
-    // try find(allocator, start, end, gr);
-
-    // std.debug.print("part 1: {d}\n", .{sum1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
+    std.debug.print("part 1: {d}\n", .{answer1});
+    std.debug.print("part 2: {d}\n", .{answer2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
