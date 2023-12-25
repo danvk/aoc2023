@@ -15,6 +15,8 @@ If there are 4+ independent connections between two components then they must be
 
 There are a few of these in a simplme form in the sample input but none in my puzzle input. Darn.
 
+Plugging the sample graph into graphviz makes it pretty obvious what the clusters are! But this runs out of memory for my input.
+
 ## Day 24
 
 For part 2 I guess this is just a really big system of equations?

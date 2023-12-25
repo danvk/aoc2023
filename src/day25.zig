@@ -65,6 +65,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     }
     std.mem.sort([]const u8, components.items, {}, compareStrings);
 
+    std.debug.print("graph G {{\n", .{});
     var connIt = conns.keyIterator();
     var connList = std.StringHashMap(std.ArrayList([]const u8)).init(allocator);
     defer connList.deinit();
@@ -78,8 +79,11 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
             try connList.put(a, std.ArrayList([]const u8).init(allocator));
         }
         try connList.getPtr(a).?.append(b);
+        if (compareStrings({}, a, b)) {
+            std.debug.print("  {s} -- {s}\n", .{ a, b });
+        }
     }
-
+    std.debug.print("}}\n", .{});
     const comps = components.items;
     for (comps, 0..) |a, i| {
         for (comps[(i + 1)..], (i + 1)..) |b, j| {
