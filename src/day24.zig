@@ -126,6 +126,69 @@ fn isValid(hit: CoordTimes) bool {
     return (hit.x >= min and hit.y >= min and hit.x <= max and hit.y <= max and hit.t1 > 0 and hit.t2 > 0);
 }
 
+fn whereAt(h: Hailstone, t: f64) Coord3 {
+    return Coord3{
+        .x = h.p.x + t * h.v.x,
+        .y = h.p.y + t * h.v.y,
+        .z = h.p.z + t * h.v.z,
+    };
+}
+
+// if a hailstone hit a at t=1 and b at t=2, what would it be?
+fn impliedHailstone(a: Hailstone, b: Hailstone) Hailstone {
+    const p1 = whereAt(a, 0);
+    const p2 = whereAt(b, 1);
+
+    const vx = p2.x - p1.x;
+    const vy = p2.y - p1.y;
+    _ = vy;
+    const vz = p2.z - p1.z;
+
+    return Hailstone{
+        .p = p1,
+        .v = Coord3{ .x = vx, .y = vx, .z = vz },
+    };
+}
+
+const Plane = struct {
+    a: f128,
+    b: f128,
+    c: f128,
+};
+
+fn timeForStone(p: Plane, s: Hailstone) f64 {
+    const a = p.a;
+    const b = p.b;
+    const c = p.c;
+    const px: f128 = s.p.x;
+    const py: f128 = s.p.y;
+    const pz: f128 = s.p.z;
+    const vx: f128 = s.v.x;
+    const vy: f128 = s.v.y;
+    const vz: f128 = s.v.z;
+
+    const num = pz - a * px - b * py - c;
+    const den = a * vx + b * vy - vz;
+    const result = num / den;
+    return @floatCast(result);
+}
+
+fn findOrigin(t1: f64, pt1: Coord3, t2: f64, pt2: Coord3) Hailstone {
+    const dt = t2 - t1;
+    const dx = (pt2.x - pt1.x) / dt;
+    const dy = (pt2.y - pt1.y) / dt;
+    const dz = (pt2.z - pt1.z) / dt;
+
+    const x0 = pt1.x - dx * t1;
+    const y0 = pt1.y - dy * t1;
+    const z0 = pt1.z - dz * t1;
+
+    return Hailstone{
+        .p = Coord3{ .x = x0, .y = y0, .z = z0 },
+        .v = Coord3{ .x = dx, .y = dy, .z = dz },
+    };
+}
+
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
@@ -139,8 +202,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     }
 
     var part1: usize = 0;
+    var parallel: struct { usize, usize } = undefined;
     for (stones.items, 0..) |a, i| {
-        for (stones.items[(i + 1)..]) |b| {
+        for (stones.items[(i + 1)..], (i + 1)..) |b, j| {
             // std.debug.print("A: {any}\n", .{a});
             // std.debug.print("B: {any}\n", .{b});
             const int = intersection(a, b);
@@ -149,13 +213,91 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
                 if (isValid(hit)) {
                     part1 += 1;
                 }
+            } else {
+                std.debug.print("parallel hailstones:\n", .{});
+                std.debug.print("A {d}: {any}\n", .{ i, a });
+                std.debug.print("B {d}: {any}\n", .{ j, b });
+                parallel = .{ i, j };
+
+                std.debug.print("{d} = {d} = {d}?\n", .{ a.v.x / b.v.x, a.v.y / b.v.y, a.v.z / b.v.z });
             }
         }
     }
-
     std.debug.print("part 1: {d}\n", .{part1});
+
+    parallel = .{ 28, 274 };
+    std.debug.print("parallel: {any}\n", .{parallel});
+
+    const pa = stones.items[parallel[0]];
+    const pb = stones.items[parallel[1]];
+    const p1 = whereAt(pa, 0);
+    const p2 = whereAt(pa, 1000);
+    const p3 = whereAt(pb, 0);
+    std.debug.print("p1: {any}\n", .{p1});
+    std.debug.print("p2: {any}\n", .{p2});
+    std.debug.print("p3: {any}\n", .{p3});
+    const points = [_]Coord3{ p1, p2, p3 };
+
+    for (&points) |p| {
+        std.debug.print("{d} = {d}a + {d}b + c\n", .{ p.z, p.x, p.y });
+    }
+
+    // const p = Plane{ .a = 0, .b = 2, .c = -16 };
+    // const p = Plane{ .a = -154366485978260 / 34705859347523, .b = 119660626630737 / 34705859347523, .c = 19580930587073342134275113886 / 34705859347523 };
+    const p = Plane{
+        .a = -3775750953325940 / 234223023870859,
+        .b = 2544191182650133 / 234223023870859,
+        .c = 465380250490660088107002948066 / 234223023870859,
+    };
+    assert(parallel[0] != stones.items.len - 1);
+    assert(parallel[0] != stones.items.len - 2);
+    assert(parallel[1] != stones.items.len - 1);
+    assert(parallel[1] != stones.items.len - 2);
+    const s1 = stones.items[stones.items.len - 1];
+    const s2 = stones.items[stones.items.len - 2];
+
+    const t1 = timeForStone(p, s1);
+    const pt1 = whereAt(s1, t1);
+    const t2 = timeForStone(p, s2);
+    const pt2 = whereAt(s2, t2);
+
+    std.debug.print("two points:\n", .{});
+    std.debug.print("{d} @ {any}\n", .{ t1, pt1 });
+    std.debug.print("{d} @ {any}\n", .{ t2, pt2 });
+
+    // std.debug.print("{d} = {d}a + {d}b + c\n", .{ pt1.z, pt1.x, pt1.y });
+    // std.debug.print("{d} = {d}a + {d}b + c\n", .{ pt2.z, pt2.x, pt2.y });
+
+    const ray = findOrigin(t1, pt1, t2, pt2);
+    std.debug.print("stone: {any}\n", .{ray});
+    std.debug.print("part2: {d}\n", .{ray.p.x + ray.p.y + ray.p.z});
+
+    // for (stones.items, 0..) |a, i| {
+    //     for (stones.items, 0..) |b, j| {
+    //         if (i == j) {
+    //             continue;
+    //         }
+    //         const h = impliedHailstone(a, b);
+    //         const p2 = whereAt(h, 2);
+    //         std.debug.print("implied: {any}\n", .{h});
+    //
+    //         for (stones.items, 0..) |c, k| {
+    //             if (i == k or j == k) {
+    //                 continue;
+    //             }
+    //             const p = whereAt(c, 2);
+    //             if (@fabs(p.x - p2.x) + @fabs(p.y - p2.y) + @fabs(p.z - p2.z) < 0.01) {
+    //                 std.debug.print("candidate! {any}\n", .{h});
+    //             }
+    //         }
+    //     }
+    // }
+
     // std.debug.print("part 2: {d}\n", .{sum2});
 }
+
+// 697869420003814.2
+// 642678186425533.1
 
 const expectEqualDeep = std.testing.expectEqualDeep;
 const expectEqual = std.testing.expectEqual;

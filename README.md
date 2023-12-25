@@ -6,6 +6,101 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+## Day 24
+
+For part 2 I guess this is just a really big system of equations?
+
+Six variables to find: px, py, pz, vx, vy, vz
+
+There are no zero velocities.
+If there are parallel hailstones then that puts a constraint on us.
+To go through parallel hailstones, your hailstone would need to be in the plane that those two hailstones define.
+
+    p1 + v1*t1 = p0 + v0*t1
+    p2 + v2*t2 = p0 + v0*t2
+    p3 + v3*t3 = p0 + v0*t3
+    p4 + v3*t4 = p0 + v0*t4
+
+each equation introduces one new variable, so there are 6 + n free variables. Too many! What about for parallel lines?
+
+    p1x + v1x*t1 = p0x + v0x*t1
+    p2x + v1x*t2 = p0x + v0x*t2
+
+    (p1x - p2x) / (v0x-vx1) = (t1-t2)
+
+sample:
+parallel hailstones:
+A: 18,19,22 @ -1,-1,-2
+B: 20,25,34 @ -2,-2,-4
+  -> parallel because B's velocity is 2x A's
+
+A plane is defined by:
+ax + by + cz - d =0
+
+solution:
+24, 13, 10 @ -3, 1, 2
+
+input:
+parallel hailstones:
+A: 416343629775116,253022765045891,491717629266329 @ -92,115,-118
+B: 365714742138785,305827058151326,537426018413809 @ -44,55,-176
+
+parallel hailstones:
+A: 406438277711560,365452366481665,303153811346747 @ -99,-24,66
+B: 344141964435022,343951825236361,384186561046085 @ -33,-8,-33
+
+parallel hailstones:
+A: 310857408788602,297796477288243,210531244259195 @ -31,-31,163
+B: 298167626012347,343890784063423,423675682350779 @ 34,34,-34
+B: 232442233530894,174047813539401,130419194940021 @ 95,95,411
+
+parallel hailstones:
+A: 280473885806842,315439639491991,204057564976545 @ -57,-342,160
+B: 321267288021646,422961112834243,399808899121358 @ -29,-174,-103
+
+parallel hailstones:
+A: 331706243127232,320892065496394,412514267667047 @ -11,33,-50
+B: 351655526618902,246087626101306,327110136190010 @ -37,111,39
+
+parallel hailstones:
+A: 297645490835688,299741689345597,267078364272051 @ -22,-66,57
+B: 298704283508254,298263525225865,296679721125221 @ -8,-24,27
+
+parallel hailstones:
+A: 277029989037226,115116345756124,187440572334869 @ -89,309,220
+B: 218075316045983,275317801447459,264760038336981 @ 178,-618,-228
+
+The hailstone should be constrained to the intersection of these planes.
+
+Presumably the hailstone won't hit my input at t=1, t=2, etc.?
+
+The parallel paths define a plane. Find the formula for that plane and all the other hailstones will hit it at a specific time. A plane is defined by three points, which we can get from sampling the two parallel rays. We can derive the equation from these points.
+
+sample:
+p1: 18,19,22
+p2: 17,18,20
+p3: 20,25,34
+
+22 = 18a + 19b + c
+20 = 17a + 18b + c
+34 = 20a + 25b + c
+
+a = 0
+b = 2
+c = -16
+
+z = 2y - 16
+
+input:
+
+p1: 298167626012347, 343890784063423, 423675682350779
+p2: 298167626012381, 343890784063457, 423675682350745
+p3: 232442233530894, 174047813539401, 130419194940021
+
+I feel like I have the solution, there's just a lot of floating point crap.
+
+... actually not. Because in the sample input there _are_ two parallel lines (including the z coordinates) but in my real input there are not. So back to square one :(
+
 ## Day 23 (8738 / 5426)
 
 Part 1: straightforward
