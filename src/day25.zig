@@ -1,6 +1,7 @@
 const std = @import("std");
 const bufIter = @import("./buf-iter.zig");
 const util = @import("./util.zig");
+const queue = @import("./queue.zig");
 
 const assert = std.debug.assert;
 
@@ -25,6 +26,58 @@ fn areConnected(a: []const u8, b: []const u8, conns: std.StringHashMap(void)) bo
     return conns.contains(key);
 }
 
+fn floodfill(seed: []const u8, conns: std.StringHashMap(std.ArrayList([]const u8))) !void {
+    var allocator = conns.allocator;
+    var counts = std.StringHashMap(usize).init(allocator);
+    defer counts.deinit();
+
+    var used = std.StringHashMap(void).init(allocator);
+    defer used.deinit();
+
+    var fringe = queue.Queue(Conn).init(allocator);
+    var seedConns = conns.get(seed).?;
+    for (seedConns.items) |next| {
+        // XXX use our own arena here?
+        // const keyBuf = try allocator.alloc(u8, 7);
+        // const left = seed;
+        // const right = next;
+        // var key = try std.fmt.bufPrint(keyBuf, "{s},{s}", .{ left, right });
+        // if (std.mem.order(u8, left, right) == .lt) .{ left, right } else .{ right, left }) catch unreachable;
+        try fringe.enqueue(Conn{ .from = seed, .to = next });
+    }
+
+    while (fringe.dequeue()) |conn| {
+        // var parts = util.splitOne(conn, ",").?;
+        var prev = conn.from;
+        var next = conn.to;
+
+        var keyBuf: [7]u8 = undefined;
+        var key = try std.fmt.bufPrint(&keyBuf, "{s},{s}", if (std.mem.order(u8, prev, next) == .lt) .{ prev, next } else .{ next, prev });
+        if (used.contains(key)) {
+            continue;
+        }
+        var keyDupe = try allocator.dupe(u8, key);
+        try used.put(keyDupe, undefined);
+
+        try counts.put(next, (counts.get(next) orelse 0) + 1);
+        if (conns.get(next)) |nextConns| {
+            for (nextConns.items) |nextNode| {
+                // const keyBufN = try allocator.alloc(u8, 7);
+                // var keyN = try std.fmt.bufPrint(keyBufN, "{s},{s}", .{ next, nextNode });
+                try fringe.enqueue(Conn{
+                    .from = next,
+                    .to = nextNode,
+                });
+            }
+        }
+    }
+
+    var it = counts.iterator();
+    while (it.next()) |entry| {
+        std.debug.print("  {s} {d}\n", .{ entry.key_ptr.*, entry.value_ptr.* });
+    }
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -46,12 +99,15 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         var parts = util.splitAnyIntoBuf(line, ": ", &partsBuf);
         var left = parts[0];
         for (parts[1..]) |right| {
-            const keyBuf1 = try allocator.alloc(u8, 7);
-            var key1 = try std.fmt.bufPrint(keyBuf1, "{s},{s}", .{ left, right });
-            try conns.put(key1, undefined);
-            const keyBuf2 = try allocator.alloc(u8, 7);
-            var key2 = try std.fmt.bufPrint(keyBuf2, "{s},{s}", .{ right, left });
-            try conns.put(key2, undefined);
+            const keyBuf = try allocator.alloc(u8, 7);
+            var key = std.fmt.bufPrint(keyBuf, "{s},{s}", if (std.mem.order(u8, left, right) == .lt) .{ left, right } else .{ right, left }) catch unreachable;
+            try conns.put(key, undefined);
+
+            // var key1 = try std.fmt.bufPrint(keyBuf1, "{s},{s}", .{ left, right });
+            // try conns.put(key1, undefined);
+            // const keyBuf2 = try allocator.alloc(u8, 7);
+            // var key2 = try std.fmt.bufPrint(keyBuf2, "{s},{s}", .{ right, left });
+            // try conns.put(key2, undefined);
 
             try componentsSet.put(left, undefined);
             try componentsSet.put(right, undefined);
@@ -78,34 +134,41 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         if (!connList.contains(a)) {
             try connList.put(a, std.ArrayList([]const u8).init(allocator));
         }
-        try connList.getPtr(a).?.append(b);
-        if (compareStrings({}, a, b)) {
-            std.debug.print("  {s} -- {s}\n", .{ a, b });
+        if (!connList.contains(b)) {
+            try connList.put(b, std.ArrayList([]const u8).init(allocator));
         }
+        try connList.getPtr(a).?.append(b);
+        try connList.getPtr(b).?.append(a);
+        std.debug.print("  {s} -- {s}\n", .{ a, b });
     }
     std.debug.print("}}\n", .{});
-    const comps = components.items;
-    for (comps, 0..) |a, i| {
-        for (comps[(i + 1)..], (i + 1)..) |b, j| {
-            var numConns: usize = 0;
-            if (areConnected(a, b, conns)) {
-                numConns += 1;
-            }
 
-            for (comps, 0..) |c, k| {
-                if (k == i or k == j) {
-                    continue;
-                }
-                if (areConnected(a, c, conns) and areConnected(b, c, conns)) {
-                    numConns += 1;
-                }
-            }
+    const seed = components.items[0];
+    std.debug.print("flood fill from {s}\n", .{seed});
+    try floodfill(seed, connList);
 
-            if (numConns >= 4) {
-                std.debug.print("{s} and {s} are strongly connected ({d})\n", .{ a, b, numConns });
-            }
-        }
-    }
+    // const comps = components.items;
+    // for (comps, 0..) |a, i| {
+    //     for (comps[(i + 1)..], (i + 1)..) |b, j| {
+    //         var numConns: usize = 0;
+    //         if (areConnected(a, b, conns)) {
+    //             numConns += 1;
+    //         }
+    //
+    //         for (comps, 0..) |c, k| {
+    //             if (k == i or k == j) {
+    //                 continue;
+    //             }
+    //             if (areConnected(a, c, conns) and areConnected(b, c, conns)) {
+    //                 numConns += 1;
+    //             }
+    //         }
+    //
+    //         if (numConns >= 4) {
+    //             std.debug.print("{s} and {s} are strongly connected ({d})\n", .{ a, b, numConns });
+    //         }
+    //     }
+    // }
 
     // std.debug.print("{d} components:\n", .{components.items.len});
     // for (components.items) |c| {

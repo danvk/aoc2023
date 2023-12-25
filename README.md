@@ -13,7 +13,7 @@ input: 1453 components / 3236 connections
 
 If there are 4+ independent connections between two components then they must be part of the same cluster.
 
-There are a few of these in a simplme form in the sample input but none in my puzzle input. Darn.
+There are a few of these in a simple form in the sample input but none in my puzzle input. Darn.
 
 Plugging the sample graph into graphviz makes it pretty obvious what the clusters are! But this runs out of memory for my input.
 
