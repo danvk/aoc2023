@@ -21,7 +21,7 @@ fn compareStrings(_: void, lhs: []const u8, rhs: []const u8) bool {
 
 fn areConnected(a: []const u8, b: []const u8, conns: std.StringHashMap(void)) bool {
     var keyBuf: [7]u8 = undefined;
-    var key = std.fmt.bufPrint(&keyBuf, "{s},{s}", if (std.mem.order(u8, a, b) == .lt) .{ a, b } else .{ b, a }) catch unreachable;
+    var key = std.fmt.bufPrint(&keyBuf, "{s},{s}", .{ a, b }) catch unreachable;
     return conns.contains(key);
 }
 
@@ -46,9 +46,12 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         var parts = util.splitAnyIntoBuf(line, ": ", &partsBuf);
         var left = parts[0];
         for (parts[1..]) |right| {
-            const keyBuf = try allocator.alloc(u8, 7);
-            var key = try std.fmt.bufPrint(keyBuf, "{s},{s}", if (std.mem.order(u8, left, right) == .lt) .{ left, right } else .{ right, left });
-            try conns.put(key, undefined);
+            const keyBuf1 = try allocator.alloc(u8, 7);
+            var key1 = try std.fmt.bufPrint(keyBuf1, "{s},{s}", .{ left, right });
+            try conns.put(key1, undefined);
+            const keyBuf2 = try allocator.alloc(u8, 7);
+            var key2 = try std.fmt.bufPrint(keyBuf2, "{s},{s}", .{ right, left });
+            try conns.put(key2, undefined);
 
             try componentsSet.put(left, undefined);
             try componentsSet.put(right, undefined);
@@ -61,6 +64,21 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         try components.append(c.*);
     }
     std.mem.sort([]const u8, components.items, {}, compareStrings);
+
+    var connIt = conns.keyIterator();
+    var connList = std.StringHashMap(std.ArrayList([]const u8)).init(allocator);
+    defer connList.deinit();
+    while (connIt.next()) |conn| {
+        var partsBuf2: [2][]const u8 = undefined;
+        var parts = util.splitIntoBuf(conn.*, ",", &partsBuf2);
+        assert(parts.len == 2);
+        var a = parts[0];
+        var b = parts[1];
+        if (!connList.contains(a)) {
+            try connList.put(a, std.ArrayList([]const u8).init(allocator));
+        }
+        try connList.getPtr(a).?.append(b);
+    }
 
     const comps = components.items;
     for (comps, 0..) |a, i| {
