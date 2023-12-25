@@ -19,3 +19,4 @@ zig-out/
 input.txt
 
 scripts/setup-day.sh
+.ipynb_checkpoints/

@@ -117,6 +117,298 @@ I feel like I have the solution, there's just a lot of floating point crap.
 
 ... actually not. Because in the sample input there _are_ two parallel lines (including the z coordinates) but in my real input there are not. So back to square one :(
 
+If two hailstones are parallel to each other in the XY-plane (part 1), does that place any constraint on the thrown hailstone? I don't think any special constraint.
+
+Can I consider the problem on each axis independently? If it has a unique solution on one axis then it will have to work for the others.
+
+    x = a + b*t
+
+    p1x + v1x*t1 = a + b*t1
+    p2x + v2x*t2 = a + b*t2
+
+Let's assume that t1=0, so that a=p1x. That eliminates two variables!
+
+… unfortunately you can't do this! It's all very time-dependent.
+
+    p1x = a
+    p2x + v2x * t2 - p1x = b*t2
+    p3x + v3x * t3 - p1x = b*t3
+
+So we still have three variables and two equations. The integer-ness puts some other constraints on the problem.
+
+This equation:
+
+    (v2x - b)*t2 = p1x - p2x
+
+implies that the prime factorization of p1x - p2x is relevant. For the sample we have:
+
+    a = p1x = 20
+    t1 = 0
+
+    (-2 - b)*t2 = 20 - 19
+    (-2 - b)*t2 = 1
+
+That implies that t2 = +/1 and b = -1 or b = -3. Pretty strong constraint!! (In fact b=-3 and t=1.)
+
+    p1: 20, 25, 34 @ -2, -2, -4
+    p2: 19, 13, 30 @ -2,  1, -2
+
+    y = p1y + c*t2 = p2y + v2y*t2
+    (c - v2y)*t2 = p2y - p1y
+    (c - 1)*t2 = 13 - 25 = -12
+
+    (v2x - b)*t2 = p1x - p2x
+    (v2y - c)*t2 = p1y - p2y
+    (1 - c)*t2 = 13 - 25
+    (1 - c)*t2 = -12
+    (c - 1)*t2 = 12
+
+So either t2=1, c=13 or t2=-1, c=-11. This is wrong. What's the flaw?
+
+Let's try for the input.
+
+    a = p1x = 230027994633462
+
+    (v2x - b)*t2 = p1x - p2x
+    (184 - b)*t2 = 230027994633462 - 213762157019377
+    (184 - b)*t2 = 5 * 41 * 79345549337
+
+    (v3x - b)*t3 = p1x - p3x
+    (15 - b)*t3 = 230027994633462 - 236440979253526
+    (15 - b)*t3 = -6412984620064
+    (15 - b)*t3 = -2^5 × 11 × 18218706307
+
+    (v4x - b)*t4 = p1x - p4x
+    (272 - b)*t4 = 230027994633462 - 150273374343556
+    (272 - b)*t4 = 79754620289906
+    (272 - b)*t4 = 2 × 233 × 509 × 1301 × 258449
+
+    (123 - b)*t5 = 230027994633462 - 218468515688398 = 2^3 × 2767 × 522202699
+
+    (-217 - b)*t6 = 230027994633462 - 338621759011922 = 2^2 × 5 × 179 × 691 × 43897907
+
+    230027994633462 - 201589965927467 = 5 × 317 × 106331 × 168737
+
+Start at
+
+    183311641883655, 215117635553996, 110059988469764 @ 148, 155, 275
+    183304099697746, 123137916295517, 255584306525969 @ 192, 257, 71
+
+    a = p1x = 183311641883655
+
+    (v2x - b)*t2 = p1x - p2x
+    (192 - b)*t2 = 183311641883655 - 183304099697746
+    (192 - b)*t2 = 7542185909
+    (192 - b)*t2 = 853 × 8841953
+
+So either:
+
+    t2 = 1
+    t2 = -1
+    t2 = 853
+    t2 = -853
+    t2 = 8841953
+    t2 = -8841953
+    t2 = 7542185909
+    t2 = -7542185909
+
+    b = 192 - 7542185909 / t2
+    192 - b = 7542185909 / t2
+
+The same has to hold for the other axes. So:
+
+    (v2y - c)*t2 = p1y - p2y
+    (257 - c)*t2 = 215117635553996 - 215117635553996
+    (257 - c)*t2 = 91979719258479
+    (257 - c)*t2 = 3 × 13 × 17 × 61 × 12347 × 184199
+
+    257 - c = -91979719258479 / t2
+    c = 257 + 91979719258479
+
+That would imply that t2=-1 or t2=+1. Did I really just get so lucky? I'm nervous.
+
+    (71 - d)*1 = 255584306525969 - 110059988469764
+    d = 71 - 145524318056205
+    d = -145524318056134
+
+If t2=+1:
+
+  b = -7542185717
+  c = 91979719258736
+  d = -145524318056134
+
+If t2=-1:
+
+  b = 7542186101
+  c = -91979719258222
+  d = 145524318056276
+
+Intersection for another one:
+
+    px3 + t * vx3 = a + t * b
+    t * (vx3 - b) = a - px3
+    t = (a - px3) / (vx3 - b)
+
+357365890932622, 177150333541705, 301288545637877 @ -71, 179, 45
+
+    t = (183311641883655 - 357365890932622) / (-71 + 7542185717)
+
+or
+
+    t = (183311641883655 - 357365890932622) / (-71 - 7542186101)
+
+neither is an integer, so something is wrong here.
+
+Back to the equations…
+
+    x = a + b*t
+
+    p1x + v1x*t1 = ax + b*t1
+    p2x + v2x*t2 = ax + b*t2
+
+    (p2x - p1x) + v2x*t2 - v1x*t1 = b*(t2 - t1)
+    (p2y - p1y) + v2y*t2 - v1y*t1 = c*(t2 - t1)
+    (p2z - p1z) + v2z*t2 - v1z*t1 = d*(t2 - t1)
+    (-12) + (-2)(3) + 4(4) = (2)*(3 - 4)
+    -12 - 6 + 16 = -2 yes
+
+eventually b=-3, c=1, d=2
+p1: 20, 25, 34 @ -2, -2, -4  (evenually t1=4)
+p2: 18, 19, 22 @ -1, -1, -2  (eventually t2=3)
+
+    (18 - 20) + (-1)t2 - (-2)t1 = b*(t2 - t1)
+    (19 - 25) + (-1)t2 - (-2)t1 = c*(t2 - t1)
+    (22 - 34) + (-2)t2 - (-4)t1 = d*(t2 - t1)
+
+    -2 - t2 + 2t1 = b*(t2 - t1)
+    -6 - t2 + 2t1 = c*(t2 - t1)
+
+    4 = (b-c)*(t2-t1)
+
+This is still a great constraint!
+
+    -12 - 2t2 + 4t1 = d*(t2 - t1)
+
+So maybe the hailstones that are parallel in the xy-plane _are_ useful. We have a set of three here:
+
+p1: 310857408788602,297796477288243,210531244259195 @ -31,-31,163
+p2: 298167626012347,343890784063423,423675682350779 @ 34,34,-34
+p3: 232442233530894,174047813539401,130419194940021 @ 95,95,411
+
+That gives us:
+
+    (p2x - p1x) + v2x*t2 - v1x*t1 = b*(t2 - t1)
+    (p2y - p1y) + v2y*t2 - v1y*t1 = c*(t2 - t1)
+
+    (-12689782776255) + 34*t2 + 31*t1 = b*(t2 - t1)
+    46094306775180 + 34*t2 + 31*t1 = c*(t2 - t1)
+    58784089551435 = (c-b)*(t2 - t1)
+    3^5 × 5 × 47 × 857 × 1201171 = (c-b)*(t2 - t1)
+
+    (p3x - p1x) + v3x*t3 - v1x*t1 = b*(t3 - t1)
+    (p3y - p1y) + v3y*t3 - v1y*t1 = c*(t3 - t1)
+    (-78415175257708) + 95*t3 + 31t1 = b*(t3 - t1)
+    (-123748663748842) + 95*t3 + 31*t1 = c*(t3 - t1)
+    -45333488491134 = (c - b) * (t3 - t1)
+    -2 × 3 × 47 × 241 × 667041707 = (c - b) * (t3 - t1)
+
+    (p3x - p2x) + v3x*t3 - v2x*t2 = b*(t3 - t2)
+    (p3y - p2y) + v3y*t3 - v2y*t2 = c*(t3 - t2)
+    (-65725392481453) + 95*t3 - 34*t2 = b*(t3 - t2)
+    (-169842970524022) + 95*t3 - 34*t2 = c*(t3 - t2)
+    -104117578042569 = (c - b) * (t3 - t2)
+    -3 × 7^2 × 13 × 47 × 1159219057 = (c - b) * (t3 - t2)
+
+So from all that we get:
+
+    3^5 × 5 × 47 × 857 × 1201171    = (c - b) * (t2 - t1)
+    -2 × 3 × 47 × 241 × 667041707   = (c - b) * (t3 - t1)
+    -3 × 7^2 × 13 × 47 × 1159219057 = (c - b) * (t3 - t2)
+
+The shared factors are 3 and 47, so there are only eight possibilities for (c - b). Each of these eight possibilities would imply values for t2-t1, t3-t1 and t3-t2. Do those imply specific values for t1, t2 and t3? Maybe?
+
+    (p2z - p1z) + v2z*t2 - v1z*t1 = d*(t2 - t1)
+    (p3z - p1z) + v3z*t3 - v1z*t1 = d*(t3 - t1)
+
+    (p3z - p2z) + v3z*t3 - v2z*t2 = d*(t3 - t2)  // this is just the difference of the previous two
+
+What if b + c + d = 0? So d = -(b + c). Given t1 we can find t2, t3, so perhaps we just need to find b and t1? And we have two equations?
+
+    d = -(b+c)
+    b + c = (c - b) + 2b
+    d = -((c - b) + 2b)
+
+    (p2z - p1z) + v2z*(t1 + (t2-t1)) - v1z*t1 = -((c - b) + 2b)*(t2 - t1)
+    (p3z - p1z) + v3z*(t1 + (t3-t1)) - v1z*t1 = --((c - b) + 2b)*(t3 - t1)
+
+Plainly we have to have t3 - t2 = (t3 - t2) + (t2 - t1), so maybe these aren't all independent?
+
+     213144438091584  +  -34 *t_2 -  163 *t_1 =  -58784089551435.0 *d
+     -80112049319174  +  411 *t_3 -  163 *t_1 =   45333488491134.0 *d
+
+Is using another set of parallel hailstones helpful?
+
+p4: 297645490835688,299741689345597,267078364272051 @ -22,-66,57
+p5: 298704283508254,298263525225865,296679721125221 @ -8,-24,27
+
+    (p5x - p4x) + v5x*t5 - v4x*t4 = b*(t5 - t4)
+    (p5y - p4y) + v5y*t5 - v4y*t4 = c*(t5 - t4)
+
+    1058792672566 + (-8)t5 - (-22)*t4 = b*(t5 - t4)
+    -1478164119732 + (-24)t5 - (-66)*t4 = c*(t5 - t4)
+
+    3176378017698 + (-24)t5 - (-66)*t4 = 3b*(t5 - t4)
+    -1478164119732 + (-24)t5 - (-66)*t4 = c*(t5 - t4)
+
+    4654542137430 = (3b - c)*(t5 - t4)
+    2 × 3 × 5 × 19 × 127 × 907 × 70891 = (3b - c)*(t5 - t4)
+
+That is another constraint, but it's a kinda complicated one! If I know b and c, though, I can get the specific times.
+
+p4: 331706243127232,320892065496394,412514267667047 @ -11,33,-50
+p5: 351655526618902,246087626101306,327110136190010 @ -37,111,39
+
+    (p5x - p4x) + v5x*t5 - v4x*t4 = b*(t5 - t4)
+    (p5y - p4y) + v5y*t5 - v4y*t4 = c*(t5 - t4)
+
+    19949283491670 + (-37)t5 - (-11)t4 = b*(t5 - t4)
+    -74804439395088 + (111)t5 - (33)t4 = c*(t5 - t4)
+
+    59847850475010 + (-111)t5 - (-33)t4 = 3b*(t5 - t4)
+    -74804439395088 + (111)t5 - (33)t4 = c*(t5 - t4)
+
+    -14956588920078 = (3b + c)*(t7 - t6)
+    2 × 3^2 × 13 × 23 × 179 × 15525151 = (3b + c) * (t7 - t6)
+
+So we know:
+
+    3b + c divides 2 × 3^2 × 13 × 23 × 179 × 15525151
+    3b - c divides 2 × 3 × 5 × 19 × 127 × 907 × 70891
+    b - c divides 3 * 47
+
+If c-b=141 then c=b+141 and that would mean:
+
+    (2b - 141) divides 2 × 3 × 5 × 19 × 127 × 907 × 70891
+    (4b + 141) divides 2 × 3^2 × 13 × 23 × 179 × 15525151
+
+I think this is a feasible number of possibilities to try, but it just feels kinda heinous.
+
+    print(cMinB, t2t1, t3t1, t3t2, t3t2 + t2t1)
+    141 416908436535.0 -321514102774.0 -738422539309.0 -321514102774.0
+    ( 213144438091584 ) +  -34 * (t_1 +  416908436535.0 ) -  163 *t_1 = -( 141  + 2b)*( 416908436535.0 )
+    ( -80112049319174 ) +  411 * (t_1 +  -321514102774.0 ) -  163 *t_1 = -( 141  + 2b)*( -321514102774.0 )
+
+c + 164.5 = 141
+c = -23.5
+
+This gives:
+
+    b = -164.5 and                t_1 = 612135863862
+    c = -23.5
+    t_2 = 416908436535 + 612135863862 = 1029044300397
+
+
+
 ## Day 23 (8738 / 5426)
 
 Part 1: straightforward
