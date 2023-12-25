@@ -6,6 +6,15 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
+## Day 25
+
+sample: 15 components / 33 connections
+input: 1453 components / 3236 connections
+
+If there are 4+ independent connections between two components then they must be part of the same cluster.
+
+There are a few of these in a simplme form in the sample input but none in my puzzle input. Darn.
+
 ## Day 24
 
 For part 2 I guess this is just a really big system of equations?
