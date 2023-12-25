@@ -17,6 +17,11 @@ There are a few of these in a simple form in the sample input but none in my puz
 
 Plugging the sample graph into graphviz makes it pretty obvious what the clusters are! But this runs out of memory for my input.
 
+New idea: find the shortest paths between all modules, count which paths they use. Maybe the top ~100 are the ones to consider?
+
+Also maybe I should just switch to Python.
+NetworkX has a `k_edge_components` that solves the problem. So I guess I should read about how that works?
+
 ## Day 24
 
 For part 2 I guess this is just a really big system of equations?
