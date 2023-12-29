@@ -6,7 +6,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-## Day 25
+## Day 25 (8738 / 5426)
 
 sample: 15 components / 33 connections
 input: 1453 components / 3236 connections
@@ -22,7 +22,11 @@ New idea: find the shortest paths between all modules, count which paths they us
 Also maybe I should just switch to Python.
 NetworkX has a `k_edge_components` that solves the problem. So I guess I should read about how that works?
 
-## Day 24
+https://dreampuf.github.io/GraphvizOnline/#graph%20G%20%7B%0A%20%20bvb%20--%20xhk%0A%20%20jqt%20--%20xhk%0A%20%20bvb%20--%20hfx%0A%20%20ntq%20--%20xhk%0A%20%20frs%20--%20qnr%0A%20%20lsr%20--%20rsh%0A%20%20lsr%20--%20rzs%0A%20%20hfx%20--%20rhn%0A%20%20qnr%20--%20rzs%0A%20%20cmg%20--%20nvd%0A%20%20nvd%20--%20pzl%0A%20%20frs%20--%20lhk%0A%20%20hfx%20--%20pzl%0A%20%20pzl%20--%20rsh%0A%20%20cmg%20--%20qnr%0A%20%20rsh%20--%20rzs%0A%20%20jqt%20--%20nvd%0A%20%20hfx%20--%20xhk%0A%20%20cmg%20--%20lhk%0A%20%20cmg%20--%20rzs%0A%20%20rhn%20--%20xhk%0A%20%20hfx%20--%20ntq%0A%20%20bvb%20--%20ntq%0A%20%20lsr%20--%20pzl%0A%20%20jqt%20--%20rhn%0A%20%20nvd%20--%20qnr%0A%20%20frs%20--%20rsh%0A%20%20lhk%20--%20lsr%0A%20%20frs%20--%20lsr%0A%20%20bvb%20--%20cmg%0A%20%20jqt%20--%20ntq%0A%20%20bvb%20--%20rhn%0A%20%20lhk%20--%20nvd%0A%7D
+
+A few days later I implemented a direct solution in a Jupyter notebook. My idea earlier about "4+ independent connections" was the right way to do it. I just had to allow more complex connections than A -- (x) -- B, which was annoying to do in Zig. My Python code wound up being pretty simple: for each edge, repeatedly find the shortest path between the two nodes and remove the edges along that path. If you wind up with 4+ connections, then they're in the same cluster. You can represent this by adding a connection between them in a separate graph, which eventually has two components. Maybe I should try to implement this in Zig for completeness.
+
+## Day 24 (7437 / 6407)
 
 For part 2 I guess this is just a really big system of equations?
 
@@ -325,6 +329,10 @@ So from all that we get:
     -2 × 3 × 47 × 241 × 667041707   = (c - b) * (t3 - t1)
     -3 × 7^2 × 13 × 47 × 1159219057 = (c - b) * (t3 - t2)
 
+    3^5 × 5 × 47 × 857 × 1201171    = (vy - vx) * (t2 - t1)
+    -2 × 3 × 47 × 241 × 667041707   = (vy - vx) * (t3 - t1)
+    -3 × 7^2 × 13 × 47 × 1159219057 = (vy - vx) * (t3 - t2)
+
 The shared factors are 3 and 47, so there are only eight possibilities for (c - b). Each of these eight possibilities would imply values for t2-t1, t3-t1 and t3-t2. Do those imply specific values for t1, t2 and t3? Maybe?
 
     (p2z - p1z) + v2z*t2 - v1z*t1 = d*(t2 - t1)
@@ -407,7 +415,27 @@ This gives:
     c = -23.5
     t_2 = 416908436535 + 612135863862 = 1029044300397
 
+That t_1 / t_2 worked! In retrospect I didn't even need to fit a line or figure out t_2 since I assumed that the velocity components added up to zero.
 
+In retrospect I'm curious why I dismissed the system-of-equations approach at the start. You start with six unknowns (position and velocity). As Jeremy said, each hailstone adds one unknown (the collision time) but introduces three constraints. So this should be determined with just three hailstones.
+
+1: 7 unknowns, 3 constraints
+2: 8 unknowns, 6 constraints
+3: 9 unknowns, 9 constraints
+
+Here's what the system of equations looks like:
+
+    310857408788602 + -31*t_0 = p_x + v_x*t_0
+    297796477288243 + -31*t_0 = p_y + v_y*t_0
+    210531244259195 + 163*t_0 = p_z + v_z*t_0
+    298167626012347 +  34*t_1 = p_x + v_x*t_1
+    343890784063423 +  34*t_1 = p_y + v_y*t_1
+    423675682350779 + -34*t_1 = p_z + v_z*t_1
+    232442233530894 +  95*t_2 = p_x + v_x*t_2
+    174047813539401 +  95*t_2 = p_y + v_y*t_2
+    130419194940021 + 411*t_2 = p_z + v_z*t_2
+
+So I guess it's not a _linear_ system of equations. I feel like Wolfram could solve this, but it's more than the max characters it will let you submit via the web form.
 
 ## Day 23 (8738 / 5426)
 
