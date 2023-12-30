@@ -160,11 +160,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
 
-    // a,b pairs
-    var conns = std.StringHashMap(void).init(allocator);
-    defer conns.deinit();
-    var componentsSet = std.StringHashMap(void).init(allocator);
-    defer componentsSet.deinit();
+    var connList = Graph.init(allocator);
+    defer connList.deinit();
 
     var partsBuf: [20][]const u8 = undefined;
     var it = std.mem.tokenize(u8, contents, "\n");
@@ -172,59 +169,28 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         var parts = util.splitAnyIntoBuf(line, ": ", &partsBuf);
         var left = parts[0];
         for (parts[1..]) |right| {
-            const keyBuf = try allocator.alloc(u8, 7);
-            var key = std.fmt.bufPrint(keyBuf, "{s},{s}", if (std.mem.order(u8, left, right) == .lt) .{ left, right } else .{ right, left }) catch unreachable;
-            try conns.put(key, undefined);
-
-            try componentsSet.put(left, undefined);
-            try componentsSet.put(right, undefined);
+            try addEdge(&connList, left, right);
         }
     }
 
-    var components = std.ArrayList([]const u8).init(allocator);
-    var cit = componentsSet.keyIterator();
-    while (cit.next()) |c| {
-        try components.append(c.*);
-    }
-    std.mem.sort([]const u8, components.items, {}, compareStrings);
-
-    std.debug.print("graph G {{\n", .{});
-    var isPrinting = components.items.len < 30;
-    var connIt = conns.keyIterator();
-    var connList = std.StringHashMap(std.ArrayList([]const u8)).init(allocator);
-    defer connList.deinit();
-    while (connIt.next()) |conn| {
-        var partsBuf2: [2][]const u8 = undefined;
-        var parts = util.splitIntoBuf(conn.*, ",", &partsBuf2);
-        assert(parts.len == 2);
-        var a = parts[0];
-        var b = parts[1];
-        if (!connList.contains(a)) {
-            try connList.put(a, std.ArrayList([]const u8).init(allocator));
-        }
-        if (!connList.contains(b)) {
-            try connList.put(b, std.ArrayList([]const u8).init(allocator));
-        }
-        try connList.getPtr(a).?.append(b);
-        try connList.getPtr(b).?.append(a);
-        if (isPrinting) {
-            std.debug.print("  {s} -- {s}\n", .{ a, b });
+    var edges = std.ArrayList(Conn).init(allocator);
+    defer edges.deinit();
+    var connIt = connList.iterator();
+    while (connIt.next()) |entry| {
+        var left = entry.key_ptr.*;
+        var nexts = entry.value_ptr.*;
+        for (nexts.items) |right| {
+            if (std.mem.order(u8, left, right) == .lt) {
+                try edges.append(Conn{ .from = left, .to = right });
+            }
         }
     }
-    if (!isPrinting) {
-        std.debug.print("  ... # elided\n", .{});
-    }
-    std.debug.print("}}\n", .{});
 
     var connected = Graph.init(allocator);
     defer connected.deinit();
-    connIt = conns.keyIterator();
-    while (connIt.next()) |conn| {
-        var partsBuf2: [2][]const u8 = undefined;
-        var parts = util.splitIntoBuf(conn.*, ",", &partsBuf2);
-        assert(parts.len == 2);
-        var a = parts[0];
-        var b = parts[1];
+    for (edges.items) |edge| {
+        var a = edge.from;
+        var b = edge.to;
 
         var n = try countPaths(&connList, a, b);
         if (n > 3) {
