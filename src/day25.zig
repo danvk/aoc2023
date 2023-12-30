@@ -239,12 +239,14 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         var n = try countPaths(&connList, a, b);
         if (n > 3) {
             try addEdge(&connected, a, b);
-            std.debug.print("{s} and {s} are in the same component\n", .{ a, b });
+            // std.debug.print("{s} and {s} are in the same component\n", .{ a, b });
         }
     }
 
     const part2 = try countComponents(connected);
-    std.debug.print("part 2: {d}\n", .{part2});
+    defer allocator.free(part2);
+    std.debug.print("components: {any}\n", .{part2});
+    std.debug.print("day 25: {d}\n", .{part2[0] * part2[1]});
 
     // const comps = components.items;
     // for (comps, 0..) |a, i| {
