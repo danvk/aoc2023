@@ -60,6 +60,12 @@ pub fn WithCostAndPrev(comptime State: type) type {
         state: State,
         cost: u32,
         prev: ?*WithCostAndPrev(State),
+
+        pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+            _ = fmt;
+            _ = options;
+            try std.fmt.format(writer, "{any}@{d}", .{ self.state, self.cost });
+        }
     };
 }
 
@@ -73,6 +79,7 @@ fn stateCostPrevOrder(comptime State: type) fn (void, *WithCostAndPrev(State), *
 
 pub fn shortestPath(
     comptime State: type, //
+    comptime hashContext: type,
     in_allocator: std.mem.Allocator,
     context: anytype,
     start: State, //
@@ -86,7 +93,7 @@ pub fn shortestPath(
     const StateWithCost = WithCost(State);
     const StateWithCostPrev = WithCostAndPrev(State);
 
-    var seen = std.AutoHashMap(State, u32).init(allocator);
+    var seen = std.HashMap(State, u32, hashContext, std.hash_map.default_max_load_percentage).init(allocator);
     defer seen.deinit();
 
     var fringe = std.PriorityQueue(*StateWithCostPrev, void, stateCostPrevOrder(State)).init(allocator, {});
@@ -96,6 +103,7 @@ pub fn shortestPath(
     try fringe.add(&seed);
 
     while (fringe.removeOrNull()) |stateCostPrevPtr| {
+        // std.debug.print("considering {any}\n", .{stateCostPrevPtr.*});
         const state = stateCostPrevPtr.state;
         const cost = stateCostPrevPtr.cost;
         if (seen.get(state)) |prev_cost| {
@@ -105,6 +113,7 @@ pub fn shortestPath(
         }
 
         if (std.meta.eql(dest, state)) {
+            // std.debug.print("found solution!\n", .{});
             var path = std.ArrayList(StateWithCost).init(in_allocator);
             var curPtr: ?*StateWithCostPrev = stateCostPrevPtr;
             while (curPtr) |cur| {
@@ -161,7 +170,12 @@ test "shortest path" {
     var bn = std.ArrayList([]const u8).init(std.testing.allocator);
     defer bn.deinit();
     try bn.append("D");
+    try g.put("B", bn);
 
-    var path = try shortestPath([]const u8, std.testing.allocator, g, "A", graph_neighbors, "D");
+    var path = try shortestPath([]const u8, std.hash_map.StringContext, std.testing.allocator, g, "A", graph_neighbors, "D");
     std.debug.print("path: {any}\n", .{path});
+
+    if (path) |valid_path| {
+        std.testing.allocator.free(valid_path);
+    }
 }
