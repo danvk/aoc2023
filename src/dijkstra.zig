@@ -64,7 +64,7 @@ pub fn WithCostAndPrev(comptime State: type) type {
         pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
             _ = fmt;
             _ = options;
-            try std.fmt.format(writer, "{any}@{d}", .{ self.state, self.cost });
+            try std.fmt.format(writer, "{s}@{d}", .{ self.state, self.cost });
         }
     };
 }
@@ -112,7 +112,7 @@ pub fn shortestPath(
             }
         }
 
-        if (std.meta.eql(dest, state)) {
+        if (hashContext.eql(undefined, dest, state)) {
             // std.debug.print("found solution!\n", .{});
             var path = std.ArrayList(StateWithCost).init(in_allocator);
             var curPtr: ?*StateWithCostPrev = stateCostPrevPtr;
@@ -144,8 +144,8 @@ pub fn shortestPath(
     return null;
 }
 
-const StrWithCost = WithCost([]const u8);
-fn graph_neighbors(
+pub const StrWithCost = WithCost([]const u8);
+pub fn graph_neighbors(
     g: std.StringHashMap(std.ArrayList([]const u8)),
     node: StrWithCost,
     out: *std.ArrayList(StrWithCost),

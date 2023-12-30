@@ -151,6 +151,15 @@ pub fn lcm(comptime V: type, nums: []const V) V {
     return prod / gcd;
 }
 
+pub fn indexOfStr(haystack: [][]const u8, needle: []const u8) ?usize {
+    for (haystack, 0..) |str, i| {
+        if (std.mem.eql(u8, str, needle)) {
+            return i;
+        }
+    }
+    return null;
+}
+
 const expect = std.testing.expect;
 const expectEqual = std.testing.expectEqual;
 const expectEqualDeep = std.testing.expectEqualDeep;

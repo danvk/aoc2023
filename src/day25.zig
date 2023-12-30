@@ -2,6 +2,7 @@ const std = @import("std");
 const bufIter = @import("./buf-iter.zig");
 const util = @import("./util.zig");
 const queue = @import("./queue.zig");
+const dijkstra = @import("./dijkstra.zig");
 
 const assert = std.debug.assert;
 
@@ -78,6 +79,49 @@ fn floodfill(seed: []const u8, conns: std.StringHashMap(std.ArrayList([]const u8
     }
 }
 
+const Graph = std.StringHashMap(std.ArrayList([]const u8));
+
+// this temporarily mutates g but returns it unaltered.
+fn countPaths(
+    g: *Graph,
+    from: []const u8,
+    to: []const u8,
+) !usize {
+    var allocator = g.allocator;
+    var maybePath = try dijkstra.shortestPath([]const u8, std.hash_map.StringContext, allocator, g.*, from, dijkstra.graph_neighbors, to);
+    if (maybePath) |path| {
+        defer allocator.free(path);
+        for (path[1..], 1..) |nodeCost2, j| {
+            const nodeCost1 = path[j - 1];
+            var a = nodeCost1.state;
+            var b = nodeCost2.state;
+            // Remove the edge from a -> b and b -> a
+            var an = g.getPtr(a).?;
+            var bi = util.indexOfStr(an.items, b).?;
+            _ = an.swapRemove(bi);
+            var bn = g.getPtr(b).?;
+            var ai = util.indexOfStr(bn.items, a).?;
+            _ = bn.swapRemove(ai);
+        }
+
+        var result = 1 + try countPaths(g, from, to);
+
+        // restore the snipped edges
+        for (path[1..], 1..) |nodeCost2, j| {
+            const nodeCost1 = path[j - 1];
+            var a = nodeCost1.state;
+            var b = nodeCost2.state;
+            var an = g.getPtr(a).?;
+            try an.append(b);
+            var bn = g.getPtr(b).?;
+            try bn.append(a);
+        }
+        return result;
+    } else {
+        return 0;
+    }
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -122,6 +166,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     std.mem.sort([]const u8, components.items, {}, compareStrings);
 
     std.debug.print("graph G {{\n", .{});
+    var isPrinting = components.items.len < 30;
     var connIt = conns.keyIterator();
     var connList = std.StringHashMap(std.ArrayList([]const u8)).init(allocator);
     defer connList.deinit();
@@ -139,13 +184,26 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         }
         try connList.getPtr(a).?.append(b);
         try connList.getPtr(b).?.append(a);
-        std.debug.print("  {s} -- {s}\n", .{ a, b });
+        if (isPrinting) {
+            std.debug.print("  {s} -- {s}\n", .{ a, b });
+        }
+    }
+    if (!isPrinting) {
+        std.debug.print("  ... # elided\n", .{});
     }
     std.debug.print("}}\n", .{});
 
-    const seed = components.items[0];
-    std.debug.print("flood fill from {s}\n", .{seed});
-    try floodfill(seed, connList);
+    var g = try connList.clone();
+    var n = try countPaths(&g, "jqt", "rsh");
+    std.debug.print("jqt -> rsh: {d}\n", .{n});
+
+    // g = try connList.clone();
+    n = try countPaths(&g, "jqt", "rhn");
+    std.debug.print("jqt -> rhn: {d}\n", .{n});
+
+    // const seed = components.items[0];
+    // std.debug.print("flood fill from {s}\n", .{seed});
+    // try floodfill(seed, connList);
 
     // const comps = components.items;
     // for (comps, 0..) |a, i| {

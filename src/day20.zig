@@ -76,15 +76,6 @@ fn setNexts(modules: *std.StringHashMap(Module)) !void {
     }
 }
 
-fn indexOfStr(haystack: [][]const u8, needle: []const u8) ?usize {
-    for (haystack, 0..) |str, i| {
-        if (std.mem.eql(u8, str, needle)) {
-            return i;
-        }
-    }
-    return null;
-}
-
 // fn printPulse(pulse: Pulse) void {
 //     std.debug.print("{s} -{s}-> {s}", .{ pulse.from, if (pulse.val == .low) "low" else "high", pulse.to });
 // }
