@@ -415,7 +415,28 @@ This gives:
     c = -23.5
     t_2 = 416908436535 + 612135863862 = 1029044300397
 
-That t_1 / t_2 worked! In retrospect I didn't even need to fit a line or figure out t_2 since I assumed that the velocity components added up to zero.
+That t_1 / t_2 worked! In retrospect I didn't even need to fit a line or figure out t_2 since I assumed that the velocity components added up to zero. The value for `b` can't be right (it should be an integer) but at least the value for `t_1` is good.
+
+In the end we have:
+
+px = 231279746486542
+py = 131907658181641
+pz = 195227847662645
+b = vx = 99
+c = vy = 240
+d = vz = 188
+
+So actually `vx + vy + vz != 0`! My assumption was wrong but still somehow led me to a correct solution.
+
+The intersection times for the three hailstones that were parallel in the xy-plane are:
+
+t1 = 612135863862
+t2 = 1029044300397
+t3 = 290621761088
+
+t2 - t1 = 416908436535
+t3 - t2 = -738422539309
+t3 - t1 = -321514102774
 
 In retrospect I'm curious why I dismissed the system-of-equations approach at the start. You start with six unknowns (position and velocity). As Jeremy said, each hailstone adds one unknown (the collision time) but introduces three constraints. So this should be determined with just three hailstones.
 
@@ -436,6 +457,48 @@ Here's what the system of equations looks like:
     130419194940021 + 411*t_2 = p_z + v_z*t_2
 
 So I guess it's not a _linear_ system of equations. I feel like Wolfram could solve this, but it's more than the max characters it will let you submit via the web form.
+
+My logic for concluding that `(vy - vx) | 3*47` holds up in light of the true values (in reality `vy - vx = 3 * 47 = 141`). Given the values that this implies for `t2 - t1` and `t3 - t2`, can I figure out the actual times using the z-coordinates?
+
+    p1z + t1 * v1z = pz + vz * t1
+    p2z + t2 * v2z = pz + vz * t2
+
+    p2z + (t1 + (t2 - t1)) * v2z = pz + vz * (t1 + (t2 - t1))
+    p3z + (t1 + (t3 - t1)) * v2z = pz + vz * (t1 + (t3 - t1))
+
+So in theory yes, but in practice these are nonlinear equations:
+
+    p1z +               t1*v1z = pz +              vz * t1
+    p2z + (t2-t1)*v2z + t1*v2z = pz + (t2-t1)*vz + vz * t1
+    p3z + (t3-t1)*v3z + t1*v3z = pz + (t3-t1)*vz + vz * t1
+
+    k1 = pz +              (vz - v1z) * t1
+    k2 = pz + (t2-t1)*vz + (vz - v2z) * t1
+    k3 = pz + (t3-t1)*vz + (vz - v3z) * t1
+
+    k1 = pz +            - v1z*t1 + vz*t1
+    k2 = pz + (t2-t1)*vz - v2z*t1 + vz*t1
+    k3 = pz + (t3-t1)*vz - v3z*t1 + vz*t1
+
+We know t2-t1, t3-t2, t3-t1, pXz and vXz, need to solve for `t1`, `vz` and `pz`. Or really just `t1`. Subtracting these equations gives:
+
+    k2 - k1 = (t2-t1)*vz + (v1z-v2z)*t1
+    k3 - k1 = (t3-t1)*vz + (v1z-v3z)*t1
+
+Since we know `t2-t1` and `t3-t1`, these are just linear equations for `t1` and `vz`.
+
+    (k2-k1)(t3-t1) = (t2-t1)(t3-t1)vz + (v1z-v2z)(t3-t1)t1
+    (k3-k1)(t2-t1) = (t2-t1)(t3-t1)vz + (v1z-v3z)(t2-t1)t1
+
+           (k2-k1)(t3-t1) - (k3-k1)(t2-t1)
+    t1 = -----------------------------------
+         (v1z-v2z)(t3-t1) - (v1z-v3z)(t2-t1)
+
+    k1 = p1z
+    k2 = p2z + (t2-t1)*v2z
+    k3 = p3z + (t3-t1)*v3z
+
+… this works perfectly (for both t1 and vz). So why did my approach from earlier with an incorrect assumption also work? I guess by shifting each equation the same amount it didn't change the collision time but did change the velocity? I still feel like I got lucky.
 
 ## Day 23 (8738 / 5426)
 
