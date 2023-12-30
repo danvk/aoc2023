@@ -27,59 +27,37 @@ fn areConnected(a: []const u8, b: []const u8, conns: std.StringHashMap(void)) bo
     return conns.contains(key);
 }
 
-fn floodfill(seed: []const u8, conns: std.StringHashMap(std.ArrayList([]const u8))) !void {
+const Graph = std.StringHashMap(std.ArrayList([]const u8));
+
+fn floodfill(seed: []const u8, conns: Graph) ![][]const u8 {
     var allocator = conns.allocator;
-    var counts = std.StringHashMap(usize).init(allocator);
-    defer counts.deinit();
+    var seen = std.StringHashMap(void).init(allocator);
+    defer seen.deinit();
 
-    var used = std.StringHashMap(void).init(allocator);
-    defer used.deinit();
-
-    var fringe = queue.Queue(Conn).init(allocator);
-    var seedConns = conns.get(seed).?;
-    for (seedConns.items) |next| {
-        // XXX use our own arena here?
-        // const keyBuf = try allocator.alloc(u8, 7);
-        // const left = seed;
-        // const right = next;
-        // var key = try std.fmt.bufPrint(keyBuf, "{s},{s}", .{ left, right });
-        // if (std.mem.order(u8, left, right) == .lt) .{ left, right } else .{ right, left }) catch unreachable;
-        try fringe.enqueue(Conn{ .from = seed, .to = next });
-    }
-
-    while (fringe.dequeue()) |conn| {
-        // var parts = util.splitOne(conn, ",").?;
-        var prev = conn.from;
-        var next = conn.to;
-
-        var keyBuf: [7]u8 = undefined;
-        var key = try std.fmt.bufPrint(&keyBuf, "{s},{s}", if (std.mem.order(u8, prev, next) == .lt) .{ prev, next } else .{ next, prev });
-        if (used.contains(key)) {
+    var fringe = queue.Queue([]const u8).init(allocator);
+    try fringe.enqueue(seed);
+    while (fringe.dequeue()) |n| {
+        if (seen.contains(n)) {
             continue;
         }
-        var keyDupe = try allocator.dupe(u8, key);
-        try used.put(keyDupe, undefined);
+        try seen.put(n, undefined);
 
-        try counts.put(next, (counts.get(next) orelse 0) + 1);
-        if (conns.get(next)) |nextConns| {
+        if (conns.get(n)) |nextConns| {
             for (nextConns.items) |nextNode| {
-                // const keyBufN = try allocator.alloc(u8, 7);
-                // var keyN = try std.fmt.bufPrint(keyBufN, "{s},{s}", .{ next, nextNode });
-                try fringe.enqueue(Conn{
-                    .from = next,
-                    .to = nextNode,
-                });
+                try fringe.enqueue(nextNode);
             }
         }
     }
 
-    var it = counts.iterator();
-    while (it.next()) |entry| {
-        std.debug.print("  {s} {d}\n", .{ entry.key_ptr.*, entry.value_ptr.* });
-    }
-}
+    var component = std.ArrayList([]const u8).init(allocator);
+    defer component.deinit();
 
-const Graph = std.StringHashMap(std.ArrayList([]const u8));
+    var it = seen.keyIterator();
+    while (it.next()) |k| {
+        try component.append(k.*);
+    }
+    return component.toOwnedSlice();
+}
 
 // this temporarily mutates g but returns it unaltered.
 fn countPaths(
@@ -122,6 +100,67 @@ fn countPaths(
     }
 }
 
+fn addEdge(g: *Graph, a: []const u8, b: []const u8) !void {
+    var an: *std.ArrayList([]const u8) = undefined;
+    if (g.getPtr(a)) |ap| {
+        an = ap;
+    } else {
+        try g.putNoClobber(a, std.ArrayList([]const u8).init(g.allocator));
+        an = g.getPtr(a).?; // XXX any more efficient way to do this?
+    }
+    if (util.indexOfStr(an.items, b) != null) {
+        return;
+    }
+    try an.append(b);
+
+    var bn: *std.ArrayList([]const u8) = undefined;
+    if (g.getPtr(b)) |bp| {
+        bn = bp;
+    } else {
+        try g.putNoClobber(b, std.ArrayList([]const u8).init(g.allocator));
+        bn = g.getPtr(b).?; // XXX any more efficient way to do this?
+    }
+    try bn.append(a);
+}
+
+fn countComponents(g: Graph) ![]usize {
+    var ally = g.allocator;
+    var seen = std.StringHashMap(void).init(ally);
+    defer seen.deinit();
+
+    var counts = std.ArrayList(usize).init(ally);
+    defer counts.deinit();
+
+    var nodes = std.ArrayList([]const u8).init(ally);
+    defer nodes.deinit();
+    var it = g.keyIterator();
+    while (it.next()) |n| {
+        try nodes.append(n.*);
+    }
+
+    for (nodes.items) |n| {
+        if (seen.contains(n)) {
+            continue;
+        }
+
+        var component = try floodfill(n, g);
+        defer ally.free(component);
+
+        std.debug.print("component: [", .{});
+        for (component) |c| {
+            std.debug.print(" {s}", .{c});
+        }
+        std.debug.print(" ]\n", .{});
+
+        try counts.append(component.len);
+        for (component) |c| {
+            try seen.put(c, undefined);
+        }
+    }
+
+    return counts.toOwnedSlice();
+}
+
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
@@ -146,12 +185,6 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
             const keyBuf = try allocator.alloc(u8, 7);
             var key = std.fmt.bufPrint(keyBuf, "{s},{s}", if (std.mem.order(u8, left, right) == .lt) .{ left, right } else .{ right, left }) catch unreachable;
             try conns.put(key, undefined);
-
-            // var key1 = try std.fmt.bufPrint(keyBuf1, "{s},{s}", .{ left, right });
-            // try conns.put(key1, undefined);
-            // const keyBuf2 = try allocator.alloc(u8, 7);
-            // var key2 = try std.fmt.bufPrint(keyBuf2, "{s},{s}", .{ right, left });
-            // try conns.put(key2, undefined);
 
             try componentsSet.put(left, undefined);
             try componentsSet.put(right, undefined);
@@ -193,17 +226,25 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     }
     std.debug.print("}}\n", .{});
 
-    var g = try connList.clone();
-    var n = try countPaths(&g, "jqt", "rsh");
-    std.debug.print("jqt -> rsh: {d}\n", .{n});
+    var connected = Graph.init(allocator);
+    defer connected.deinit();
+    connIt = conns.keyIterator();
+    while (connIt.next()) |conn| {
+        var partsBuf2: [2][]const u8 = undefined;
+        var parts = util.splitIntoBuf(conn.*, ",", &partsBuf2);
+        assert(parts.len == 2);
+        var a = parts[0];
+        var b = parts[1];
 
-    // g = try connList.clone();
-    n = try countPaths(&g, "jqt", "rhn");
-    std.debug.print("jqt -> rhn: {d}\n", .{n});
+        var n = try countPaths(&connList, a, b);
+        if (n > 3) {
+            try addEdge(&connected, a, b);
+            std.debug.print("{s} and {s} are in the same component\n", .{ a, b });
+        }
+    }
 
-    // const seed = components.items[0];
-    // std.debug.print("flood fill from {s}\n", .{seed});
-    // try floodfill(seed, connList);
+    const part2 = try countComponents(connected);
+    std.debug.print("part 2: {d}\n", .{part2});
 
     // const comps = components.items;
     // for (comps, 0..) |a, i| {
