@@ -6,7 +6,7 @@ I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C
 
 ## Day by day
 
-## Day 25 (8738 / 5426)
+### Day 25 (8738 / 5426)
 
 sample: 15 components / 33 connections
 input: 1453 components / 3236 connections
@@ -26,7 +26,7 @@ https://dreampuf.github.io/GraphvizOnline/#graph%20G%20%7B%0A%20%20bvb%20--%20xh
 
 A few days later I implemented a direct solution in a Jupyter notebook. My idea earlier about "4+ independent connections" was the right way to do it. I just had to allow more complex connections than A -- (x) -- B, which was annoying to do in Zig. My Python code wound up being pretty simple: for each edge, repeatedly find the shortest path between the two nodes and remove the edges along that path. If you wind up with 4+ connections, then they're in the same cluster. You can represent this by adding a connection between them in a separate graph, which eventually has two components. Maybe I should try to implement this in Zig for completeness.
 
-## Day 24 (7437 / 6407)
+### Day 24 (7437 / 6407)
 
 For part 2 I guess this is just a really big system of equations?
 
@@ -500,7 +500,7 @@ Since we know `t2-t1` and `t3-t1`, these are just linear equations for `t1` and 
 
 … this works perfectly (for both t1 and vz). So why did my approach from earlier with an incorrect assumption also work? I guess by shifting each equation the same amount it didn't change the collision time but did change the velocity? I still feel like I got lucky.
 
-## Day 23 (8738 / 5426)
+### Day 23 (8738 / 5426)
 
 Part 1: straightforward
 Part 2: The search is bogging down, there seem to be many different ways to reach the end state in the same number of steps.
@@ -523,7 +523,7 @@ Input: found 120 connections
 - ⭐️: 9:39 AM
 - ⭐️⭐️: 10:27 AM
 
-## Day 22 (7437 / 6407)
+### Day 22 (7437 / 6407)
 
 Pretty straightforward today! The one trick was to sort by bottom z before dropping. I had an off-by-one on my "brick intersection" code that slowed me down, and it took some head scratching to figure out exactly what they wanted me to compute at the end of part 1. I was about to implement the "chain reaction" code for part 2 before realizing it was just part 1! I looped over the bricks, disintegrating each one in turn and calling my `fall1` function to see how many would drop. A bit slow but definitely correct.
 
@@ -1086,6 +1086,12 @@ Nitty gritty questions:
 - Understanding that everything is passed by value and copied (including structs) was the key insight for understanding Zig. A slice is a struct with a len and a ptr, and these are copied when you assign to a slice. I think I had a similar insight about either Go or Rust in the past.
 - Hash maps are just hard to use in Zig since you have to think about who owns the keys.
 - It's interesting that structs can have private functions but not private fields. I guess this makes some sense since you have to be able to copy the bytes of a struct to use it.
+- There's no fundamental difference between closures and passing standalone functions + a context object. So why does Zig object to closures? Is this just a "nudge" away from using them?
+
+## Thoughts on this year's Advent of Code
+
+- This year was pretty hard. Definitely harder than the previous three years, probably on a par with 2019. Some of the early days were surprisingly hard/tricky, e.g. day 1, day 5, day 8, day 10, day 12. Then day 20, 21, and 24 were all challenging.
+- Some of the problem setup was a bit convoluted. I wonder how well AoC dealt with people using GPT to compete?
 
 ## References
 
