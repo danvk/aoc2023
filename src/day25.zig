@@ -6,12 +6,6 @@ const dijkstra = @import("./dijkstra.zig");
 
 const assert = std.debug.assert;
 
-// alternative with arena allocator:
-// pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
-//     var arena = std.heap.ArenaAllocator.init(in_allocator);
-//     defer arena.deinit();
-//     var allocator = arena.allocator();
-
 const Conn = struct {
     from: []const u8,
     to: []const u8,
@@ -21,14 +15,10 @@ fn compareStrings(_: void, lhs: []const u8, rhs: []const u8) bool {
     return std.mem.order(u8, lhs, rhs).compare(std.math.CompareOperator.lt);
 }
 
-fn areConnected(a: []const u8, b: []const u8, conns: std.StringHashMap(void)) bool {
-    var keyBuf: [7]u8 = undefined;
-    var key = std.fmt.bufPrint(&keyBuf, "{s},{s}", .{ a, b }) catch unreachable;
-    return conns.contains(key);
-}
-
 const Graph = std.StringHashMap(std.ArrayList([]const u8));
 
+// find all the nodes connected to the seed.
+// caller must free returned slice
 fn floodfill(seed: []const u8, conns: Graph) ![][]const u8 {
     var allocator = conns.allocator;
     var seen = std.StringHashMap(void).init(allocator);
@@ -247,45 +237,6 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     defer allocator.free(part2);
     std.debug.print("components: {any}\n", .{part2});
     std.debug.print("day 25: {d}\n", .{part2[0] * part2[1]});
-
-    // const comps = components.items;
-    // for (comps, 0..) |a, i| {
-    //     for (comps[(i + 1)..], (i + 1)..) |b, j| {
-    //         var numConns: usize = 0;
-    //         if (areConnected(a, b, conns)) {
-    //             numConns += 1;
-    //         }
-    //
-    //         for (comps, 0..) |c, k| {
-    //             if (k == i or k == j) {
-    //                 continue;
-    //             }
-    //             if (areConnected(a, c, conns) and areConnected(b, c, conns)) {
-    //                 numConns += 1;
-    //             }
-    //         }
-    //
-    //         if (numConns >= 4) {
-    //             std.debug.print("{s} and {s} are strongly connected ({d})\n", .{ a, b, numConns });
-    //         }
-    //     }
-    // }
-
-    // std.debug.print("{d} components:\n", .{components.items.len});
-    // for (components.items) |c| {
-    //     std.debug.print("  {s}\n", .{c});
-    // }
-    //
-    // std.debug.print("{d} connections\n", .{conns.count()});
-    // var kit = conns.keyIterator();
-    // while (kit.next()) |k| {
-    //     std.debug.print("  {s}\n", .{k.*});
-    // }
-
-    // Which components are only connected to one other?
-
-    // std.debug.print("part 1: {d}\n", .{sum1});
-    // std.debug.print("part 2: {d}\n", .{sum2});
 }
 
 const expectEqualDeep = std.testing.expectEqualDeep;
