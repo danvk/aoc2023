@@ -26,6 +26,8 @@ https://dreampuf.github.io/GraphvizOnline/#graph%20G%20%7B%0A%20%20bvb%20--%20xh
 
 A few days later I implemented a direct solution in a Jupyter notebook. My idea earlier about "4+ independent connections" was the right way to do it. I just had to allow more complex connections than A -- (x) -- B, which was annoying to do in Zig. My Python code wound up being pretty simple: for each edge, repeatedly find the shortest path between the two nodes and remove the edges along that path. If you wind up with 4+ connections, then they're in the same cluster. You can represent this by adding a connection between them in a separate graph, which eventually has two components. Maybe I should try to implement this in Zig for completeness.
 
+... a few days later: the same solution in Zig took many hours (as opposed to a few minutes) to implement, but mostly that's because I didn't have a graph library available to me. Maybe there's a Zig graph lib out there? Or maybe I should have built one up over the previous 49 problems. I am impressed that you can have a recursive generic type in Zig.
+
 ### Day 24 (7437 / 6407)
 
 For part 2 I guess this is just a really big system of equations?
