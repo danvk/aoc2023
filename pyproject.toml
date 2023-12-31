@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.10"
 jupyter = "^1.0.0"
 networkx = "^3.2.1"
+sympy = "^1.12"
 
 
 [build-system]

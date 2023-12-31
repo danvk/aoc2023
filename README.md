@@ -49,6 +49,8 @@ Looking at the z-coordinates for these three hailstones lets you determine the a
 
 Later I found a more direct, blunt solution: the hailstones in the input all have large positions but small velocities (each component has an absolute value less than 1000). So assume that's true for the thrown stone as well. Of course, it feels more safe to assume this when you know it's true! For each (vx, vy), you can use any two stones to figure out px, py, pz, vx, vy and vz. If these are all integers, use a third stone to check for another collision. Since you only need to scan in two dimensions, this winds up being very fast.
 
+Sympy is is able to solve the nine equations in nine unknowns that you get from three hailstones extremely quickly. So I guess that's another good solution.
+
 - Start: 11:00 AM?
 - ⭐️: 12:27 PM
 - ⭐️⭐️: 3:13 PM on 12/25
