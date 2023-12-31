@@ -502,6 +502,47 @@ Since we know `t2-t1` and `t3-t1`, these are just linear equations for `t1` and 
 
 … this works perfectly (for both t1 and vz). So why did my approach from earlier with an incorrect assumption also work? I guess by shifting each equation the same amount it didn't change the collision time but did change the velocity? I still feel like I got lucky.
 
+Another idea is to assume that vx/vy/vz are all small. If you assume that they're all less than 1000 (like the input) then that's only 8 billion possibilities to try. And each check should be very fast. … or maybe you can even check them independently?
+
+If you know vx, vy, vz, how do you figure out px, py, pz, t1, t2, t3?
+
+    p1z + v1z * t1 = pz + vz * t1
+    p1y + v1y * t1 = py + vy * t1
+    p2z + v2z * t2 = pz + vz * t2
+    p2y + v2y * t2 = py + vy * t2
+
+That's four equations, four variables, and it's linear. Can the hailstones that are parallel in the xy-plane simplify this? For those, v1x=v1y and v2x=v2y.
+
+    p1x + v1x * t1 = px + vx * t1
+    p1y + v1x * t1 = py + vy * t1
+    p2x + v2x * t2 = px + vx * t2
+    p2y + v2x * t2 = py + vy * t2
+
+    p1x = px + (vx - v1x) * t1
+    p1y = py + (vy - v1x) * t1
+    p2x = px + (vx - v2x) * t2
+    p2y = py + (vy - v2x) * t2
+
+    p2y - p1y = (vy - v2y) * t2 - (vy - v1y) * t1
+    p2x - p1x = (vx - v2x) * t2 - (vx - v1x) * t1
+
+This is two equations in two variables! This doesn't depend at all on the hailstones being parallel. Solving it gives:
+
+    (p2y-p1y)(vx-v1x) = (vy-v2y)(vx-v1x)t2 - (vx-v1x)(vy-v1y)t1
+    (p2x-p1x)(vy-v1y) = (vx-v2x)(vy-v1y)t2 - (vy-v1y)(vx-v1x)t1
+
+         (p2y-p1y)(vx-v1x) - (p2x-p1x)(vy-v1y)
+    t2 = -------------------------------------
+          (vy-v2y)(vx-v1x) - (vx-v2x)(vy-v1y)
+
+    t1 = ((vy - v2y)*t2 - (p2y - p1y)) / (vy - v1y)
+
+    px = p1x + (v1x - vx) * t1
+    py = p1y + (v1y - vy) * t1
+    pz = p1z + (v1z - vz) * t1
+
+If that's an integer and it also works for z, then it's probably correct.
+
 ### Day 23 (8738 / 5426)
 
 Part 1: straightforward
@@ -1076,6 +1117,12 @@ Also `std.mem.startsWith` is slightly simpler than `std.mem.eql` here.
 Nitty gritty questions:
 
 - Why is it `expectEqual(expected, actual)` when the other way around works so much better from a type inference perspective?
+
+It's annoying that you can't write something like:
+
+    for (-10..10) |vx| {}
+
+Since `for` and ranges must be `usize`.
 
 ## Observations
 
