@@ -47,7 +47,7 @@ Where (vx, vy, vz) is the velocity of the thrown stone and t1, t2 and t3 are the
 
 Looking at the z-coordinates for these three hailstones lets you determine the actual values of t1 and vz by solving two linear equations in two variables. This lets you calculate all the other variables. This only results in integer times for one of the eight possibilities, so this is the solution. (On 12/25 I followed a more roundabout path involving an incorrect assumption that still miraculously produced a correct collision time.)
 
-Later I found a more direct, blunt solution: the hailstones in the input all have large positions but small velocities (each component has an absolute value less than 1000). So assume that's true for the thrown stone as well. For each (vx, vy), you can use any two stones to figure out px, py, pz, vx, vy and vz. If these are all integers, use a third stone to check for another collision. Since you only need to scan in two dimensions, this winds up being very fast.
+Later I found a more direct, blunt solution: the hailstones in the input all have large positions but small velocities (each component has an absolute value less than 1000). So assume that's true for the thrown stone as well. Of course, it feels more safe to assume this when you know it's true! For each (vx, vy), you can use any two stones to figure out px, py, pz, vx, vy and vz. If these are all integers, use a third stone to check for another collision. Since you only need to scan in two dimensions, this winds up being very fast.
 
 - Start: 11:00 AM?
 - ⭐️: 12:27 PM
