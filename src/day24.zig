@@ -267,7 +267,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
                         const sz3 = s.p.z + t3 * s.v.z;
                         if (areClose(z3, sz3)) {
                             // std.debug.print("vx={d}, vy={d}: t1={d}/t2={d}: {any} {any}, p=({d},{d},{d})\n", .{ vx, vy, t1, t2, whereAt(s0, t1), whereAt(s1, t2), px, py, pz });
-                            std.debug.print("part 2: {d}\n", .{px + py + pz});
+                            std.debug.print("part 2: {d}\n", .{});
                         }
                     }
                 }
