@@ -131,7 +131,7 @@ pub fn shortestPath(
         var nextPrevs = try std.ArrayList(*StateWithCostPrev).initCapacity(in_allocator, nexts.items.len);
         defer nextPrevs.deinit();
         for (nexts.items) |next| {
-            var nextPrev = try allocator.create(StateWithCostPrev);
+            const nextPrev = try allocator.create(StateWithCostPrev);
             nextPrev.* = StateWithCostPrev{
                 .cost = next.cost,
                 .state = next.state,
@@ -172,7 +172,7 @@ test "shortest path" {
     try bn.append("D");
     try g.put("B", bn);
 
-    var path = try shortestPath([]const u8, std.hash_map.StringContext, std.testing.allocator, g, "A", graph_neighbors, "D");
+    const path = try shortestPath([]const u8, std.hash_map.StringContext, std.testing.allocator, g, "A", graph_neighbors, "D");
     std.debug.print("path: {any}\n", .{path});
 
     if (path) |valid_path| {
