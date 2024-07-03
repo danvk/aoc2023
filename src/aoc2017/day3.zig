@@ -35,7 +35,7 @@ fn part1(n: u32) u32 {
     }
     std.debug.print("{d} is at {d}, {d}\n", .{ i, x, y });
     // Will become @abs in Zig 0.12: https://github.com/ziglang/zig/issues/16026
-    return std.math.absCast(x) + std.math.absCast(y);
+    return @abs(x) + @abs(y);
 }
 
 const Point = struct { x: i32, y: i32 };
