@@ -42,7 +42,7 @@ pub fn readGrid(allocator: std.mem.Allocator, filename: []const u8, blankChar: ?
 pub fn printGrid(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, blankChar: ?u8) void {
     for (0..maxY + 1) |y| {
         for (0..maxX + 1) |x| {
-            var c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }) orelse blankChar orelse ' ';
+            const c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }) orelse blankChar orelse ' ';
             std.debug.print("{c}", .{c});
         }
         std.debug.print("\n", .{});
@@ -58,7 +58,7 @@ pub fn printGridFmt(comptime V: type, grid: std.AutoHashMap(Coord, V), topLeft: 
     while (y <= maxY) : (y += 1) {
         var x = minX;
         while (x <= maxX) : (x += 1) {
-            var c = fmt(grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }));
+            const c = fmt(grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }));
             std.debug.print("{c}", .{c});
         }
         std.debug.print("\n", .{});
@@ -110,7 +110,7 @@ pub fn rotCW(grid: *std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) !void 
 }
 
 test "rotate grid" {
-    var gr = try readGrid(std.testing.allocator, "day14/grid-test.txt", '.');
+    const gr = try readGrid(std.testing.allocator, "day14/grid-test.txt", '.');
     var grid = gr.grid;
     defer grid.deinit();
     std.debug.print("maxX: {d}, maxY: {d}\n", .{ gr.maxX, gr.maxY });

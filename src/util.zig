@@ -192,7 +192,7 @@ test "extractIntsIntoBuf" {
 
 test "splitAnyIntoBuf" {
     var buf: [5][]const u8 = undefined;
-    var parts = splitAnyIntoBuf("Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53", ":|", &buf);
+    const parts = splitAnyIntoBuf("Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53", ":|", &buf);
     try expectEqual(@as(usize, 3), parts.len);
     try expectEqualDeep(@as([]const u8, "Card 1"), parts[0]);
     try expectEqualDeep(@as([]const u8, " 41 48 83 86 17 "), parts[1]);

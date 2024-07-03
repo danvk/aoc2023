@@ -4,6 +4,11 @@ This time in Zig?
 
 I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C++) replacement.
 
+To run my code:
+
+    zig build
+    ./zig-out/bin/main day8 day8/input.txt
+
 ## Day by day
 
 ### Day 25 (8738 / 5426)
@@ -58,6 +63,7 @@ Sympy is is able to solve the nine equations in nine unknowns that you get from 
 ### Day 23 (8738 / 5426)
 
 Part 1: straightforward
+
 Part 2: The search is bogging down, there seem to be many different ways to reach the end state in the same number of steps.
 
 I'm at 2250 steps after ~5 minutes, and there are 9406 non-rock squares. But this seems to be getting slower (like a quadratic) so I'm not optimistic about it terminating.
@@ -125,13 +131,13 @@ So maybe I should detect when a tile is "full" and freeze it. That way I'm only 
 
 sample:
 
-13: day21.TileHash{ .hash = 17606044957879186035, .count = 42 }
-14: day21.TileHash{ .hash = 18010981749530968007, .count = 39 }
+    13: day21.TileHash{ .hash = 17606044957879186035, .count = 42 }
+    14: day21.TileHash{ .hash = 18010981749530968007, .count = 39 }
 
 input:
 
-128: day21.TileHash{ .hash = 3360108315240557322, .count = 7577 }
-129: day21.TileHash{ .hash = 7951923478988671822, .count = 7596 }
+    128: day21.TileHash{ .hash = 3360108315240557322, .count = 7577 }
+    129: day21.TileHash{ .hash = 7951923478988671822, .count = 7596 }
 
 This may _still_ be too slow. I also can't entirely remove frozen tiles from the calculation since they can still affect non-frozen tiles around them.
 
@@ -708,6 +714,23 @@ This is a trick for "slice by length" and allows more optimizations than `runtim
 
 A `packed struct` guarantees that a `u5` will use exactly 5 bits of memory, and a `bool` will use exactly 1.
 
+## Updating from Zig 0.11.0 to Zig 0.13.0
+
+Since I waited so long to do my writeup, I have two new versions of Zig to install.
+
+https://ziglang.org/download/0.12.0/release-notes.html#Redesign-How-Autodoc-Works
+https://ziglang.org/download/0.13.0/release-notes.html
+
+- I updated Zig with `brew upgrade zig`
+- I had to update ZLS in VS Code via "Zig Language Server: Check for Server Updates"
+- I had to change `.{ .path = "..." }` to `b.path("...")` in a few places in `build.zig`
+- I got reams of "local variable is never mutated, consider using 'const'" errors
+  - 238 total errors
+  - It seems Zig would like me to do more than "consider" this.
+  - It's frustrating that there's no "Fix All" with ZLS. I have to do these all one-by-one, and it's already hung at least once.
+- Change `@fabs` and `std.math.absCast` → `@abs`
+- Change `std.fs.File.Writer` → `anytype` for `pub fn format` printer functions
+
 ## Warmup
 
 Following:
@@ -794,4 +817,4 @@ Questions:
 
 ## Advent of Code 2017
 
-I also did all the 2017 AoC problems as a warmup. See [aoc2017/README.md] for my notes on them.
+I also did all the 2017 AoC problems as a warmup. See [aoc2017/README.md](/aoc2017/README.md) for my notes on them.

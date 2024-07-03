@@ -21,13 +21,13 @@ const TuringMachine = struct {
 };
 
 fn parseInstruction(lines: [][]const u8) !Instruction {
-    var line = lines[0];
+    const line = lines[0];
     assert(std.mem.startsWith(u8, line, "    - Write the value "));
-    var writeChar = line[line.len - 2];
+    const writeChar = line[line.len - 2];
     assert(writeChar == '0' or writeChar == '1');
-    var write = try std.fmt.charToDigit(writeChar, 10);
+    const write = try std.fmt.charToDigit(writeChar, 10);
 
-    var moveLine = lines[1];
+    const moveLine = lines[1];
     var move: i8 = 1;
     if (std.mem.endsWith(u8, moveLine, "to the left.")) {
         move = -1;
@@ -37,9 +37,9 @@ fn parseInstruction(lines: [][]const u8) !Instruction {
         unreachable;
     }
 
-    var stateLine = lines[2];
+    const stateLine = lines[2];
     assert(std.mem.startsWith(u8, stateLine, "    - Continue with state"));
-    var state = stateLine[stateLine.len - 2];
+    const state = stateLine[stateLine.len - 2];
     assert(state >= 'A');
     assert(state <= 'Z');
 
@@ -57,28 +57,28 @@ fn parseState(lines: [][]const u8) !struct { State, [][]const u8 } {
     var line = rest[0];
     assert(std.mem.endsWith(u8, line, "0:"));
     rest = rest[1..];
-    var instr0 = try parseInstruction(rest);
+    const instr0 = try parseInstruction(rest);
     rest = rest[3..];
 
     line = rest[0];
     assert(std.mem.endsWith(u8, line, "1:"));
     rest = rest[1..];
-    var instr1 = try parseInstruction(rest);
+    const instr1 = try parseInstruction(rest);
     rest = rest[3..];
 
     return .{ State{ .state = state, .instr = .{ instr0, instr1 } }, rest };
 }
 
 fn parseInput(allocator: std.mem.Allocator, lines: [][]const u8) !TuringMachine {
-    var beginLine = lines[0];
+    const beginLine = lines[0];
     assert(std.mem.startsWith(u8, beginLine, "Begin in state A."));
 
-    var diagnosticLine = lines[1];
+    const diagnosticLine = lines[1];
     assert(std.mem.startsWith(u8, diagnosticLine, "Perform a diagnostic checksum after "));
     var diagBuf: [1]usize = undefined;
-    var diag = try util.extractIntsIntoBuf(usize, diagnosticLine, &diagBuf);
+    const diag = try util.extractIntsIntoBuf(usize, diagnosticLine, &diagBuf);
     assert(diag.len == 1);
-    var diagnosticSteps = diag[0];
+    const diagnosticSteps = diag[0];
 
     var states = std.ArrayList(State).init(allocator);
 
@@ -86,7 +86,7 @@ fn parseInput(allocator: std.mem.Allocator, lines: [][]const u8) !TuringMachine 
     while (rest.len > 0) {
         assert(rest[0].len == 0);
         rest = rest[1..];
-        var pair = try parseState(rest);
+        const pair = try parseState(rest);
         try states.append(pair[0]);
         std.debug.print("state: {any}\n", .{pair[0]});
         rest = pair[1];
@@ -105,8 +105,8 @@ fn execute(allocator: std.mem.Allocator, machine: TuringMachine) !usize {
     var pos: i128 = 0;
     var state = machine.startState;
     for (0..machine.diagnosticSteps) |_| {
-        var val = regs.get(pos) orelse 0;
-        var instr = machine.states[state - 'A'].instr[val];
+        const val = regs.get(pos) orelse 0;
+        const instr = machine.states[state - 'A'].instr[val];
         try regs.put(pos, instr.write);
         pos += instr.move;
         state = instr.nextState;
@@ -125,14 +125,14 @@ fn execute(allocator: std.mem.Allocator, machine: TuringMachine) !usize {
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
     defer arena.deinit();
-    var allocator = arena.allocator();
+    const allocator = arena.allocator();
     const filename = args[0];
 
-    var contents = try util.readInputFile(allocator, filename);
+    const contents = try util.readInputFile(allocator, filename);
     var lines = std.ArrayList([]const u8).init(allocator);
     try util.splitIntoArrayList(contents, "\n", &lines);
 
-    var machine = try parseInput(allocator, lines.items);
+    const machine = try parseInput(allocator, lines.items);
     std.debug.print("machine: {any}\n", .{machine});
 
     std.debug.print("part 1: {d}\n", .{try execute(allocator, machine)});

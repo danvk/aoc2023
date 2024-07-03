@@ -36,9 +36,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         defer nums.deinit();
         try util.readInts(u32, line, &nums);
 
-        const min_max = std.mem.minMax(u32, nums.items);
-        const min = min_max.min;
-        const max = min_max.max;
+        const min, const max = std.mem.minMax(u32, nums.items);
         const diff = max - min;
         // std.debug.print("{d} - {d} = {d}\n", .{ min, max, diff });
         sum += diff;

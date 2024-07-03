@@ -3,7 +3,7 @@ const std = @import("std");
 fn part1(line: []u8) u32 {
     var sum: u32 = 0;
     for (line, 0..) |a, i| {
-        var b = if (i == line.len - 1) line[0] else line[i + 1];
+        const b = if (i == line.len - 1) line[0] else line[i + 1];
         if (a == b) {
             // std.debug.print("{d} sum += {d}\n", .{ i, a });
             sum += (a - '0');
@@ -15,8 +15,8 @@ fn part1(line: []u8) u32 {
 fn part2(line: []u8) u32 {
     var sum: u32 = 0;
     for (line, 0..) |a, i| {
-        var j = (i + (line.len >> 1)) % line.len;
-        var b = line[j];
+        const j = (i + (line.len >> 1)) % line.len;
+        const b = line[j];
         if (a == b) {
             // std.debug.print("{d} sum += {d}\n", .{ i, a });
             sum += (a - '0');
@@ -34,7 +34,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var file = try std.fs.cwd().openFile(filename, .{});
     defer file.close();
 
-    var reader = file.reader();
+    const reader = file.reader();
     var buf_reader = std.io.bufferedReader(reader);
     var in_stream = buf_reader.reader();
     var buf: [4096]u8 = undefined;

@@ -80,15 +80,15 @@ fn part2(allocator: std.mem.Allocator, start: Coord, step1: Coord, grid: std.Aut
     var lastNode = start;
     var pos = step1;
     while (true) {
-        var tile = grid.get(pos).?;
+        const tile = grid.get(pos).?;
         if (tile == Tile.S) {
             break; // completed the loop
         }
 
-        var moves = neighborsForTile(tile);
-        var a = moves[0];
-        var b = moves[1];
-        var interiorDirs = rhsForMove(tile);
+        const moves = neighborsForTile(tile);
+        const a = moves[0];
+        const b = moves[1];
+        const interiorDirs = rhsForMove(tile);
         var interiorDir: ?Dir = null;
         var diagIntDirs: ?struct { Dir, Dir } = null;
         if (std.meta.eql(pos.move(a), lastNode)) {
@@ -121,7 +121,7 @@ fn part2(allocator: std.mem.Allocator, start: Coord, step1: Coord, grid: std.Aut
             std.debug.print("{any} diagonal candidates: {any}\n", .{ lastNode, diags });
         }
         for (candidates.items) |id| {
-            var p = lastNode.move(id);
+            const p = lastNode.move(id);
             if (!ds.contains(p)) {
                 try fringeSet.put(p, undefined);
                 std.debug.print("{any} added to fringe: {any}\n", .{ lastNode, p });
@@ -170,8 +170,8 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     while (try iter.next()) |line| {
         w = line.len;
         for (line, 0..) |c, i| {
-            var tile = std.meta.stringToEnum(Tile, &[_]u8{c}).?;
-            var coord = Coord{ .x = @intCast(i), .y = y };
+            const tile = std.meta.stringToEnum(Tile, &[_]u8{c}).?;
+            const coord = Coord{ .x = @intCast(i), .y = y };
 
             if (tile == Tile.@".") {
                 continue;
@@ -189,9 +189,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     defer starts.deinit();
     for (dirMod.DIRS) |dir| {
         var c = start.move(dir);
-        var maybeTile = grid.get(c);
+        const maybeTile = grid.get(c);
         if (maybeTile) |tile| {
-            var moves = neighborsForTile(tile);
+            const moves = neighborsForTile(tile);
             if (std.meta.eql(c.move(moves[0]), start) or std.meta.eql(c.move(moves[1]), start)) {
                 try starts.append(c);
             }
@@ -205,7 +205,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     defer ds.deinit();
     try ds.put(start, 0);
 
-    var maxSteps: usize = 0;
+    const maxSteps: usize = 0;
     _ = maxSteps;
     for (starts.items) |step1| {
         var numSteps: usize = 0;
@@ -213,10 +213,10 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         var pos = step1;
         while (true) {
             numSteps += 1;
-            var tile = grid.get(pos).?;
+            const tile = grid.get(pos).?;
 
             // std.debug.print("{any} {any}\n", .{ pos, tile });
-            var prev = ds.get(pos) orelse 1_000_000;
+            const prev = ds.get(pos) orelse 1_000_000;
             if (numSteps < prev) {
                 try ds.put(pos, numSteps);
             }
@@ -224,9 +224,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
                 break; // completed the loop
             }
 
-            var moves = neighborsForTile(tile);
-            var a = moves[0];
-            var b = moves[1];
+            const moves = neighborsForTile(tile);
+            const a = moves[0];
+            const b = moves[1];
             if (std.meta.eql(pos.move(a), lastNode)) {
                 lastNode = pos;
                 pos = pos.move(b);
@@ -250,13 +250,13 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         var numBars: usize = 0;
         var prevCorner: ?Tile = null;
         for (0..w) |x| {
-            var c = Coord{ .x = @intCast(x), .y = @intCast(yc) };
+            const c = Coord{ .x = @intCast(x), .y = @intCast(yc) };
             if (!ds.contains(c)) {
                 if (numBars % 2 == 1) {
                     part2alt += 1;
                 }
             } else {
-                var tile = grid.get(c).?;
+                const tile = grid.get(c).?;
                 if (tile == Tile.@"|") {
                     numBars += 1;
                 } else if (tile == Tile.J and prevCorner == Tile.F) {

@@ -51,7 +51,7 @@ pub const Coord = struct {
         };
     }
 
-    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "({d}, {d})", .{ self.x, self.y });

@@ -46,8 +46,8 @@ const Cell = struct {
     }
 
     pub fn distFromOrigin(self: Cell) u32 {
-        const dy = std.math.absCast(self.y);
-        const dx = std.math.absCast(self.x);
+        const dy = @abs(self.y);
+        const dx = @abs(self.x);
         if (self.x == 0) {
             // std.debug.print(".x=0 -> {d}\n", .{dy});
             return dy;

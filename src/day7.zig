@@ -110,7 +110,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     var iter = try bufIter.iterLines(filename);
     while (try iter.next()) |line| {
-        var parts = util.splitOne(line, " ").?;
+        const parts = util.splitOne(line, " ").?;
         var hand: Hand = undefined;
         @memcpy(&hand, parts.head);
         const bid = try std.fmt.parseInt(u32, parts.rest, 10);
@@ -142,8 +142,8 @@ test "hand rank" {
 }
 
 test "ordering" {
-    var a = [_]u8{ 'K', 'K', '6', '7', '7' };
-    var b = [_]u8{ 'K', 'T', 'J', 'J', 'T' };
+    const a = [_]u8{ 'K', 'K', '6', '7', '7' };
+    const b = [_]u8{ 'K', 'T', 'J', 'J', 'T' };
     try expect(handLessThan(b, a));
     try expect(!handLessThan(a, b));
 }

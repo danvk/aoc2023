@@ -20,10 +20,10 @@ fn findMirrorY(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, exclu
         var isMatch = true;
         for (0..maxY + 1) |y| {
             for (0..maxX + 1) |x| {
-                var c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }).?;
-                var my: i32 = mirrorY + 1 + (mirrorY - @as(i32, @intCast(y)));
+                const c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }).?;
+                const my: i32 = mirrorY + 1 + (mirrorY - @as(i32, @intCast(y)));
 
-                var other = grid.get(Coord{ .x = @intCast(x), .y = my }) orelse c;
+                const other = grid.get(Coord{ .x = @intCast(x), .y = my }) orelse c;
                 if (other != c) {
                     isMatch = false;
                 }
@@ -45,10 +45,10 @@ fn findMirrorX(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, exclu
         var isMatch = true;
         for (0..maxY + 1) |y| {
             for (0..maxX + 1) |x| {
-                var c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }).?;
-                var mx: i32 = mirrorX + 1 + (mirrorX - @as(i32, @intCast(x)));
+                const c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }).?;
+                const mx: i32 = mirrorX + 1 + (mirrorX - @as(i32, @intCast(x)));
 
-                var other = grid.get(Coord{ .x = mx, .y = @intCast(y) }) orelse c;
+                const other = grid.get(Coord{ .x = mx, .y = @intCast(y) }) orelse c;
                 if (other != c) {
                     isMatch = false;
                 }
@@ -67,7 +67,7 @@ fn transpose(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, out: *s
         const yi: i32 = @intCast(y);
         for (0..maxX + 1) |x| {
             const xi: i32 = @intCast(x);
-            var mc = grid.get(Coord{ .x = xi, .y = yi });
+            const mc = grid.get(Coord{ .x = xi, .y = yi });
             if (mc) |c| {
                 try out.put(Coord{ .x = yi, .y = xi }, c);
             }
@@ -78,7 +78,7 @@ fn transpose(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize, out: *s
 fn printGrid(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) void {
     for (0..maxY + 1) |y| {
         for (0..maxX + 1) |x| {
-            var c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }) orelse ' ';
+            const c = grid.get(Coord{ .x = @intCast(x), .y = @intCast(y) }) orelse ' ';
             std.debug.print("{c}", .{c});
         }
         std.debug.print("\n", .{});
@@ -115,10 +115,10 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
             // std.debug.print("{s}\n", .{line});
         }
 
-        var rawMirrorX = findMirrorX(grid, maxX, maxY, null);
-        var rawMirrorY = findMirrorY(grid, maxX, maxY, null);
+        const rawMirrorX = findMirrorX(grid, maxX, maxY, null);
+        const rawMirrorY = findMirrorY(grid, maxX, maxY, null);
         try transpose(grid, maxX, maxY, &trans);
-        var reMirrorY = findMirrorX(trans, maxY, maxX, null);
+        const reMirrorY = findMirrorX(trans, maxY, maxX, null);
         assert(rawMirrorY == reMirrorY);
         assert((rawMirrorX == null) != (rawMirrorY == null));
         const count1: i32 = 100 * (rawMirrorY orelse 0) + (rawMirrorX orelse 0);
@@ -134,8 +134,8 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
                 const k = Coord{ .x = @intCast(xi), .y = @intCast(yi) };
                 const c = grid.get(k).?;
                 try grid.put(k, if (c == '#') '.' else '#');
-                var mirrorX = findMirrorX(grid, maxX, maxY, rawMirrorX);
-                var mirrorY = findMirrorY(grid, maxX, maxY, rawMirrorY);
+                const mirrorX = findMirrorX(grid, maxX, maxY, rawMirrorX);
+                const mirrorY = findMirrorY(grid, maxX, maxY, rawMirrorY);
                 var count2: i32 = 100 * (mirrorY orelse 0) + (mirrorX orelse 0);
                 std.debug.print("set {any} was {c} -> {?d}/{?d} {d}\n", .{ k, c, mirrorX, mirrorY, count2 });
                 // printGrid(grid, maxX, maxY);

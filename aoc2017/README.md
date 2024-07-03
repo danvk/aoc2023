@@ -252,6 +252,7 @@ Fortunately there's a cycle after only 30 dances.
 
 Circular linked lists, always annoying!
 
+```
 {
     day17.Value{ .num = 0, .next = 5 },
     day17.Value{ .num = 1, .next = 0 },
@@ -262,9 +263,11 @@ Circular linked lists, always annoying!
     day17.Value{ .num = 6, .next = 1 },
     day17.Value{ .num = 7, .next = 2 }
 }
+```
 
 inserting 8 after 3: day17.Value{ .num = 3, .next = 6 }
 
+```
 {
     day17.Value{ .num = 0, .next = 5 },
     day17.Value{ .num = 1, .next = 0 },
@@ -276,6 +279,7 @@ inserting 8 after 3: day17.Value{ .num = 3, .next = 6 }
     day17.Value{ .num = 7, .next = 2 },
     day17.Value{ .num = 8, .next = 6 }
 }
+```
 
 This makes a big difference:
 

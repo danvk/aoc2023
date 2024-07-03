@@ -14,13 +14,13 @@ fn pointsForMatches(matches: u32) u32 {
 // "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53"
 fn pointsForLine(line: []const u8) !u32 {
     var buf: [3][]const u8 = undefined;
-    var parts = util.splitAnyIntoBuf(line, ":|", &buf);
+    const parts = util.splitAnyIntoBuf(line, ":|", &buf);
     assert(parts.len == 3);
 
     var intBuf: [50]u8 = undefined;
     var intBuf2: [50]u8 = undefined;
-    var winners = try util.extractIntsIntoBuf(u8, parts[1], &intBuf);
-    var nums = try util.extractIntsIntoBuf(u8, parts[2], &intBuf2);
+    const winners = try util.extractIntsIntoBuf(u8, parts[1], &intBuf);
+    const nums = try util.extractIntsIntoBuf(u8, parts[2], &intBuf2);
 
     var matches: u32 = 0;
     for (nums) |num| {

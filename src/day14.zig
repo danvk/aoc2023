@@ -20,7 +20,7 @@ pub fn shiftUp(grid: *std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) !voi
         for (0..(1 + maxY)) |yu| {
             // If relevant, roll this rock as far up as it will go.
             // Important to start from the top and work down.
-            var y: i32 = @intCast(yu);
+            const y: i32 = @intCast(yu);
             const init = Coord{ .x = x, .y = y };
             if (grid.get(init) orelse '.' != 'O') {
                 continue;
@@ -48,7 +48,7 @@ pub fn weight(grid: std.AutoHashMap(Coord, u8), maxX: usize, maxY: usize) i32 {
         for (0..(1 + maxY)) |yu| {
             // If relevant, roll this rock as far up as it will go.
             // Important to start from the top and work down.
-            var y: i32 = @intCast(yu);
+            const y: i32 = @intCast(yu);
             const k = Coord{ .x = x, .y = y };
             if (grid.get(k) == 'O') {
                 const count = @as(i32, @intCast(maxY)) + 1 - y;
@@ -73,7 +73,7 @@ fn spin(grid: *std.AutoHashMap(Coord, u8), dim: usize) !void {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var gridResult = try readGrid(allocator, filename, 'x');
+    const gridResult = try readGrid(allocator, filename, 'x');
     var grid = gridResult.grid;
     defer grid.deinit();
     const maxX = gridResult.maxX;

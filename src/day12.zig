@@ -36,12 +36,12 @@ fn matches(pat: []const u8, expected: []u8) bool {
 }
 
 fn numMatching(pat: []const u8, nums: []u8) u32 {
-    var n = std.mem.count(u8, pat, "?");
+    const n = std.mem.count(u8, pat, "?");
     var count: u32 = 0;
     var buf: [100]u8 = undefined;
 
     std.debug.print("{s} {any}\n", .{ pat, nums });
-    var num: u32 = @as(u32, 1) << @intCast(n);
+    const num: u32 = @as(u32, 1) << @intCast(n);
     for (0..num) |x| {
         var y = x;
         @memcpy(buf[0..pat.len], pat);
@@ -71,7 +71,7 @@ fn lookupMemo(pat: []const u8, nums: []u8) ?u64 {
     var buf: [1000]u8 = undefined;
     @memcpy(buf[0..], pat);
     @memcpy(buf[pat.len], nums);
-    var key = buf[0..(pat.len + nums.len)];
+    const key = buf[0..(pat.len + nums.len)];
     return memo.get(key);
 }
 
@@ -79,7 +79,7 @@ fn setMemo(pat: []const u8, nums: []u8, count: u64) !void {
     var buf: [1000]u8 = undefined;
     @memcpy(buf[0..], pat);
     @memcpy(buf[pat.len], nums);
-    var key = buf[0..(pat.len + nums.len)];
+    const key = buf[0..(pat.len + nums.len)];
     try memo.put(key, count); // <-- this won't work since buf is freed.
 }
 
@@ -153,7 +153,7 @@ fn numMatchRec(pat: []const u8, nums: []u8) u64 {
     if (c == '#' or c == '?') {
         // match nums[0] #s here.
         const n = nums[0];
-        var ok = true;
+        const ok = true;
         _ = ok;
         if (pat.len < n) {
             return count;
@@ -202,9 +202,9 @@ fn numMatchSplit(pat: []const u8, nums: []u8) u64 {
         return numMatchRec(pat, nums);
     }
 
-    var splitI = nums.len / 2;
-    var nums1 = nums[0..splitI];
-    var nums2 = nums[splitI..];
+    const splitI = nums.len / 2;
+    const nums1 = nums[0..splitI];
+    const nums2 = nums[splitI..];
     assert(nums1.len > 0);
     assert(nums2.len > 0);
     // std.debug.print("split {any} -> {any} / {any}\n", .{ nums, nums1, nums2 });
@@ -224,7 +224,7 @@ fn numMatchSplit(pat: []const u8, nums: []u8) u64 {
     var count: u64 = 0;
     var rightBuf: [1000]u8 = undefined;
     for (minLen1..(pat.len - minLen2 + 1)) |i| {
-        var c = pat[i];
+        const c = pat[i];
         if (c == '#') {
             // must be a '.' or '?' in between the splits.
             continue;
@@ -278,17 +278,17 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var timer = try std.time.Timer.start();
 
     while (try iter.next()) |line| {
-        var n = std.mem.count(u8, line, "?");
+        const n = std.mem.count(u8, line, "?");
         maxQ = @max(maxQ, n);
 
-        var parts = util.splitOne(line, " ").?;
+        const parts = util.splitOne(line, " ").?;
         var nums = try util.extractIntsIntoBuf(u8, parts.rest, &intBuf);
-        var pat = parts.head;
+        const pat = parts.head;
         std.debug.print("{d} {s} {d} {d}\n", .{ numLines, pat, n, nums.len });
         // const count = numMatching(pat, nums);
         // sum += count;
         // std.debug.print(" -> {d}\n", .{count});
-        var count = numMatchRec(pat, nums);
+        const count = numMatchRec(pat, nums);
         std.debug.print(" -> {d}\n", .{count});
         // assert(count == count2);
         sum += count;
@@ -303,9 +303,9 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         nums = intBuf[0..numNums];
 
         var unfoldBuf: [1000]u8 = undefined;
-        var unfolded = unfold(pat, &unfoldBuf);
+        const unfolded = unfold(pat, &unfoldBuf);
         std.debug.print(" -> {s} {any}\n", .{ unfolded, nums });
-        var count2 = numMatchRec(unfolded, nums);
+        const count2 = numMatchRec(unfolded, nums);
         // var count3 = numMatchSplit(unfolded, nums);
         sum2 += count2;
         numLines += 1;

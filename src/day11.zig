@@ -84,7 +84,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var part1: u64 = 0;
     for (galaxies.items, 0..) |g1, i| {
         for (galaxies.items[(i + 1)..], (i + 1)..) |g2, j| {
-            var d = std.math.absCast(g1.x - g2.x) + std.math.absCast(g1.y - g2.y);
+            const d = @abs(g1.x - g2.x) + @abs(g1.y - g2.y);
             std.debug.print("{d} -> {d}: {d}\n", .{ i + 1, j + 1, d });
             part1 += d;
         }

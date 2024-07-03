@@ -16,7 +16,7 @@ const Coord3 = struct {
         return Coord3{ .x = self.x, .y = self.y, .z = self.z - 1 };
     }
 
-    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "{d},{d},{d}", .{ self.x, self.y, self.z });
@@ -32,7 +32,7 @@ const Brick = struct {
     a: Coord3,
     b: Coord3,
 
-    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "{c}: {any}~{any}", .{ self.name, self.a, self.b });
@@ -91,7 +91,7 @@ fn findSupports(bricks: std.ArrayList(Brick)) !usize {
     defer supports.deinit();
 
     for (bricks.items, 0..) |*brick, i| {
-        var z = brick.bottom();
+        const z = brick.bottom();
         if (z == 1) {
             std.debug.print("Brick {c} is on the ground\n", .{brick.name});
             continue; // already resting on the ground
@@ -154,7 +154,7 @@ fn chainReaction(allocator: std.mem.Allocator, bricks: []Brick, i: usize) !usize
     for (i..(bricks.len - 1)) |j| {
         copyBuf[j] = copyBuf[j + 1];
     }
-    var copy = copyBuf[0..(bricks.len - 1)];
+    const copy = copyBuf[0..(bricks.len - 1)];
     return fall1(copy);
 }
 
@@ -162,7 +162,7 @@ fn fall1(bricks: []Brick) usize {
     var numMoved: usize = 0;
     std.mem.sort(Brick, bricks, {}, sortByBottom);
     for (bricks, 0..) |*brick, i| {
-        var z = brick.bottom();
+        const z = brick.bottom();
         if (z == 1) {
             // std.debug.print("Brick {c} is on the ground\n", .{brick.name});
             continue; // already resting on the ground
@@ -199,12 +199,12 @@ fn fall(bricks: *std.ArrayList(Brick)) void {
 }
 
 fn parseBrick(line: []const u8, i: usize) !Brick {
-    var name: u8 = if (i >= 26) 'Z' else 'A' + @as(u8, @intCast(i));
+    const name: u8 = if (i >= 26) 'Z' else 'A' + @as(u8, @intCast(i));
     var intBuf: [6]i32 = undefined;
-    var ints = try util.extractIntsIntoBuf(i32, line, &intBuf);
-    var a = Coord3{ .x = ints[0], .y = ints[1], .z = ints[2] };
-    var b = Coord3{ .x = ints[3], .y = ints[4], .z = ints[5] };
-    var brick = Brick{ .a = a, .b = b, .name = name };
+    const ints = try util.extractIntsIntoBuf(i32, line, &intBuf);
+    const a = Coord3{ .x = ints[0], .y = ints[1], .z = ints[2] };
+    const b = Coord3{ .x = ints[3], .y = ints[4], .z = ints[5] };
+    const brick = Brick{ .a = a, .b = b, .name = name };
 
     assert(brick.a.x <= brick.b.x);
     assert(brick.a.y <= brick.b.y);
@@ -232,7 +232,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
         std.debug.print("{any}\n", .{brick});
     }
     std.debug.print("---\n", .{});
-    var sum1 = try findSupports(bricks);
+    const sum1 = try findSupports(bricks);
 
     std.debug.print("part 2: {d}\n", .{sum1});
     // std.debug.print("part 2: {d}\n", .{sum2});

@@ -151,7 +151,7 @@ fn execute1(instr: Instruction, state: *State1) void {
 }
 
 fn part1(instructions: []Instruction) i128 {
-    var regs = std.mem.zeroes([26]i128);
+    const regs = std.mem.zeroes([26]i128);
     var state = State1{
         .pos = 0,
         .regs = regs,
@@ -251,8 +251,8 @@ fn executeUntilStallOrDone(state: *State2, instructions: []Instruction, otherSta
 
 fn part2(allocator: std.mem.Allocator, instructions: []Instruction) !usize {
     const n = instructions.len;
-    var regs0 = std.mem.zeroes([26]i128);
-    var regs1 = std.mem.zeroes([26]i128);
+    const regs0 = std.mem.zeroes([26]i128);
+    const regs1 = std.mem.zeroes([26]i128);
     var state0 = State2{
         .pos = 0,
         .regs = regs0,

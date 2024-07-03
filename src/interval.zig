@@ -11,8 +11,8 @@ pub fn Interval(comptime IntType: type) type {
         }
 
         pub fn intersection(self: @This(), other: @This()) ?@This() {
-            var low = @max(self.low, other.low);
-            var high = @min(self.high, other.high);
+            const low = @max(self.low, other.low);
+            const high = @min(self.high, other.high);
             return if (low < high) @This(){ .low = low, .high = high } else null;
         }
 

@@ -14,7 +14,7 @@ pub fn reverse(nums: []u8, pos: usize, len: usize) void {
     while (a < b) {
         const ai = a % nums.len;
         const bi = b % nums.len;
-        var t = nums[ai];
+        const t = nums[ai];
         nums[ai] = nums[bi];
         nums[bi] = t;
         a += 1;
@@ -37,7 +37,7 @@ pub fn hashOnce(nums: []u8, len: usize, state: State) State {
 }
 
 pub fn hash(nums: []u8, lengths: []const u8) void {
-    var state = State{ .pos = 0, .skip = 0 };
+    const state = State{ .pos = 0, .skip = 0 };
     _ = hashWithState(nums, lengths, state);
 }
 

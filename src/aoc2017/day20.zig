@@ -37,7 +37,7 @@ const Particle = struct {
 
 fn parseVec3(buf: []const u8) !Vec3 {
     var intBuf: [3]i64 = undefined;
-    var ints = try util.extractIntsIntoBuf(i64, buf, &intBuf);
+    const ints = try util.extractIntsIntoBuf(i64, buf, &intBuf);
     assert(ints.len == 3);
 
     return Vec3{ .x = ints[0], .y = ints[1], .z = ints[2] };
@@ -68,7 +68,7 @@ fn tick(allocator: std.mem.Allocator, particlesList: *std.ArrayList(Particle)) !
     defer coords.deinit();
     var toRemove = std.ArrayList(usize).init(allocator);
     defer toRemove.deinit();
-    var particles = particlesList.items;
+    const particles = particlesList.items;
     for (particles) |*particle| {
         particle.tick();
     }
