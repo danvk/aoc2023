@@ -24,10 +24,10 @@ const Instruction = struct {
 fn parseInstruction(line: []const u8) !Instruction {
     // aj dec -520 if icd < 9
     var buf: [7][]const u8 = undefined;
-    var parts = util.splitIntoBuf(line, " ", &buf);
+    const parts = util.splitIntoBuf(line, " ", &buf);
     assert(parts.len == 7);
     const reg = parts[0];
-    var op = std.meta.stringToEnum(Op, parts[1]) orelse unreachable;
+    const op = std.meta.stringToEnum(Op, parts[1]) orelse unreachable;
     const amount = try std.fmt.parseInt(i32, parts[2], 10);
 
     assert(std.mem.eql(u8, parts[3], "if"));

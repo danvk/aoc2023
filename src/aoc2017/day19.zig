@@ -22,11 +22,11 @@ fn part1(allocator: std.mem.Allocator, maze: std.AutoHashMap(Coord, u8), x0: i32
             // if (d == Dir.down or d == Dir.up) {
             //     goal = '-';
             // }
-            var newDs = [_]Dir{ d.ccw(), d.cw() };
+            const newDs = [_]Dir{ d.ccw(), d.cw() };
             var ok = false;
             // std.debug.print("At {any} dir {any}, looking for {s}, will try {any}\n", .{ pos, d, [_]u8{goal}, newDs });
             for (newDs) |newD| {
-                var nextPos = pos.move(newD);
+                const nextPos = pos.move(newD);
                 if (maze.contains(nextPos)) {
                     d = newD;
                     pos = nextPos;

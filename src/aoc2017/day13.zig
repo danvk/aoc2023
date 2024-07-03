@@ -112,7 +112,7 @@ fn part2(layers: std.AutoHashMap(u32, Layer), maxLayer: u32) u32 {
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
-    var allocator = arena.allocator();
+    const allocator = arena.allocator();
 
     const filename = args[0];
 

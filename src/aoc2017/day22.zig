@@ -39,15 +39,15 @@ fn part1(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, bool), w: u
     _ = allocator;
     assert(w % 2 == 1);
     const mid: i32 = @intCast((w - 1) / 2);
-    var curNode = Coord{ .x = mid, .y = mid };
-    var curDir = Dir.up;
+    const curNode = Coord{ .x = mid, .y = mid };
+    const curDir = Dir.up;
     var carrier = Carrier{ .pos = curNode, .dir = curDir };
     std.debug.print("start state: {any}\n", .{carrier});
 
     var numInfects: usize = 0;
 
     for (0..numRounds) |i| {
-        var pair = try advance(grid, carrier);
+        const pair = try advance(grid, carrier);
         carrier = pair[0];
         const causedInfection = pair[1];
         std.debug.print("{d} infect? {any}\n", .{ i, causedInfection });
@@ -142,8 +142,8 @@ fn part2(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, State), w: 
     _ = allocator;
     assert(w % 2 == 1);
     const mid: i32 = @intCast((w - 1) / 2);
-    var curNode = Coord{ .x = mid, .y = mid };
-    var curDir = Dir.up;
+    const curNode = Coord{ .x = mid, .y = mid };
+    const curDir = Dir.up;
     var carrier = Carrier{ .pos = curNode, .dir = curDir };
     std.debug.print("start state: {any}\n", .{carrier});
 
@@ -151,7 +151,7 @@ fn part2(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, State), w: 
 
     for (0..numRounds) |i| {
         _ = i;
-        var pair = try advance2(grid, carrier);
+        const pair = try advance2(grid, carrier);
         carrier = pair[0];
         const causedInfection = pair[1];
         // std.debug.print("{d} infect? {any}\n", .{ i, causedInfection });

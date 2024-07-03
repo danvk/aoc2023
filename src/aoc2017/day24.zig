@@ -20,7 +20,7 @@ fn findStrongest(components: *[]Component, startPin: u32) Result {
     // var bestI: usize = 0;
     // XXX how can I write this as a for loop?
     while (i < components.len) : (i += 1) {
-        var component = components.*[i];
+        const component = components.*[i];
         // std.debug.print("try component {d}: {any}\n", .{ i, component });
         if (component.used) {
             continue;
@@ -57,7 +57,7 @@ fn part1(components: *[]Component) Result {
 pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
     defer arena.deinit();
-    var allocator = arena.allocator();
+    const allocator = arena.allocator();
     const filename = args[0];
 
     var file = try std.fs.cwd().openFile(filename, .{});
@@ -75,7 +75,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     while (try in_stream.readUntilDelimiterOrEof(&buf, '\n')) |line| {
         // I guess fixed-size arrays are copied by value?
         var pin_buf: [2]u32 = undefined;
-        var pins = try util.extractIntsIntoBuf(u32, line, &pin_buf);
+        const pins = try util.extractIntsIntoBuf(u32, line, &pin_buf);
         assert(pins.len == 2);
         try components.append(Component{
             .id = i,

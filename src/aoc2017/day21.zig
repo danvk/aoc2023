@@ -143,8 +143,8 @@ fn allTransforms(allocator: std.mem.Allocator, pat: Pattern, out: *std.ArrayList
 
 // caller is responsible for freeing returned buffer
 fn createPattern(allocator: std.mem.Allocator, rows: usize, cols: usize) !Pattern {
-    var buf = try allocator.alloc(u8, rows * cols);
-    var pat = Pattern{
+    const buf = try allocator.alloc(u8, rows * cols);
+    const pat = Pattern{
         .buf = buf,
         .rows = rows,
         .cols = cols,
@@ -156,7 +156,7 @@ fn createPattern(allocator: std.mem.Allocator, rows: usize, cols: usize) !Patter
 // caller owns returned buffer
 // XXX this would be a good use for a Rust lifetime annotation! Pattern could share buf.
 fn parsePattern(allocator: std.mem.Allocator, buf: []const u8) !Pattern {
-    var rows = 1 + std.mem.count(u8, buf, "/");
+    const rows = 1 + std.mem.count(u8, buf, "/");
     var pat = try createPattern(allocator, rows, rows);
     for (0..rows) |y| {
         for (0..rows) |x| {
@@ -174,10 +174,10 @@ const Rule = struct {
 fn parseRule(allocator: std.mem.Allocator, line: []const u8) !Rule {
     var buf: [2][]const u8 = undefined;
     // var parts = util.splitOne(line, " => ").?;
-    var parts = util.splitIntoBuf(line, " => ", &buf);
+    const parts = util.splitIntoBuf(line, " => ", &buf);
     assert(parts.len == 2);
-    var left = try parsePattern(allocator, parts[0]);
-    var right = try parsePattern(allocator, parts[1]);
+    const left = try parsePattern(allocator, parts[0]);
+    const right = try parsePattern(allocator, parts[1]);
 
     return Rule{ .left = left, .right = right };
 }
@@ -210,7 +210,7 @@ fn iterate(allocator: std.mem.Allocator, rules: std.StringHashMap(Pattern), numI
         const dims = Size{ .width = n, .height = n };
         const outDims = Size{ .width = m, .height = m };
         for (0..numCells) |yi| {
-            var y0 = n * yi;
+            const y0 = n * yi;
             for (0..numCells) |xi| {
                 const x0 = n * xi;
                 pat.sliceInto(Coord{ .x = x0, .y = y0 }, dims, &slice);
@@ -232,7 +232,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     // XXX why is ArenaAllocator in std.heap rather than std.mem?
     var arena = std.heap.ArenaAllocator.init(parent_allocator);
     defer arena.deinit();
-    var allocator = arena.allocator();
+    const allocator = arena.allocator();
 
     const filename = args[0];
     var lines_it = try bufIter.iterLines(filename);
@@ -244,7 +244,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
     var scratch = std.ArrayList(Pattern).init(allocator);
 
     while (try lines_it.next()) |line| {
-        var rule = try parseRule(allocator, line);
+        const rule = try parseRule(allocator, line);
         std.debug.print("{s} -> {any}\n", .{ line, rule });
 
         try allTransforms(allocator, rule.left, &scratch);

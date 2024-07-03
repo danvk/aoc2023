@@ -118,7 +118,7 @@ fn execute(instr: Instruction, state: *State) void {
 }
 
 fn part1(instructions: []Instruction) usize {
-    var regs = std.mem.zeroes([26]i128);
+    const regs = std.mem.zeroes([26]i128);
     var state = State{
         .pos = 0,
         .regs = regs,
@@ -134,7 +134,7 @@ fn part1(instructions: []Instruction) usize {
 }
 
 fn part2(instructions: []Instruction) i128 {
-    var regs = std.mem.zeroes([26]i128);
+    const regs = std.mem.zeroes([26]i128);
     var state = State{
         .pos = 0,
         .regs = regs,

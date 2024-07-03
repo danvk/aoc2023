@@ -26,7 +26,7 @@ fn is_valid2(line: []const u8, parent_allocator: std.mem.Allocator) !bool {
 
     var it = std.mem.splitAny(u8, line, " \t");
     while (it.next()) |word| {
-        var my_word = try allocator.dupe(u8, word);
+        const my_word = try allocator.dupe(u8, word);
         std.mem.sort(u8, my_word, {}, comptime std.sort.asc(u8));
         if (values.contains(my_word)) {
             return false;

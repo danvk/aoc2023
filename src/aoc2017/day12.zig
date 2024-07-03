@@ -83,7 +83,7 @@ pub fn part2(allocator: std.mem.Allocator, programs: std.AutoHashMap(u32, Progra
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
-    var allocator = arena.allocator();
+    const allocator = arena.allocator();
 
     const filename = args[0];
 
@@ -103,7 +103,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     while (try line_it.next()) |line| {
         std.debug.print("line: {s}\n", .{line});
         // Comment this out and the lines all look great:
-        var program = try parseProgram(allocator, line);
+        const program = try parseProgram(allocator, line);
         // const heapProgram = try allocator.create(Program);
         // heapProgram.* = program;
 
