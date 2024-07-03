@@ -728,7 +728,8 @@ https://ziglang.org/download/0.13.0/release-notes.html
   - 238 total errors
   - It seems Zig would like me to do more than "consider" this.
   - It's frustrating that there's no "Fix All" with ZLS. I have to do these all one-by-one, and it's already hung at least once.
-- Change `@fabs` → `@abs`
+- Change `@fabs` and `std.math.absCast` → `@abs`
+- Change `std.fs.File.Writer` → `anytype` for `pub fn format` printer functions
 
 ## Warmup
 

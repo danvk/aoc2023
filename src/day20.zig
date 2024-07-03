@@ -24,7 +24,7 @@ const Pulse = struct {
     to: []const u8,
     val: PulseType,
 
-    pub fn format(p: Pulse, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(p: Pulse, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "{s} -{s}-> {s}", .{ p.from, if (p.val == .low) "low" else "high", p.to });
