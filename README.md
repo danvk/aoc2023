@@ -4,6 +4,11 @@ This time in Zig?
 
 I know about Zig because of Bun. Zig seems fast, I think it's a C (rather than C++) replacement.
 
+To run my code:
+
+    zig build
+    ./zig-out/bin/main day8 day8/input.txt
+
 ## Day by day
 
 ### Day 25 (8738 / 5426)
