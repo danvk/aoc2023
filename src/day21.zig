@@ -30,7 +30,7 @@ fn step(gr: *gridMod.GridResult, spots: std.AutoHashMap(Coord, void), nexts: *st
     var grid = gr.grid;
     while (it.next()) |pos| {
         for (dirMod.DIRS) |d| {
-            var p = pos.move(d);
+            const p = pos.move(d);
             if ((grid.get(p) orelse '.') == '.') {
                 try nexts.put(p, undefined);
             }
@@ -78,7 +78,7 @@ fn addToFrozen(numSteps: usize, gr: gridMod.GridResult, spots: *std.AutoHashMap(
     var tit = tiles.keyIterator();
     while (tit.next()) |t| {
         const tile = t.*;
-        var th = tileHash(gr, spots.*, tile);
+        const th = tileHash(gr, spots.*, tile);
         if ((th.hash == freezeHashes[0] or th.hash == freezeHashes[1]) and !frozen.contains(tile)) {
             // std.debug.print("newly frozen tile {any} after {d} steps\n", .{ tile, numSteps });
             try newFrozen.put(tile, th.hash == freezeHashes[1]);
@@ -159,7 +159,7 @@ fn tileHash(gr: gridMod.GridResult, spots: std.AutoHashMap(Coord, void), tile: C
     const maxY: i32 = @intCast(gr.maxY + 1);
     var buf = [2]u32{ 0, 0 };
     var bufAddr: [*]u8 = @ptrCast(&buf);
-    var bufSlice = bufAddr[0..8];
+    const bufSlice = bufAddr[0..8];
     var hasher = std.hash.Wyhash.init(42);
     for (0..@intCast(maxY)) |yu| {
         const y: i32 = @intCast(yu);
@@ -254,7 +254,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var frozen = std.AutoHashMap(Coord, usize).init(allocator);
     defer frozen.deinit();
 
-    var finalCounts = [_]u64{
+    const finalCounts = [_]u64{
         hashToCount.get(finalHashes[0]).?,
         hashToCount.get(finalHashes[1]).?,
     };

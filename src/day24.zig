@@ -35,7 +35,7 @@ const Hailstone = struct {
 
 fn parseHailstone(line: []const u8) !Hailstone {
     var intBuf: [6]i64 = undefined;
-    var xs = try util.extractIntsIntoBuf(i64, line, &intBuf);
+    const xs = try util.extractIntsIntoBuf(i64, line, &intBuf);
     assert(intBuf.len == 6);
 
     return Hailstone{
@@ -194,7 +194,7 @@ fn isInt(v: f64) bool {
 }
 
 fn areClose(a: f64, b: f64) bool {
-    return @fabs(a - b) < 0.01;
+    return @abs(a - b) < 0.01;
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
@@ -204,7 +204,7 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     defer stones.deinit();
     var iter = try bufIter.iterLines(filename);
     while (try iter.next()) |line| {
-        var stone = try parseHailstone(line);
+        const stone = try parseHailstone(line);
         // std.debug.print("{any}\n", .{stone});
         try stones.append(stone);
     }

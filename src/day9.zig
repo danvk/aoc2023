@@ -16,7 +16,7 @@ fn extrapolateNext(allocator: std.mem.Allocator, nums: []i32) !i32 {
     defer diffs.deinit();
 
     for (nums[1..], 1..) |next, i| {
-        var diff = next - nums[i - 1];
+        const diff = next - nums[i - 1];
         allZero = allZero and (diff == 0);
         try diffs.append(diff);
     }
@@ -26,7 +26,7 @@ fn extrapolateNext(allocator: std.mem.Allocator, nums: []i32) !i32 {
         return nums[0];
     }
     // nums are not all the same; infer the next difference.
-    var diff = try extrapolateNext(allocator, diffs.items);
+    const diff = try extrapolateNext(allocator, diffs.items);
     return nums[nums.len - 1] + diff;
 }
 

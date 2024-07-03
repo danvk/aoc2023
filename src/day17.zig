@@ -27,14 +27,14 @@ const StateWithCost = dijkstra.WithCost(State);
 fn nextStates2(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(StateWithCost)) !void {
     out.clearAndFree();
     var grid = gr.grid;
-    var maxX = gr.maxX;
-    var maxY = gr.maxY;
+    const maxX = gr.maxX;
+    const maxY = gr.maxY;
 
     const state = sc.state;
     const cost = sc.cost;
     var pos = state.pos;
     var dir = state.dir;
-    var n = state.numStraight;
+    const n = state.numStraight;
     // options are:
     // 1. turn left
     // 2. turn right
@@ -58,14 +58,14 @@ fn nextStates2(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(St
 fn nextStates1(gr: gridMod.GridResult, sc: StateWithCost, out: *std.ArrayList(StateWithCost)) !void {
     out.clearAndFree();
     var grid = gr.grid;
-    var maxX = gr.maxX;
-    var maxY = gr.maxY;
+    const maxX = gr.maxX;
+    const maxY = gr.maxY;
 
     const state = sc.state;
     const cost = sc.cost;
     var pos = state.pos;
     var dir = state.dir;
-    var n = state.numStraight;
+    const n = state.numStraight;
     // options are:
     // 1. turn left
     // 2. turn right
@@ -116,7 +116,7 @@ fn isDone2(gr: gridMod.GridResult, sl: StateWithCost) bool {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var gr = try gridMod.readGrid(allocator, filename, 'x');
+    const gr = try gridMod.readGrid(allocator, filename, 'x');
     var grid = gr.grid;
     defer grid.deinit();
 

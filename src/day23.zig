@@ -55,7 +55,7 @@ fn nextStates(gr: gridMod.GridResult, state: *State, nextBuf: []*State, isPart2:
         if (hasVisited(state, np)) {
             continue;
         }
-        var statePtr = try allocator.create(State);
+        const statePtr = try allocator.create(State);
         statePtr.* = State{
             .pos = np,
             .prev = state,
@@ -84,7 +84,7 @@ fn find(allocator: std.mem.Allocator, start: Coord, end: Coord, gr: gridMod.Grid
     var nextsBuf: [4]*State = undefined;
 
     while (fringe.dequeue()) |statePtr| {
-        var nexts = try nextStates(gr, statePtr, &nextsBuf, false);
+        const nexts = try nextStates(gr, statePtr, &nextsBuf, false);
         for (nexts) |next| {
             if (next.pos.x == end.x and next.pos.y == end.y) {
                 const len = pathLen(next);
@@ -173,7 +173,7 @@ fn findConnections(gr: gridMod.GridResult, nodes: []Coord) !std.ArrayList(Connec
         var nextsBuf: [4]*State = undefined;
 
         while (fringe.dequeue()) |statePtr| {
-            var nexts = try nextStates(gr, statePtr, &nextsBuf, true);
+            const nexts = try nextStates(gr, statePtr, &nextsBuf, true);
             if (nexts.len > 1 and statePtr != &initState) {
                 unreachable;
             }
@@ -211,7 +211,7 @@ fn hasVisited2(state: *State2, idx: usize) bool {
 }
 
 fn nextStates2(allocator: std.mem.Allocator, state: *State2, connections: []Connection, nextBuf: []*State2) ![]*State2 {
-    var idx = state.idx;
+    const idx = state.idx;
     var i: usize = 0;
     for (connections) |conn| {
         if (conn.from != idx) {
@@ -220,7 +220,7 @@ fn nextStates2(allocator: std.mem.Allocator, state: *State2, connections: []Conn
         if (hasVisited2(state, conn.to)) {
             continue;
         }
-        var statePtr = try allocator.create(State2);
+        const statePtr = try allocator.create(State2);
         statePtr.* = State2{
             .idx = conn.to,
             .prev = state,
@@ -250,7 +250,7 @@ fn part2(allocator: std.mem.Allocator, start: usize, end: usize, connections: []
     var nextsBuf: [4]*State2 = undefined;
 
     while (fringe.dequeue()) |statePtr| {
-        var nexts = try nextStates2(allocator, statePtr, connections, &nextsBuf);
+        const nexts = try nextStates2(allocator, statePtr, connections, &nextsBuf);
         for (nexts) |next| {
             if (next.idx == end) {
                 const len = pathLen2(next);
@@ -268,13 +268,13 @@ fn part2(allocator: std.mem.Allocator, start: usize, end: usize, connections: []
 pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
-    var allocator = arena.allocator();
+    const allocator = arena.allocator();
 
     const filename = args[0];
-    var gr = try gridMod.readGrid(allocator, filename, 'x');
+    const gr = try gridMod.readGrid(allocator, filename, 'x');
     var grid = gr.grid;
-    var maxX = gr.maxX;
-    var maxY = gr.maxY;
+    const maxX = gr.maxX;
+    const maxY = gr.maxY;
     defer grid.deinit();
 
     const start = Coord{ .x = 1, .y = 0 };

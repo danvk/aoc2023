@@ -123,7 +123,7 @@ fn addGearRatios(allocator: std.mem.Allocator, grid: std.AutoHashMap(Coord, u8))
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var gridResult = try readGrid(allocator, filename, '.');
+    const gridResult = try readGrid(allocator, filename, '.');
     const extent = gridResult.extent;
     var grid = gridResult.grid;
     defer grid.deinit();

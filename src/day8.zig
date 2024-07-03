@@ -20,7 +20,7 @@ fn ghostCycle(allocator: std.mem.Allocator, nodes: std.StringHashMap(Node), rlLi
 
     var numEnds: usize = 0;
     while (numEnds < 10) {
-        var dir = rlLine[steps % rlLine.len];
+        const dir = rlLine[steps % rlLine.len];
         var spot = nodes.get(node).?;
         if (dir == 'L') {
             node = &spot.left;
@@ -49,8 +49,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     var iter = try bufIter.iterLines(filename);
 
-    var rlLineIn = try iter.next();
-    var rlLine = try allocator.dupe(u8, rlLineIn.?);
+    const rlLineIn = try iter.next();
+    const rlLine = try allocator.dupe(u8, rlLineIn.?);
 
     var nodes = std.StringHashMap(Node).init(allocator);
     defer nodes.deinit();
@@ -61,7 +61,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         }
 
         var strBuf: [6][]u8 = undefined;
-        var parts = util.splitAnyIntoBuf(line, " =(,)", &strBuf);
+        const parts = util.splitAnyIntoBuf(line, " =(,)", &strBuf);
         assert(parts.len == 3);
 
         // std.debug.print("{any}\n", .{parts});
@@ -70,9 +70,9 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         var right: [3]u8 = undefined;
         @memcpy(&left, parts[1]);
         @memcpy(&right, parts[2]);
-        var n = Node{ .left = left, .right = right };
+        const n = Node{ .left = left, .right = right };
         // std.debug.print("{any}\n", .{n});
-        var name = try allocator.dupe(u8, parts[0]);
+        const name = try allocator.dupe(u8, parts[0]);
         try nodes.putNoClobber(name, n);
     }
 
@@ -83,7 +83,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var initIt = nodes.keyIterator();
     while (initIt.next()) |key| {
         if (key.*[2] == 'A') {
-            var name = try allocator.dupe(u8, key.*);
+            const name = try allocator.dupe(u8, key.*);
             try ghosts.append(name);
             std.debug.print("{s}\n", .{key.*});
         }
@@ -99,13 +99,13 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     steps = 0;
     while (true) {
-        var dir = rlLine[steps % rlLine.len];
+        const dir = rlLine[steps % rlLine.len];
         var allZ = true;
         if (steps < 20) {
             std.debug.print("{c} ", .{dir});
         }
         for (ghosts.items, 0..) |key, i| {
-            var spot = nodes.get(key).?;
+            const spot = nodes.get(key).?;
             var nextKey = if (dir == 'L') spot.left else if (dir == 'R') spot.right else unreachable;
             if (nextKey[2] != 'Z') {
                 allZ = false;

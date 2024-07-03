@@ -22,16 +22,16 @@ const Plan = struct {
 // R 6 (#70c710)
 fn parsePlan(line: []const u8) !Plan {
     var partsBuf: [3][]const u8 = undefined;
-    var parts = util.splitAnyIntoBuf(line, " ()", &partsBuf);
+    const parts = util.splitAnyIntoBuf(line, " ()", &partsBuf);
     assert(parts.len == 3);
-    var dir = parts[0];
+    const dir = parts[0];
     assert(dir.len == 1);
-    var len = try std.fmt.parseInt(usize, parts[1], 10);
+    const len = try std.fmt.parseInt(usize, parts[1], 10);
     var colorStr = parts[2];
     assert(colorStr[0] == '#');
     assert(colorStr.len == 7);
-    var color = try std.fmt.parseInt(u24, colorStr[1..], 16);
-    var plan = Plan{
+    const color = try std.fmt.parseInt(u24, colorStr[1..], 16);
+    const plan = Plan{
         .dir = switch (dir[0]) {
             'L' => .left,
             'R' => .right,
@@ -48,7 +48,7 @@ fn parsePlan(line: []const u8) !Plan {
 // R 6 (#70c710)
 fn parsePlan2(line: []const u8) !Plan {
     var partsBuf: [3][]const u8 = undefined;
-    var parts = util.splitAnyIntoBuf(line, " ()", &partsBuf);
+    const parts = util.splitAnyIntoBuf(line, " ()", &partsBuf);
     assert(parts.len == 3);
     // var dir = parts[0];
     // assert(dir.len == 1);
@@ -56,9 +56,9 @@ fn parsePlan2(line: []const u8) !Plan {
     var colorStr = parts[2];
     assert(colorStr[0] == '#');
     assert(colorStr.len == 7);
-    var len = try std.fmt.parseInt(u24, colorStr[1..6], 16);
+    const len = try std.fmt.parseInt(u24, colorStr[1..6], 16);
     const dir = colorStr[6];
-    var plan = Plan{
+    const plan = Plan{
         // 0 means R, 1 means D, 2 means L, and 3 means U.
         .dir = switch (dir) {
             '2' => .left,
@@ -125,7 +125,7 @@ fn area(grid: std.AutoHashMap(Coord, u8), topLeft: Coord, bottomRight: Coord, ys
 
         var x = minX;
         while (x <= maxX) : (x += 1) {
-            var c = Coord{ .x = x, .y = y };
+            const c = Coord{ .x = x, .y = y };
             if (grid.get(c)) |tile| {
                 if (tile == '|') {
                     numBars += 1;
@@ -167,10 +167,10 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     try grid.put(pos, '?');
 
     var iter = try bufIter.iterLines(filename);
-    var minX: i32 = 0;
-    var minY: i32 = 0;
-    var maxX: i32 = 0;
-    var maxY: i32 = 0;
+    const minX: i32 = 0;
+    const minY: i32 = 0;
+    const maxX: i32 = 0;
+    const maxY: i32 = 0;
     var coords = std.ArrayList(Coord).init(allocator);
     var countDirect: usize = 0;
     defer coords.deinit();
@@ -232,13 +232,13 @@ pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
 
     // std.debug.print("part 1: {d} + {d} = {d}\n", .{ count, intArea, count + intArea });
 
-    var slArea = shoelaceArea(coords.items);
+    const slArea = shoelaceArea(coords.items);
     std.debug.print("shoelace area: {d}\n", .{slArea});
 
     // A = i + b/2 - 1
     // i = A - b/2 + 1
 
-    var totalArea = slArea + (countDirect >> 1) + 1;
+    const totalArea = slArea + (countDirect >> 1) + 1;
     std.debug.print("part 2: {d}\n", .{totalArea});
 }
 

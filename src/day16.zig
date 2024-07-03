@@ -127,10 +127,10 @@ fn numEnergized(allocator: std.mem.Allocator, grid: *std.AutoHashMap(Coord, u8),
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var gr = try gridMod.readGrid(allocator, filename, 'x');
+    const gr = try gridMod.readGrid(allocator, filename, 'x');
     var grid = gr.grid;
-    var maxX = gr.maxX;
-    var maxY = gr.maxY;
+    const maxX = gr.maxX;
+    const maxY = gr.maxY;
     defer grid.deinit();
 
     const sum1 = try numEnergized(allocator, &grid, maxX, maxY, Beam{ .pos = Coord{ .x = 0, .y = 0 }, .dir = Dir.right });

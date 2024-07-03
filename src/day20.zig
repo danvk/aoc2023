@@ -32,7 +32,7 @@ const Pulse = struct {
 };
 
 fn parseModule(allocator: std.mem.Allocator, line: []const u8) !Module {
-    var sides = util.splitOne(line, " -> ").?;
+    const sides = util.splitOne(line, " -> ").?;
     const nameType = sides.head;
     var mod: Module = undefined;
     if (nameType[0] == '%') {
@@ -94,7 +94,7 @@ fn pressButton(n: u64, allocator: std.mem.Allocator, modules: *std.StringHashMap
     // var pulses = queue.Queue(Pulse).init(allocator);
     var pulses = try std.ArrayList(Pulse).initCapacity(allocator, 1000);
     defer pulses.deinit();
-    var broadcast = modules.get("broadcaster").?;
+    const broadcast = modules.get("broadcaster").?;
     var low: u64 = 1;
     var high: u64 = 0;
     var i: usize = 0;
@@ -225,7 +225,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     defer modules.deinit();
     var it = std.mem.tokenize(u8, contents, "\n");
     while (it.next()) |line| {
-        var module = try parseModule(allocator, line);
+        const module = try parseModule(allocator, line);
         try modules.put(module.name, module);
     }
 
@@ -237,7 +237,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var numPresses: u64 = 0;
     while (true) {
         numPresses += 1;
-        var sent = try pressButton(numPresses, in_allocator, &modules);
+        const sent = try pressButton(numPresses, in_allocator, &modules);
         if (sent) {
             break;
         }

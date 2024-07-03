@@ -20,7 +20,7 @@ const Graph = std.StringHashMap(std.ArrayList([]const u8));
 // find all the nodes connected to the seed.
 // caller must free returned slice
 fn floodfill(seed: []const u8, conns: Graph) ![][]const u8 {
-    var allocator = conns.allocator;
+    const allocator = conns.allocator;
     var seen = std.StringHashMap(void).init(allocator);
     defer seen.deinit();
 
@@ -56,29 +56,29 @@ fn countPaths(
     to: []const u8,
 ) !usize {
     var allocator = g.allocator;
-    var maybePath = try dijkstra.shortestPath([]const u8, std.hash_map.StringContext, allocator, g.*, from, dijkstra.graph_neighbors, to);
+    const maybePath = try dijkstra.shortestPath([]const u8, std.hash_map.StringContext, allocator, g.*, from, dijkstra.graph_neighbors, to);
     if (maybePath) |path| {
         defer allocator.free(path);
         for (path[1..], 1..) |nodeCost2, j| {
             const nodeCost1 = path[j - 1];
-            var a = nodeCost1.state;
-            var b = nodeCost2.state;
+            const a = nodeCost1.state;
+            const b = nodeCost2.state;
             // Remove the edge from a -> b and b -> a
             var an = g.getPtr(a).?;
-            var bi = util.indexOfStr(an.items, b).?;
+            const bi = util.indexOfStr(an.items, b).?;
             _ = an.swapRemove(bi);
             var bn = g.getPtr(b).?;
-            var ai = util.indexOfStr(bn.items, a).?;
+            const ai = util.indexOfStr(bn.items, a).?;
             _ = bn.swapRemove(ai);
         }
 
-        var result = 1 + try countPaths(g, from, to);
+        const result = 1 + try countPaths(g, from, to);
 
         // restore the snipped edges
         for (path[1..], 1..) |nodeCost2, j| {
             const nodeCost1 = path[j - 1];
-            var a = nodeCost1.state;
-            var b = nodeCost2.state;
+            const a = nodeCost1.state;
+            const b = nodeCost2.state;
             var an = g.getPtr(a).?;
             try an.append(b);
             var bn = g.getPtr(b).?;
@@ -133,7 +133,7 @@ fn countComponents(g: Graph) ![]usize {
             continue;
         }
 
-        var component = try floodfill(n, g);
+        const component = try floodfill(n, g);
         defer ally.free(component);
 
         std.debug.print("component: [", .{});
@@ -157,7 +157,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var allocator = arena.allocator();
 
     const filename = args[0];
-    var contents = try util.readInputFile(allocator, filename);
+    const contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
 
     var connList = Graph.init(allocator);
@@ -167,7 +167,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var it = std.mem.tokenize(u8, contents, "\n");
     while (it.next()) |line| {
         var parts = util.splitAnyIntoBuf(line, ": ", &partsBuf);
-        var left = parts[0];
+        const left = parts[0];
         for (parts[1..]) |right| {
             try addEdge(&connList, left, right);
         }
@@ -177,8 +177,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     defer edges.deinit();
     var connIt = connList.iterator();
     while (connIt.next()) |entry| {
-        var left = entry.key_ptr.*;
-        var nexts = entry.value_ptr.*;
+        const left = entry.key_ptr.*;
+        const nexts = entry.value_ptr.*;
         for (nexts.items) |right| {
             if (std.mem.order(u8, left, right) == .lt) {
                 try edges.append(Conn{ .from = left, .to = right });
@@ -189,10 +189,10 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     var connected = Graph.init(allocator);
     defer connected.deinit();
     for (edges.items) |edge| {
-        var a = edge.from;
-        var b = edge.to;
+        const a = edge.from;
+        const b = edge.to;
 
-        var n = try countPaths(&connList, a, b);
+        const n = try countPaths(&connList, a, b);
         if (n > 3) {
             try addEdge(&connected, a, b);
             // std.debug.print("{s} and {s} are in the same component\n", .{ a, b });

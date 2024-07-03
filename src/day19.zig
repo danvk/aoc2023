@@ -22,7 +22,7 @@ const Workflow = struct {
 
 fn parseWorkflow(allocator: std.mem.Allocator, line: []const u8) !Workflow {
     var partsBuf: [2][]const u8 = undefined;
-    var parts = util.splitAnyIntoBuf(line, "{}", &partsBuf);
+    const parts = util.splitAnyIntoBuf(line, "{}", &partsBuf);
     assert(parts.len == 2);
 
     const name = parts[0];
@@ -37,7 +37,7 @@ fn parseWorkflow(allocator: std.mem.Allocator, line: []const u8) !Workflow {
             continue;
         }
         var ruleBuf: [3][]const u8 = undefined;
-        var ruleParts = util.splitAnyIntoBuf(ruleStr, "<>:", &ruleBuf);
+        const ruleParts = util.splitAnyIntoBuf(ruleStr, "<>:", &ruleBuf);
         assert(ruleParts.len == 3);
         const part = ruleParts[0];
         assert(part.len == 1);
@@ -170,8 +170,8 @@ fn throughWorkflow(range: XmasRange, wf: Workflow, out: *std.ArrayList(WorkflowR
     for (wf.rules) |rule| {
         // Part matches this rule, part does not.
         const ruleRs = rangeForRule(rule);
-        var i = xmasToRange(rule.part);
-        var curR = remaining[i];
+        const i = xmasToRange(rule.part);
+        const curR = remaining[i];
         if (ruleRs.pass.intersection(curR)) |matchR| {
             var matchXR = remaining;
             matchXR[i] = matchR;
@@ -215,18 +215,18 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     defer arena.deinit();
     var allocator = arena.allocator();
     const filename = args[0];
-    var contents = try util.readInputFile(allocator, filename);
+    const contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
 
     var partsBuf: [2][]const u8 = undefined;
-    var parts = util.splitIntoBuf(contents, "\n\n", &partsBuf);
+    const parts = util.splitIntoBuf(contents, "\n\n", &partsBuf);
     assert(parts.len == 2);
 
     var workflows = std.StringHashMap(Workflow).init(allocator);
     defer workflows.deinit();
     var it = std.mem.tokenize(u8, parts[0], "\n");
     while (it.next()) |line| {
-        var workflow = try parseWorkflow(allocator, line);
+        const workflow = try parseWorkflow(allocator, line);
         std.debug.print("{s} -> {any}\n", .{ workflow.name, workflow });
         try workflows.put(workflow.name, workflow);
     }
@@ -307,8 +307,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     //     }
     // }
 
-    var fullRange = Range{ .low = 1, .high = 4001 };
-    var initRange = XmasRange{ fullRange, fullRange, fullRange, fullRange };
+    const fullRange = Range{ .low = 1, .high = 4001 };
+    const initRange = XmasRange{ fullRange, fullRange, fullRange, fullRange };
     var cubes = std.ArrayList(WorkflowRange).init(allocator);
     try cubes.append(WorkflowRange{ .name = "in", .range = initRange });
     std.debug.print("{d} cubes, volume={d}\n", .{ cubes.items.len, xmasRangeVolume(cubes.items[0].range) });

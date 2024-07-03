@@ -27,15 +27,15 @@ fn numWinners(time: u64, distance: u64) u64 {
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
     const filename = args[0];
 
-    var contents = try util.readInputFile(allocator, filename);
+    const contents = try util.readInputFile(allocator, filename);
     defer allocator.free(contents);
 
-    var lines = util.splitOne(contents, "\n").?;
+    const lines = util.splitOne(contents, "\n").?;
 
     var numsBuf1: [20]u64 = undefined;
     var numsBuf2: [20]u64 = undefined;
-    var times = try util.extractIntsIntoBuf(u64, lines.head, &numsBuf1);
-    var distances = try util.extractIntsIntoBuf(u64, lines.rest, &numsBuf2);
+    const times = try util.extractIntsIntoBuf(u64, lines.head, &numsBuf1);
+    const distances = try util.extractIntsIntoBuf(u64, lines.rest, &numsBuf2);
 
     var prod: u64 = 1;
     for (times, distances) |time, distance| {

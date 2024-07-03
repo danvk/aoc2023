@@ -714,6 +714,22 @@ This is a trick for "slice by length" and allows more optimizations than `runtim
 
 A `packed struct` guarantees that a `u5` will use exactly 5 bits of memory, and a `bool` will use exactly 1.
 
+## Updating from Zig 0.11.0 to Zig 0.13.0
+
+Since I waited so long to do my writeup, I have two new versions of Zig to install.
+
+https://ziglang.org/download/0.12.0/release-notes.html#Redesign-How-Autodoc-Works
+https://ziglang.org/download/0.13.0/release-notes.html
+
+- I updated Zig with `brew upgrade zig`
+- I had to update ZLS in VS Code via "Zig Language Server: Check for Server Updates"
+- I had to change `.{ .path = "..." }` to `b.path("...")` in a few places in `build.zig`
+- I got reams of "local variable is never mutated, consider using 'const'" errors
+  - 238 total errors
+  - It seems Zig would like me to do more than "consider" this.
+  - It's frustrating that there's no "Fix All" with ZLS. I have to do these all one-by-one, and it's already hung at least once.
+- Change `@fabs` → `@abs`
+
 ## Warmup
 
 Following:

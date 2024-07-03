@@ -61,8 +61,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
         std.debug.print("After \"{s}\"\n", .{part});
 
         var partsBuf: [2][]const u8 = undefined;
-        var partParts = util.splitAnyIntoBuf(part, "-=", &partsBuf);
-        var label = partParts[0];
+        const partParts = util.splitAnyIntoBuf(part, "-=", &partsBuf);
+        const label = partParts[0];
         const v = hash(label);
         if (std.mem.endsWith(u8, part, "-")) {
             var maybeIdx: ?usize = null;
@@ -81,7 +81,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
             }
         } else if (part[part.len - 2] == '=') {
             // insert
-            var focalLen = try std.fmt.parseInt(u8, part[part.len - 1 ..], 10);
+            const focalLen = try std.fmt.parseInt(u8, part[part.len - 1 ..], 10);
             var items = boxes[v].items;
             var maybeIdx: ?usize = null;
             for (items, 0..) |lens, i| {
@@ -113,7 +113,7 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
 
     for (boxes, 1..) |box, boxNum| {
         for (box.items, 1..) |lens, slotNum| {
-            var power = boxNum * slotNum * lens.focalLen;
+            const power = boxNum * slotNum * lens.focalLen;
             std.debug.print("{s}: {d} * {d} * {d} = {d}\n", .{ lens.label, boxNum, slotNum, lens.focalLen, power });
             sum2 += power;
         }

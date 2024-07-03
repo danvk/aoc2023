@@ -41,8 +41,8 @@ fn mapRangeThroughRanges(r: Iv64, ranges: []Range, out: *std.ArrayList(Iv64)) !v
         return;
     }
 
-    var range = ranges[0];
-    var split = mapRangeThroughRange(r, range);
+    const range = ranges[0];
+    const split = mapRangeThroughRange(r, range);
     if (split.mapped) |mapped| {
         try out.append(mapped);
     }
@@ -61,7 +61,7 @@ fn readRanges(alloc: std.mem.Allocator, iter: *bufIter.ReadByLineIterator) !std.
         if (line.len == 0) {
             break;
         }
-        var ints = try util.extractIntsIntoBuf(u64, line, &intBuf);
+        const ints = try util.extractIntsIntoBuf(u64, line, &intBuf);
         assert(ints.len == 3);
         try out.append(Range{
             .dest = ints[0],
@@ -76,13 +76,13 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     // XXX probably don't need arena allocator here
     var arena = std.heap.ArenaAllocator.init(in_allocator);
     defer arena.deinit();
-    var allocator = arena.allocator();
+    const allocator = arena.allocator();
 
     const filename = args[0];
 
     var iter = try bufIter.iterLines(filename);
     var seedsBuf: [100]u64 = undefined;
-    var line1 = (try iter.next()).?;
+    const line1 = (try iter.next()).?;
     var seeds = try util.extractIntsIntoBuf(u64, line1, &seedsBuf);
     std.debug.print("seeds: {any}\n", .{seeds});
     assert(seeds.len > 2);
@@ -92,8 +92,8 @@ pub fn main(in_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void
     // defer part2Seeds.deinit();
     var i: usize = 0;
     while (i < seeds.len) : (i += 2) {
-        var start = seeds[i];
-        var num = seeds[i + 1];
+        const start = seeds[i];
+        const num = seeds[i + 1];
         try part2Seeds.append(Iv64{ .low = start, .high = start + num });
     }
     var seeds2 = part2Seeds.items;
