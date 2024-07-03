@@ -718,7 +718,7 @@ A `packed struct` guarantees that a `u5` will use exactly 5 bits of memory, and 
 
 Since I waited so long to do my writeup, I have two new versions of Zig to install.
 
-https://ziglang.org/download/0.12.0/release-notes.html#Redesign-How-Autodoc-Works
+https://ziglang.org/download/0.12.0/release-notes.html
 https://ziglang.org/download/0.13.0/release-notes.html
 
 - I updated Zig with `brew upgrade zig`
