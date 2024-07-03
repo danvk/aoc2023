@@ -15,7 +15,7 @@ const Coord3 = struct {
     y: f64,
     z: f64,
 
-    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "{d},{d},{d}", .{ self.x, self.y, self.z });
@@ -26,7 +26,7 @@ const Hailstone = struct {
     p: Coord3,
     v: Coord3,
 
-    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "{any} @ {any}", .{ self.p, self.v });

@@ -16,7 +16,7 @@ const Coord3 = struct {
         return Coord3{ .x = self.x, .y = self.y, .z = self.z - 1 };
     }
 
-    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "{d},{d},{d}", .{ self.x, self.y, self.z });
@@ -32,7 +32,7 @@ const Brick = struct {
     a: Coord3,
     b: Coord3,
 
-    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: std.fs.File.Writer) !void {
+    pub fn format(self: @This(), comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
         _ = fmt;
         _ = options;
         try std.fmt.format(writer, "{c}: {any}~{any}", .{ self.name, self.a, self.b });

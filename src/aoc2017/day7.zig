@@ -108,7 +108,7 @@ pub fn main(parent_allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!
             // std.debug.print("  {d} ({d}) {s}\n", .{ sum, child.value, child_name });
         }
         const extent = std.mem.minMax(u32, sums.items);
-        if (extent.min != extent.max) {
+        if (extent[0] != extent[1]) {
             std.debug.print("{s}:\n", .{prog.name});
             for (prog.children, sums.items) |child_name, sum| {
                 const child = programs.get(child_name) orelse unreachable;

@@ -30,8 +30,8 @@ pub const ReadByLineIterator = struct {
 // Caller is responsible for calling deinit() on returned iterator when done.
 pub fn iterLines(filename: []const u8) !ReadByLineIterator {
     var file = try std.fs.cwd().openFile(filename, .{});
-    var reader = file.reader();
-    var buf_reader = std.io.bufferedReader(reader);
+    const reader = file.reader();
+    const buf_reader = std.io.bufferedReader(reader);
 
     return ReadByLineIterator{
         .file = file,
