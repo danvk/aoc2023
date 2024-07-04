@@ -1,6 +1,27 @@
 const std = @import("std");
 
 pub fn main() !void {
+    std.debug.prin("Hello World!\n", .{});
+}
+
+
+fn fibonacci(n: u32) u32 {
+    if (n == 0 or n == 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+
+
+
+
+
+    // std.debug.print("All your {s} are belong to us.\n", .{}); // <-- missing argument
+
+    const comp = comptime fibonacci(40);
+    std.debug.print("comptime: {d}\n", .{comp});
+    const run = fibonacci(40);
+    std.debug.print("runtime: {d}\n", .{run});
+
     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
     std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
 
@@ -17,8 +38,14 @@ pub fn main() !void {
 }
 
 test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
+    var list = std.ArrayList(i32); // .init(std.testing.allocator);
     defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
     try list.append(42);
     try std.testing.expectEqual(@as(i32, 42), list.pop());
+}
+
+test "test with overflow" {
+    var a: u8 = 255;
+    a += 1;
+    std.debug.print("255 + 1 = {d}!\n", .{a});
 }
