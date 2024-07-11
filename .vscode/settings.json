@@ -3,6 +3,8 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ziglang.vscode-zig",
         "files.eol": "\n",
-        "editor.inlayHints.enabled": "offUnlessPressed"
-    }
+        "editor.inlayHints.enabled": "offUnlessPressed",
+    },
+    "zig.zls.enableBuildOnSave": true,
+    "zig.zls.buildOnSaveStep": "check",
 }

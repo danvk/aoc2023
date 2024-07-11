@@ -75,4 +75,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     b.installArtifact(exe2017);
+
+    // See https://kristoff.it/blog/improving-your-zls-experience/
+    const check = b.step("check", "Check if the code compiles; this is for ZLS.");
+    check.dependOn(&exe.step);
+    check.dependOn(&exe2017.step);
 }

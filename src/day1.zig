@@ -48,6 +48,10 @@ fn calibration2(line: []const u8) u8 {
 }
 
 pub fn main(allocator: std.mem.Allocator, args: []const [:0]u8) anyerror!void {
+    const a: u8 = 255;
+    // a += 1;
+    std.debug.print("255 + 1 = {d}!\n", .{a});
+
     _ = allocator;
     const filename = args[0];
 
