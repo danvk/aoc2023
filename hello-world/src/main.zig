@@ -1,19 +1,24 @@
 const std = @import("std");
 
-pub fn main() !void {
-    std.debug.prin("Hello World!\n", .{});
-}
-
-
 fn fibonacci(n: u32) u32 {
     if (n == 0 or n == 1) return n;
     return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
+const Box = struct {
+    val: u32,
+};
 
+pub fn main() !void {
+    // var a: u8 = 255;
+    // a += 1;
+    // std.debug.print("255 + 1 = {d}!\n", .{a});
 
-
-
+    var a: Box = .{ .val = 1 };
+    var b = a;
+    b.val = 2;
+    std.debug.print("a: {} b: {}\n", .{ a, b });
+    a.val = 2;
 
     // std.debug.print("All your {s} are belong to us.\n", .{}); // <-- missing argument
 
